@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173d36">
+  <meta name="description" content="Исследуйте макроэкономику: управляйте политикой государства, переходите по месяцам и сравнивайте экономические гипотезы.">
+  <title>Экономическая лаборатория</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+  <dialog id="new-dialog">
+    <form id="new-form">
+      <button class="dialog-close" type="button" aria-label="Закрыть">×</button>
+      <span class="eyebrow">ИСХОДНЫЕ УСЛОВИЯ</span>
+      <h2>Новый эксперимент</h2>
+      <p>Вымышленная развивающаяся страна. 10 млн жителей, $6 000 ВВП на человека, инфляция 8%, госдолг 50% ВВП.</p>
+      <label class="field">Структура экономики<select name="resource"><option value="true">Сырьевая: добыча определяет экспорт</option><option value="false">Диверсифицированная: промышленность и услуги</option></select></label>
+      <label class="field">Начальное число случайности<input type="number" name="seed" min="0" max="4294967295" value="42" required></label>
+      <label class="check"><input type="checkbox" name="stochastic"> Небольшие внешние случайные колебания</label>
+      <p class="muted small">Текущий эксперимент будет заменён. Скачайте сохранение, если хотите к нему вернуться. Коэффициенты условные; модель не откалибрована под конкретную страну.</p>
+      <button class="primary wide" type="submit">Начать с января 2026</button>
+    </form>
+  </dialog>
+  <noscript>Для работы модели включите JavaScript в браузере.</noscript>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

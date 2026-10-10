@@ -1,0 +1,10 @@
+import {rm,mkdir,copyFile,cp,readFile,writeFile} from 'node:fs/promises';
+await rm('dist',{recursive:true,force:true});
+await mkdir('dist',{recursive:true});
+for(const f of ['index.html','styles.css']) await copyFile(f,`dist/${f}`);
+await cp('src','dist/src',{recursive:true});
+await cp('docs','dist/docs',{recursive:true});
+const manifest=JSON.parse(await readFile('.openai/hosting.json','utf8'));
+manifest.static={directory:'dist'};
+await writeFile('.openai/hosting.json',JSON.stringify(manifest,null,2)+'\n');
+console.log('Static application built in dist/');

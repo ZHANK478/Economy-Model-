@@ -1,0 +1,326 @@
+import {createSimulation,advanceMonth,runMonths,comparePolicies,exportSimulation,importSimulation,accountBalances,scheduleShock,copy,sanitizePolicy} from './engine.js';
+import {VERSION,POLICY_FIELDS,PARAMETER_FIELDS,MODULES,SECTORS,BASE_POLICY} from './config.js';
+
+const STORE='economy-model-v1',CHECKPOINT='economy-checkpoint-v1';
+const app=document.getElementById('app');
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const signed=(x,d=1)=>(x>0?'+':'')+n(x,d);
+const money=x=>n(x/1000,2);
+const pct=x=>n(x,1)+'%';
+const months=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const date=(month,short=false)=>short?`${String(month%12+1).padStart(2,'0')}.${2026+Math.floor(month/12)}`:`${months[month%12]} ${2026+Math.floor(month/12)}`;
+const iconCheck='<span class="tick">✓</span>';
+let state=createSimulation(),draft=copy(state.policy),checkpoint=null,comparison=null;
+let view='overview',policyTab='Кредит',chartMetric='gdpPerCapitaReal',compareMetric='gdpPerCapitaReal',compareMonths=24,compareSource='current';
+let mobileOpen=false,busy=false,toastTimer;
+try {
+  const saved=localStorage.getItem(STORE);
+  if(saved){const wrapper=JSON.parse(saved);state=importSimulation(wrapper.simulation);draft=sanitizePolicy(wrapper.draft);}
+  const snap=localStorage.getItem(CHECKPOINT);if(snap) checkpoint=importSimulation(snap);
+} catch(e) {setTimeout(()=>toast('Не удалось прочитать сохранение. Открыты исходные условия.'),0);}
+
+function toast(message) {
+  const el=document.getElementById('toast');el.textContent=message;el.classList.add('visible');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),4500);
+}
+function persist() {
+  try {localStorage.setItem(STORE,JSON.stringify({simulation:exportSimulation(state),draft}));}
+  catch(e){toast('Браузер не сохранил состояние. Используйте «Сохранить файл».');}
+}
+function download(filename,content,type='application/json') {
+  const url=URL.createObjectURL(new Blob([content],{type}));
+  const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+const pending=()=>Object.keys(draft).filter(key=>draft[key]!==state.policy[key]);
+const previous=()=>state.history.find(x=>x.month===state.month-1)??state.metrics;
+
+const chartOptions=[['gdpPerCapitaReal','ВВП / человек'],['inflationYoY','Инфляция'],['unemployment','Безработица'],['debtRatio','Госдолг']];
+const metricNames={gdpPerCapitaReal:'Реальный ВВП на человека',inflationYoY:'Инфляция за 12 месяцев',unemployment:'Безработица',debtRatio:'Госдолг / ВВП',exchangeRate:'Курс валюты'};
+function chart(series,key,{compare=false}={}) {
+  const data=series.map(x=>({...x,points:x.points.filter(p=>p.month>=0&&Number.isFinite(p[key]))}));
+  const points=data.flatMap(x=>x.points);
+  if(points.length<2||new Set(points.map(p=>p.month)).size<2) return '<div class="chart-empty"><div><strong>Первое решение — начало графика</strong><br>Измените политику и перейдите к следующему месяцу.</div></div>';
+  const W=780,H=260,left=52,right=18,top=18,bottom=36;
+  let lo=Math.min(...points.map(p=>p[key])),hi=Math.max(...points.map(p=>p[key]));
+  const padding=Math.max((hi-lo)*.15,key==='gdpPerCapitaReal'?50:key==='exchangeRate'?.02:.5);
+  lo-=padding;hi+=padding;
+  const from=Math.min(...points.map(p=>p.month)),to=Math.max(...points.map(p=>p.month));
+  const x=m=>left+(m-from)/(to-from)*(W-left-right);
+  const y=v=>top+(hi-v)/(hi-lo)*(H-top-bottom);
+  let out=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(metricNames[key])}, помесячный график">`;
+  for(let i=0;i<5;i++) {
+    const val=lo+(hi-lo)*i/4,py=y(val);
+    out+=`<line x1="${left}" y1="${py}" x2="${W-right}" y2="${py}" stroke="#e8ede3"/><text x="${left-9}" y="${py+4}" text-anchor="end" fill="#849083" font-size="10">${n(val,key==='gdpPerCapitaReal'?0:1)}</text>`;
+  }
+  if(!compare&&data[0].points.length>1) {
+    const line=data[0].points.map(p=>`${x(p.month)},${y(p[key])}`).join(' ');
+    out+=`<defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#86b095" stop-opacity=".24"/><stop offset="100%" stop-color="#86b095" stop-opacity="0"/></linearGradient></defs><polygon points="${x(from)},${H-bottom} ${line} ${x(to)},${H-bottom}" fill="url(#chart-fill)"/>`;
+  }
+  data.forEach((s,j)=>{
+    const poly=s.points.map(p=>`${x(p.month)},${y(p[key])}`).join(' ');
+    out+=`<polyline points="${poly}" fill="none" stroke="${j===0?'#347b62':'#bc8b47'}" stroke-width="2.4" ${j===0&&compare?'stroke-dasharray="5 4"':''} stroke-linecap="round" stroke-linejoin="round"/>`;
+    const end=s.points.at(-1);if(end) out+=`<circle cx="${x(end.month)}" cy="${y(end[key])}" r="3.5" fill="${j===0?'#347b62':'#bc8b47'}" stroke="white" stroke-width="2"/>`;
+  });
+  for(let i=0;i<5;i++) {const month=Math.round(from+(to-from)*i/4);out+=`<text x="${x(month)}" y="${H-10}" fill="#849083" text-anchor="middle" font-size="10">${date(month,true)}</text>`;}
+  const first=data[0].points;
+  first.forEach((p,i)=>{
+    const next=first[i+1],before=first[i-1];const width=Math.max(6,((next?x(next.month):W-right)-(before?x(before.month):left))/2);
+    const values=data.map(ds=>{const v=ds.points.find(z=>z.month===p.month);return v?`${ds.name}: ${n(v[key],key==='gdpPerCapitaReal'?0:1)}`:'';}).filter(Boolean).join(' · ');
+    out+=`<rect data-chart-tip="${esc(date(p.month)+' · '+values)}" x="${x(p.month)-width/2}" y="${top}" width="${width}" height="${H-top-bottom}" fill="transparent"><title>${esc(date(p.month)+' · '+values)}</title></rect>`;
+  });
+  return out+'</svg><div class="chart-tip"></div>';
+}
+function spark(key) {
+  const pts=state.history.filter(x=>x.month>=0).slice(-18);if(pts.length<2) return '';
+  const values=pts.map(p=>p[key]),lo=Math.min(...values),hi=Math.max(...values),range=Math.max(hi-lo,.001);
+  const points=values.map((v,i)=>`${i/(values.length-1)*65},${26-(v-lo)/range*23}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 65 29" aria-hidden="true"><polyline points="${points}" fill="none" stroke="#609b75" stroke-width="1.4"/></svg>`;
+}
+function cards() {
+  const m=state.metrics,prev=previous();
+  const data=[
+    ['gdpPerCapitaReal','Реальный ВВП / человек',n(m.gdpPerCapitaReal,0),'$ базы',true,false],
+    ['inflationYoY','Инфляция за 12 месяцев',n(m.inflationYoY,1),'%',false,true],
+    ['unemployment','Безработица',n(m.unemployment,1),'%',false,true],
+    ['realIncomeIndex','Реальные доходы',n(m.realIncomeIndex,1),'индекс',true,false],
+    ['gdpGrowthYoY','Рост реального ВВП',signed(m.gdpGrowthYoY,1),'% г/г',true,true],
+    ['exchangeRate','Национальная валюта',n(m.exchangeRate,3),'ед. / $',false,false],
+    ['deficitRatio','Дефицит бюджета',signed(m.deficitRatio,1),'% ВВП',false,true],
+    ['debtRatio','Государственный долг',n(m.debtRatio,1),'% ВВП',false,true]
+  ];
+  return '<div class="kpis">'+data.map(([key,name,value,unit,higher,pp])=>{
+    const delta=m[key]-prev[key],color=state.month===0||Math.abs(delta)<.001?'neutral':((delta>0)===higher?'positive':'negative');
+    const formatted=state.month===0?'Исходные условия':`${signed(delta,key==='exchangeRate'?3:1)} ${pp?'п.п.':''} за ход`;
+    return `<div class="kpi"><div class="name">${name}</div><div class="value">${value} <span class="unit">${unit}</span></div><div class="change ${color}">${formatted}</div>${spark(key)}</div>`;
+  }).join('')+'</div>';
+}
+function policyControls() {
+  return POLICY_FIELDS.filter(x=>x[6]===policyTab).map(([key,name,min,max,step,unit,,help])=>`
+    <div class="policy-control"><div class="control-title"><label for="policy-${key}">${name}</label><output class="control-value" id="value-${key}">${n(draft[key],step<1?2:0)}</output></div>
+    <input id="policy-${key}" type="range" min="${min}" max="${max}" step="${step}" value="${draft[key]}" data-policy="${key}" aria-label="${name}">
+    <div class="control-meta"><span>${esc(unit)}</span><input type="number" class="number-entry" min="${min}" max="${max}" step="${step}" value="${draft[key]}" data-policy-number="${key}" aria-label="${name}, точное значение"></div>
+    <div class="policy-help">${help}</div></div>`).join('');
+}
+function sidebar() {
+  const changes=pending();
+  return `<aside class="sidebar ${mobileOpen?'open':''}"><div class="sidebar-head"><div><span class="eyebrow">ВАША РОЛЬ · ГОСУДАРСТВО</span><h2>Экономическая политика</h2></div>${mobileOpen?'<button class="dark-button" data-action="controls" aria-label="Закрыть">×</button>':''}</div>
+    <p class="small muted">Решения действуют со следующего месяца. Реакция экономики занимает время.</p>
+    <div class="policy-tabs">${['Кредит','Налоги','Бюджет','Валюта','Структура'].map(t=>`<button data-policy-tab="${t}" class="${t===policyTab?'active':''}">${t}</button>`).join('')}</div>
+    <div id="policy-controls">${policyControls()}</div>
+    ${policyTab==='Кредит'?`<div class="policy-checks"><label class="check"><input type="checkbox" data-policy-check="liquiditySupport" ${draft.liquiditySupport?'checked':''}> Ликвидность от центрального банка</label><label class="check"><input type="checkbox" data-policy-check="bankRescue" ${draft.bankRescue?'checked':''}> Спасение банков за счёт бюджета</label></div>`:''}
+    <div class="policy-foot"><div class="policy-summary"><span>Ожидаемая реальная ставка</span><strong id="real-rate">${n(draft.rate-state.expectedInflation*100,1)}%</strong></div>
+      <div id="pending-note" class="policy-pending">${changes.length?`Изменено решений: ${changes.length}`:'Текущая политика сохранена'}</div>
+      <button class="primary wide" data-action="step" ${busy?'disabled':''}>${busy?'Вычисление…':'Следующий месяц'} <span aria-hidden="true">→</span></button>
+      <div style="display:flex;gap:8px"><button class="secondary" data-action="run3" ${busy?'disabled':''}>+3 месяца</button><button class="secondary" data-action="run12" ${busy?'disabled':''}>+12 месяцев</button></div>
+      <button class="secondary wide" data-action="compare-view">Сравнить с прежней политикой</button>
+      <button class="secondary wide" data-action="cancel-policy" id="cancel-policy" ${changes.length?'':'disabled'}>Отменить изменения решений</button>
+    </div></aside>`;
+}
+function row(label,value,meta='') {return `<div class="data-row"><div>${label}${meta?`<div class="meta">${meta}</div>`:''}</div><b>${value}</b></div>`;}
+function bar(label,value,display,color='#89b899') {return `<div class="bar-row"><div class="bar-title"><span>${label}</span><b>${display}</b></div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,Math.min(100,value))}%;background:${color}"></div></div></div>`;}
+function chartPanel() {
+  return `<section class="panel"><div class="panel-head"><div><span class="eyebrow">ДИНАМИКА ЭКОНОМИКИ</span><h2>${metricNames[chartMetric]}</h2><span class="muted small">Каждая точка — один месяц</span></div><div class="pill-group">${chartOptions.map(([key,label])=>`<button class="${chartMetric===key?'active':''}" data-chart="${key}">${label}</button>`).join('')}</div></div>
+    <div class="chart-wrap">${chart([{name:'Экономика',points:state.history}],chartMetric)}</div><div class="chart-legend"><span><span class="legend-line"></span>Ваш эксперимент</span><span>${state.month} ${state.month===1?'месяц':'мес.'} · ${state.stochastic?'Внешние колебания включены':'Без случайных шоков'}</span></div></section>`;
+}
+function report() {
+  if(state.month===0) return `<ol class="report-list"><li><div class="report-number">01</div><div><strong>Выберите экономическую гипотезу</strong><span>Например, увеличьте ставку с 11% до 15%. Остальные решения оставьте прежними.</span></div></li><li><div class="report-number">02</div><div><strong>Перейдите к следующему месяцу</strong><span>Сравните инфляцию, спрос, занятость и курс. Последствия накапливаются.</span></div></li><li><div class="report-number">03</div><div><strong>Сравните два пути</strong><span>Одинаковые исходные условия и внешние шоки, разная государственная политика.</span></div></li></ol>`;
+  const r=state.lastReport,m=state.metrics;
+  const items=[
+    [`Выпуск: ${signed(r.changes.gdp,1)}% за месяц`,`Потребление ${n(m.consumption,0)}, инвестиции ${n(m.investment,0)}, госзакупки ${n(m.governmentPurchases,0)} млн в базовых ценах.`],
+    [`Цены: ${signed(m.inflationMonthly,2)}% за месяц`,`За 12 месяцев ${pct(m.inflationYoY)}. Ожидания: ${pct(m.expectedInflation)}; кредитная ставка: ${pct(m.lendingRate)}.`],
+    [`Валюта: ${signed(r.changes.exchange,2)}% к доллару`,`Текущий счёт: ${signed(r.external.currentAccountUSD,0)} млн $. Резервов на ${n(m.reserveMonths,1)} месяца импорта.`]
+  ];
+  return '<ol class="report-list">'+items.map(([title,body],i)=>`<li><div class="report-number">0${i+1}</div><div><strong>${title}</strong><span>${body}</span></div></li>`).join('')+'</ol>';
+}
+function overview() {
+  const m=state.metrics;
+  return chartPanel()+`<div class="two-cols"><section class="panel"><div class="panel-head"><h2>Отчёт за месяц</h2><span class="eyebrow">${date(state.month,true)}</span></div>${report()}</section>
+    <section class="panel"><div class="panel-head"><h2>Устойчивость</h2><span class="badge">${state.resourceMode?'Сырьевой экспорт':'Диверсификация'}</span></div>
+    ${bar('Резервы / месяцы импорта',m.reserveMonths/12*100,n(m.reserveMonths,1)+' мес.')}
+    ${bar('Капитал банков / норматив',m.capitalRatio/draft.bankCapitalRequirement/2*100,pct(m.capitalRatio),m.capitalRatio<draft.bankCapitalRequirement?'#c69864':'#89b899')}
+    ${bar('Исполнение конечных заказов',m.fulfillment,pct(m.fulfillment))}
+    ${bar('Доверие к политике',m.confidence,n(m.confidence,0)+' / 100')}
+    <div class="audit-ok" style="margin-top:20px">${iconCheck} Балансы сходятся · погрешность ${n(m.auditError,8)} млн</div></section></div>
+    ${state.lastReport.events.length?`<div class="callout warning" style="margin-top:15px"><strong>События и ограничения</strong>${state.lastReport.events.slice(0,5).map(esc).join('<br>')}</div>`:''}`;
+}
+function economy() {
+  const m=state.metrics,r=state.lastReport;
+  return `<section class="panel"><div class="panel-head"><div><span class="eyebrow">РЕАЛЬНЫЙ СЕКТОР</span><h2>Производство и мощности</h2></div><span class="muted small">Объёмы: млн в базовых ценах</span></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Отрасль</th><th>Выпуск</th><th>Загрузка</th><th>Работники, тыс.</th><th>Запасы</th><th>Цены, индекс</th></tr></thead><tbody>${state.firms.map((f,i)=>`<tr><td><span class="sector-color" style="background:${SECTORS[i].color}"></span>${esc(f.name)}</td><td>${n(f.production,0)}</td><td>${pct(f.utilization*100)}</td><td>${n(f.workers*1000,0)}</td><td>${n(f.inventory,0)}</td><td>${n(f.price*100,1)}</td></tr>`).join('')}</tbody></table></div></section>
+    <div class="two-cols"><section class="panel"><h2>ВВП по расходам</h2><p class="small muted">Млрд национальной валюты за месяц. Трансферты не прибавляются к ВВП.</p>
+      ${row('Потребление',money(r.gdp?.consumption??m.consumption)+' млрд')}${row('Инвестиции',money(r.gdp?.investment??m.investment)+' млрд')}${row('Государственные закупки',money(r.gdp?.government??m.governmentPurchases)+' млрд')}${row('Экспорт',money(r.gdp?.exports??m.exports)+' млрд')}${row('− Импорт',money(r.gdp?.imports??m.imports)+' млрд')}${row('Изменение запасов',money(r.gdp?.inventories??0)+' млрд')}${row('Номинальный ВВП',money(m.nominalGDPMonthly)+' млрд')}
+    </section><section class="panel"><h2>Будущий выпуск</h2>${row('ВВП: разрыв с потенциалом',signed(m.outputGap,1)+'%')}${row('Производительность',n(m.productivity,1),'Индекс начала = 100')}${row('Инфраструктура',n(m.infrastructure,1),'Реальный запас с учётом износа')}${row('Квалификация',n(m.skills,1))}${row('Введено капитала за месяц',money(m.investmentCompleted)+' млрд базы')}${row('Проекты в очереди',String(state.projects.length),'Вложения уже оплачены; ввод ещё впереди')}
+      <details class="method-details"><summary>Матрица межотраслевых затрат</summary><p>В документации приведены все коэффициенты. Сначала решается q = (I − A)⁻¹f, затем выпуск ограничивается мощностями, трудом, импортом и запасами.</p><a href="./docs/MODEL.md" target="_blank" rel="noopener">Открыть формулы модели</a></details></section></div>`;
+}
+function fiscal() {
+  const m=state.metrics,f=state.lastReport.fiscal,a=accountBalances(state),g=state.government;
+  const domesticRate=g.domesticBonds.length?g.domesticBonds.reduce((v,b)=>v+b.principal*b.rate,0)/a.domesticDebt*100:0;
+  return `<div class="balance-strip"><div class="panel"><span class="eyebrow">ДОЛГ ГОСУДАРСТВА</span><div class="big">${money(a.totalGovernmentDebt)} млрд</div><span class="small muted">${pct(m.debtRatio)} ВВП за 12 месяцев</span></div><div class="panel"><span class="eyebrow">КАЗНАЧЕЙСТВО</span><div class="big">${money(g.cash)} млрд</div><span class="small muted">Средства на счёте</span></div><div class="panel"><span class="eyebrow">ПРОЦЕНТЫ ПО ДОЛГУ</span><div class="big">${money(m.interestExpense)} млрд</div><span class="small muted">За текущий месяц</span></div></div>
+    <div class="two-cols"><section class="panel"><h2>Доходы бюджета</h2>${row('НДС',money(f.vat??0)+' млрд')}${row('Подоходный налог',money(f.incomeTax??0)+' млрд')}${row('Налог на прибыль',money(f.corporateTax??0)+' млрд')}${row('Пошлины',money(f.tariff??0)+' млрд')}${row('Сырьевая рента',money(f.royalty??0)+' млрд')}${row('Доход центрального банка',money(f.centralIncome??0)+' млрд')}${row('Всего налогов',money(m.taxRevenue)+' млрд')}${row('Собираемость прямых налогов',pct(state.institutions.taxCompliance*100))}</section>
+    <section class="panel"><h2>Расходы и финансирование</h2>${row('Закупки и инвестиции',money(f.purchases??0)+' млрд')}${row('Пособия и пенсии',money(f.transfers??0)+' млрд')}${row('Поддержка бизнеса',money(f.businessSupport??0)+' млрд')}${row('Обслуживание долга',money(f.interest??0)+' млрд')}${row('Спасение банков',money(f.bankRescue??0)+' млрд')}${row('Дефицит за месяц',money(state.government.lastDeficit)+' млрд')}${row('Новые внутренние займы',money(f.domesticIssued??0)+' млрд')}${row('Новые внешние займы',money(f.externalIssued??0)+' млрд $')}${row('Погашение основного долга',money((f.domesticRedeemed??0)+(f.externalRedeemed??0)*state.exchangeRate)+' млрд')}</section></div>
+    <section class="panel" style="margin-top:15px"><h2>Сроки и валютный риск</h2><div class="mini-stats"><div class="mini-stat"><span>Средний внутренний купон</span><strong>${pct(domesticRate)}</strong></div><div class="mini-stat"><span>Внешний долг</span><strong>${money(a.externalDebtUSD)} млрд $</strong></div><div class="mini-stat"><span>Премия за риск новых займов</span><strong>${pct(m.sovereignSpread)}</strong></div></div><p class="small muted">Старые облигации сохраняют купон. Ставка влияет на бюджет при новых займах и рефинансировании. Дефицит на карточке — текущий месячный поток × 12 / ВВП последних 12 месяцев.</p></section>`;
+}
+function credit() {
+  const m=state.metrics,b=state.bank,a=accountBalances(state);
+  return `<div class="two-cols"><section class="panel"><h2>Передача ставки</h2>${row('Ключевая ставка',pct(state.policy.rate),'Применённое решение')}${row('Ожидания инфляции',pct(m.expectedInflation))}${row('Ожидаемая реальная ставка',pct(state.policy.rate-m.expectedInflation))}${row('Новые кредиты',pct(m.lendingRate),'Годовая эффективная ставка')}${row('Депозиты',pct(m.depositRate),'Годовая эффективная ставка')}${row('Кредитная доступность',pct(b.creditSupply*100))}${row('Выдано кредитов / овердрафтов',money(m.moneyCreated)+' млрд')}${row('Списано кредитов',money(m.creditLosses)+' млрд')}
+    <div class="callout" style="margin-top:15px">Ставки старых кредитов пересматриваются частично. Выдача кредита создаёт депозит; погашение уменьшает оба. Списание уменьшает актив и капитал банка.</div></section>
+    <section class="panel"><h2>Баланс банков</h2>${row('Активы за вычетом внешнего фондирования',money(a.bankAssets)+' млрд')}${row('Кредиты частному сектору',money(a.privateLoans)+' млрд')}${row('Депозиты',money(a.deposits)+' млрд')}${row('Капитал',money(a.bankEquity)+' млрд')}${row('Капитал / рискованные активы',pct(m.capitalRatio))}${row('Проблемные кредиты',pct(m.npl))}${row('Ликвидность / депозиты',pct(m.bankLiquidity))}${row('Заём у центрального банка',money(b.centralBorrowing)+' млрд')}${row('Чистые внешние активы',money(b.foreignAssetsUSD)+' млрд $')}
+    <div class="audit-ok" style="margin-top:15px">${iconCheck} Активы = депозиты + заём ЦБ + капитал</div></section></div>
+    <section class="panel" style="margin-top:15px"><h2>Долговая нагрузка</h2><div class="table-wrap"><table class="table"><thead><tr><th>Заёмщик</th><th>Долг, млн</th><th>Валютная часть, млн $</th><th>Средняя ставка</th><th>Проценты / месяц</th></tr></thead><tbody>${[...state.households,...state.firms].map(a=>`<tr><td>${esc(a.name)}</td><td>${n(a.loanLC+a.loanFX*state.exchangeRate,0)}</td><td>${n(a.loanFX,0)}</td><td>${pct(a.averageRate*100)}</td><td>${n(a.interestPaid??0,0)}</td></tr>`).join('')}</tbody></table></div></section>`;
+}
+function external() {
+  const m=state.metrics,e=state.lastReport.external??{};
+  const worldFields=[['commodityPrice','Мировая цена сырья',25,250,5,'Индекс, старт = 100'],['energyPrice','Цена импортной энергии',25,250,5,'Индекс, старт = 100'],['foreignDemand','Внешний спрос',40,180,5,'Индекс, старт = 100'],['globalRate','Зарубежная ставка',0,15,.25,'% годовых'],['weather','Урожайность',40,150,5,'Индекс, нормальная = 100'],['importAvailability','Доступность компонентов',10,120,5,'Индекс, старт = 100']];
+  return `<div class="two-cols"><section class="panel"><h2>Внешние счета</h2>${row('Курс валюты',n(m.exchangeRate,3)+' ед. / $')}${row('Реальный курс',n(m.realExchangeRate,1),'Индекс начала = 100; рост означает реальное обесценение')}${row('Экспорт',money(e.exportsUSD??0)+' млрд $')}${row('Импорт',money(e.importsUSD??0)+' млрд $')}${row('Текущий счёт',money(m.currentAccountUSD)+' млрд $')}${row('Прямые инвестиции',money(e.inflowUSD??0)+' млрд $')}${row('Вывод сбережений за рубеж',money(e.flightUSD??0)+' млрд $')}${row('Переводы мигрантов',money(e.remittancesUSD??0)+' млрд $')}</section>
+    <section class="panel"><h2>Резервы и сырьё</h2>${row('Валютные резервы',money(m.reservesUSD)+' млрд $')}${row('Резервы / импорт',n(m.reserveMonths,1)+' мес.')}${row('Стабилизационный фонд',money(m.fundUSD)+' млрд $')}${row('Валютная интервенция',n(state.policy.fxIntervention,0)+' млн $ / мес.')}${row('Сценарий',state.resourceMode?'Сырьевая экономика':'Диверсифицированная экономика')}
+    <p class="small muted" style="margin-top:15px">Сырьевая структура выбирается в начале эксперимента: она меняет экспорт, размещение капитала и бюджетную ренту.</p><button data-action="new">Изменить структуру и начать заново</button></section></div>
+    <section class="panel" style="margin-top:15px"><span class="eyebrow">УСЛОВИЯ ЭКСПЕРИМЕНТА · НЕ ГОСУДАРСТВЕННЫЕ РЫЧАГИ</span><h2 style="margin-top:5px">Внешний мир</h2><p class="small muted">Установите условия для проверки гипотезы. При сравнении A/B обе экономики получают одни и те же значения и шоки.</p>
+    <div class="world-grid">${worldFields.map(([key,label,min,max,step,unit])=>`<label class="field">${label}<input type="number" data-world="${key}" value="${state.world[key]}" min="${min}" max="${max}" step="${step}"><span class="small muted">${unit}</span></label>`).join('')}</div>
+    <div class="section-actions" style="margin-top:18px"><label class="check" style="margin:0"><input type="checkbox" data-stochastic ${state.stochastic?'checked':''}> Случайные внешние колебания · seed ${state.seed}</label></div>
+    <h3 style="margin-top:20px">Запланировать шок на ближайшие 12 месяцев</h3><div class="shock-list"><button data-shock="commodity">Сырьё −30%</button><button data-shock="energy">Энергия +30%</button><button data-shock="demand">Внешний спрос −15%</button><button data-shock="weather">Неурожай −20%</button><button data-shock="supply">Компоненты −30%</button></div>
+    ${state.shocks.length?`<div class="timeline-note">${state.shocks.map((x,i)=>`${esc(x.key)} × ${n(x.multiplier,2)} · ${date(x.start,true)}–${date(x.start+x.duration-1,true)} <button class="small secondary" data-remove-shock="${i}" ${state.month>=x.start?'disabled':''}>Удалить</button>`).join('<br>')}</div>`:''}</section>`;
+}
+function households() {
+  const m=state.metrics;
+  return `<section class="panel"><span class="eyebrow">ЛЮДИ И ДОХОДЫ</span><h2 style="margin-top:5px">Три группы домохозяйств</h2><p class="small muted">Доход и расходы — млн национальной валюты за месяц. Потребление — объём в базовых ценах.</p><div class="table-wrap"><table class="table"><thead><tr><th>Группа</th><th>Население, млн</th><th>Доход</th><th>Потребление</th><th>Депозиты</th><th>Долг</th><th>Склонность к потреблению</th></tr></thead><tbody>${state.households.map(h=>`<tr><td>${esc(h.name)}</td><td>${n(state.population*h.population,2)}</td><td>${n(h.income,0)}</td><td>${n(h.consumption,0)}</td><td>${n(h.cash,0)}</td><td>${n(h.loanLC+h.loanFX*state.exchangeRate,0)}</td><td>${pct(h.mpc*100)}</td></tr>`).join('')}</tbody></table></div></section>
+    <div class="two-cols"><section class="panel"><h2>Рынок труда</h2>${row('Население',n(state.population,3)+' млн')}${row('Дети / трудоспособные / пожилые',state.ageCohorts.map(x=>n(x,2)).join(' / ')+' млн')}${row('Рабочая сила',n(m.laborForce,3)+' млн')}${row('Занятость',n(m.employment,3)+' млн')}${row('Безработица',pct(m.unemployment))}${row('Миграционный прирост',signed(m.migration*1000000,0)+' человек / мес.')}${row('Участие в рынке труда',pct(state.participation*100))}</section>
+    <section class="panel"><h2>Покупательная способность</h2>${row('Реальный доход на человека',n(m.realIncomeIndex,1),'Индекс исходного состояния = 100')}${row('Потребительские цены',n(state.consumerPriceIndex,1),'Индекс исходного состояния = 100')}${row('Продовольственная инфляция',pct(m.foodInflation),'За 12 месяцев')}${row('Энергетическая инфляция',pct(m.energyInflation),'За 12 месяцев')}${row('Базовая инфляция',pct(m.coreInflation),'Промышленность, строительство и услуги')}${row('Теневая экономика',pct(m.informality))}</section></div>`;
+}
+function compareView() {
+  const changed=pending();
+  let controls=`<section class="panel"><span class="eyebrow">ПРОВЕРКА ГИПОТЕЗ</span><h2 style="margin-top:5px">Одна страна. Два решения.</h2><p class="small muted">A сохраняет политику исходной точки. B применяет значения ваших ползунков. Обе ветви получают одинаковые внешние условия.</p><div class="section-actions"><span class="toolbar-label">Начало</span><select id="compare-source" aria-label="Исходная точка"><option value="current" ${compareSource==='current'?'selected':''}>Текущий месяц</option><option value="checkpoint" ${compareSource==='checkpoint'?'selected':''} ${!checkpoint?'disabled':''}>Сохранённая точка ${checkpoint?'· '+date(checkpoint.month,true):''}</option></select><span class="toolbar-label">Горизонт</span><select id="compare-months" aria-label="Горизонт сравнения">${[6,12,24,60].map(v=>`<option value="${v}" ${compareMonths===v?'selected':''}>${v} месяцев</option>`).join('')}</select><button class="primary" data-action="compare" ${busy?'disabled':''}>${busy?'Вычисление…':'Рассчитать A / B'}</button></div><div class="small muted">${changed.length?`${changed.length} изменений относительно текущей политики.`:'Чтобы проверить гипотезу, измените хотя бы одно решение в панели политики.'}</div></section>`;
+  if(!comparison) return controls+`<section class="panel comparison-empty"><span class="eyebrow">КОНТРОЛЬНЫЙ ЭКСПЕРИМЕНТ</span><h2>Отделите эффект политики</h2><p>Создайте точку сравнения, измените ставку или бюджет и посмотрите на обе траектории. Основное время не продвигается.</p><button data-action="checkpoint">Сохранить текущую точку</button></section>`;
+  const c=comparison,a=c.a.metrics,b=c.b.metrics;
+  const base=c.a;
+  const differences=Object.entries(c.b.policy).filter(([key,val])=>val!==base.policy[key]);
+  controls+=`<section class="panel"><div class="panel-head"><div><span class="eyebrow">РЕЗУЛЬТАТ · ${c.months} МЕСЯЦЕВ</span><h2>${metricNames[compareMetric]}</h2><span class="small muted">${date(c.originMonth,true)} → ${date(c.originMonth+c.months,true)}</span></div><div class="pill-group">${chartOptions.map(([key,label])=>`<button data-compare-chart="${key}" class="${compareMetric===key?'active':''}">${label}</button>`).join('')}</div></div><div class="chart-wrap">${chart([{name:'A',points:c.a.history.filter(x=>x.month>=c.originMonth)},{name:'B',points:c.b.history.filter(x=>x.month>=c.originMonth)}],compareMetric,{compare:true})}</div><div class="chart-legend"><span><span class="legend-line"></span>A · прежняя политика</span><span><span class="legend-line alt"></span>B · ваша гипотеза</span></div></section>`;
+  const metrics=[['gdpPerCapitaReal','ВВП / человек, $ базы',0],['inflationYoY','Инфляция, %',1],['unemployment','Безработица, %',1],['realIncomeIndex','Реальный доход, индекс',1],['debtRatio','Госдолг / ВВП, %',1],['exchangeRate','Курс, ед. / $',3],['reservesUSD','Резервы, млн $',0],['investment','Инвестиции / месяц, млн базы',0]];
+  controls+=`<section class="panel"><h2>Результаты на конец горизонта</h2><div class="table-wrap"><table class="table"><thead><tr><th>Показатель</th><th>A</th><th>B</th><th>Разница B − A</th></tr></thead><tbody>${metrics.map(([key,label,d])=>`<tr><td>${label}</td><td>${n(a[key],d)}</td><td>${n(b[key],d)}</td><td>${signed(b[key]-a[key],d)}</td></tr>`).join('')}</tbody></table></div><p class="small muted" style="margin-top:12px">Изменённые решения: ${differences.map(([key,val])=>`${esc(POLICY_FIELDS.find(f=>f[0]===key)?.[1]??key)}: ${esc(base.policy[key])} → ${esc(val)}`).join('; ')||'решения одинаковые — траектории должны совпасть'}.</p><p class="small muted">Вывод относится к допущениям этой модели. Для проверки устойчивости повторите эксперимент с другими коэффициентами.</p></section>`;
+  return controls;
+}
+function methodology() {
+  const audit=state.lastReport.audit;
+  return `<section class="panel"><span class="eyebrow">МОДЕЛЬ ${VERSION}</span><h2 style="margin-top:5px">Что именно вычисляется</h2><div class="callout warning"><strong>Исследовательская модель с условной калибровкой</strong>Балансовые тождества проверяются при каждом ходе. Поведенческие коэффициенты не оценены по данным конкретной страны; результат — следствие заданных допущений. Это не точный прогноз реальной экономики.</div>
+    <div class="explain"><p>Открытая экономика: пять отраслей, три группы семей, агрегированная банковская система, консолидированное государство и внешний сектор. Месячный шаг, адаптивные ожидания, ограничения производства и согласованные финансовые операции.</p>
+      <div class="formula">ВВП = потребление + инвестиции + госзакупки + экспорт − импорт + изменение запасов</div>
+      <ul><li><strong>Годовая эффективная ставка → месяц:</strong> <code>(1 + r)^(1/12) − 1</code>. Износ: <code>1 − (1 − δ)^(1/12)</code>. Купоны с номинальной годовой ставкой: <code>долг × купон / 12</code>.</li><li><strong>Инфляция за 12 месяцев:</strong> <code>ИПЦ[t] / ИПЦ[t−12] − 1</code>. Рост ВВП сравнивает месячный реальный выпуск с тем же месяцем прошлого года.</li><li><strong>Бюджет:</strong> процент от годового опорного ВВП делится на 12 и индексируется по ценам. Опорный реальный ВВП растёт на 2% в год. Проценты и погашение долга рассчитываются по каждой когорте.</li><li><strong>Долг / ВВП:</strong> накопленный долг делится на сумму номинального ВВП за последние 12 месяцев. Дефицит на главном экране — месячный поток, приведённый к годовому темпу.</li><li><strong>$6 000 на человека:</strong> начальная годовая величина при населении 10 млн и ВВП $60 млрд. Реальный показатель на карточке — текущий месячный выпуск × 12 / население, в ценах начала. Это годовой темп, а не сумма прошедшего года.</li><li><strong>Первые годовые сравнения:</strong> до января 2026 используется явная синтетическая история с ростом 3% и инфляцией 8%. После 12 ходов весь годовой расчёт опирается на ваши месяцы.</li><li><strong>Цены:</strong> операции месяца проходят по открывающим ценам. В конце месяца рассчитываются новые цены и ИПЦ; они действуют в следующем месяце. Разовый НДС не становится повторяющимся ценовым шоком.</li></ul></div>
+    <div class="section-actions"><a href="./docs/MODEL.md" target="_blank" rel="noopener">Уравнения и ограничения</a><span class="separator"></span><a href="https://github.com/ZHANK478/Economy-Model-" target="_blank" rel="noopener">Исходный код</a></div></section>
+    <section class="panel"><h2>Все 20 экономических блоков</h2><div class="module-grid">${MODULES.map(([name,detail],i)=>`<div class="module-card"><span class="module-index">${String(i+1).padStart(2,'0')}</span><strong>${name}</strong><p>${detail}</p></div>`).join('')}</div></section>
+    <section class="panel"><h2>Проверка учёта за последний месяц</h2><p class="small muted">Остатки тождеств, млн. Малые значения порядка 10⁻⁹ — погрешность вычислений.</p>${Object.keys(audit).length?Object.entries(audit).map(([key,val])=>row(({bankBalance:'Банковский баланс',nominalGDP:'ВВП: номинальное тождество',realGDP:'ВВП: реальное тождество',goods:'Баланс товаров',externalNFA:'Чистые внешние активы / текущий счёт',governmentCash:'Движение казначейского счёта',governmentDebt:'Движение госдолга'})[key]??key,`<span class="audit-code">${val.toExponential(3)}</span>`)).join(''):'<p class="small muted">Полный набор проверок появится после первого месяца.</p>'}</section>
+    <section class="panel"><span class="eyebrow">УСТОЙЧИВОСТЬ ГИПОТЕЗ</span><h2 style="margin-top:5px">Изменить допущения</h2><p class="small muted">Это параметры исследователя, а не действия правительства. Они применяются к последующим ходам. Сравнение из сохранённой точки использует параметры этой точки.</p>${PARAMETER_FIELDS.map(([key,label,min,max,step])=>`<div class="parameter-control"><label for="param-${key}">${label}</label><input type="range" id="param-${key}" min="${min}" max="${max}" step="${step}" value="${state.parameters[key]}" data-parameter="${key}"><input type="number" min="${min}" max="${max}" step="${step}" value="${state.parameters[key]}" data-parameter-number="${key}" aria-label="${label}, значение"></div>`).join('')}</section>`;
+}
+function render() {
+  const views={overview,economy,fiscal,credit,external,households,compare:compareView,method:methodology};
+  const nav=[['overview','Обзор'],['economy','Производство'],['fiscal','Бюджет'],['credit','Банки'],['external','Внешний мир'],['households','Население'],['compare','Гипотезы A / B'],['method','Модель']];
+  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brandmark">M</span><span>МАКРОЭКОНОМИЧЕСКАЯ<br>ЛАБОРАТОРИЯ</span></div><div class="top-actions"><span class="badge"><span class="status-dot"></span>Сохраняется в браузере</span><button data-action="export">Сохранить файл</button><button data-action="import">Открыть</button><button data-action="new">Новая страна</button></div></header>
+    <div class="workspace">${sidebar()}<main class="main"><div class="page-head"><div><span class="eyebrow">ВЫМЫШЛЕННАЯ СТРАНА · ${state.resourceMode?'СЫРЬЕВАЯ ЭКОНОМИКА':'ДИВЕРСИФИЦИРОВАННАЯ ЭКОНОМИКА'}</span><h1>Экономическая лаборатория</h1><p class="intro">Изменяйте политику. Наблюдайте последствия. Проверяйте гипотезы.</p></div><div class="datebox"><div class="label">${state.month===0?'НАЧАЛО ЭКСПЕРИМЕНТА':'ЗАВЕРШЁННЫЙ МЕСЯЦ'}</div><div class="month">${date(state.month)}</div><span class="badge">Ход ${state.month}</span></div></div>
+    ${cards()}<nav class="view-tabs" aria-label="Разделы модели">${nav.map(([key,label])=>`<button data-view="${key}" class="${view===key?'active':''}" aria-current="${view===key?'page':'false'}">${label}</button>`).join('')}</nav>
+    <div id="view-content">${views[view]()}</div><div class="section-actions" style="margin-top:20px"><button data-action="checkpoint">Сохранить точку ${checkpoint?'· '+date(checkpoint.month,true):''}</button>${checkpoint?'<button data-action="restore">Вернуться к точке</button>':''}<button data-action="csv">Скачать ряды CSV</button></div>
+    <footer class="footer-note">Условная макроэкономическая модель · Все суммы в национальной валюте, если не указано иное.<br>Коэффициенты не оценены по статистике страны. <a href="#" data-view="method">Формулы, месячный учёт и ограничения →</a></footer></main></div>
+    <div class="mobile-controls"><button data-action="controls">Политика ${pending().length?'· '+pending().length:''}</button><button class="primary" data-action="step" ${busy?'disabled':''}>${busy?'Вычисление…':'Следующий месяц →'}</button></div></div>`;
+}
+function updateDraft(key,val) {
+  const field=POLICY_FIELDS.find(x=>x[0]===key);if(!field||!Number.isFinite(Number(val))) return;
+  draft[key]=Math.max(field[2],Math.min(field[3],Number(val)));
+  const range=app.querySelector(`[data-policy="${key}"]`),num=app.querySelector(`[data-policy-number="${key}"]`);
+  if(range)range.value=draft[key];if(num&&document.activeElement!==num)num.value=draft[key];
+  const out=document.getElementById('value-'+key);if(out)out.textContent=n(draft[key],field[4]<1?2:0);
+  const cancel=document.getElementById('cancel-policy');if(cancel)cancel.disabled=pending().length===0;
+  const rr=document.getElementById('real-rate');if(rr)rr.textContent=pct(draft.rate-state.expectedInflation*100);
+  const pn=document.getElementById('pending-note');if(pn)pn.textContent=pending().length?`Изменено решений: ${pending().length}`:'Текущая политика сохранена';
+  comparison=null;persist();
+}
+async function step(count) {
+  if(busy)return;busy=true;render();await new Promise(r=>setTimeout(r,0));
+  try {state=runMonths(state,count,draft);comparison=null;mobileOpen=false;persist();}
+  catch(e){toast('Расчёт остановлен: '+e.message);console.error(e);}
+  busy=false;render();
+}
+async function calculateCompare() {
+  if(busy)return;busy=true;render();await new Promise(r=>setTimeout(r,0));
+  try {
+    const origin=compareSource==='checkpoint'&&checkpoint?checkpoint:state;
+    comparison=comparePolicies(origin,origin.policy,draft,compareMonths);
+    toast(`Рассчитаны ${compareMonths} месяцев. Основной эксперимент остался на прежней дате.`);
+  }catch(e){toast('Сравнение остановлено: '+e.message);console.error(e);}
+  busy=false;render();
+}
+function exportCSV() {
+  const fields=['month','realGDPMonthly','nominalGDPMonthly','gdpPerCapitaReal','inflationYoY','inflationMonthly','unemployment','debtRatio','deficitRatio','exchangeRate','reservesUSD','realIncomeIndex','investment','capitalRatio','npl'];
+  const lines=[fields.join(';'),...state.history.filter(x=>x.month>=0).map(x=>fields.map(k=>String(x[k]??'')).join(';'))];
+  download('economy-monthly-data.csv','\uFEFF'+lines.join('\n'),'text/csv;charset=utf-8');
+}
+
+app.addEventListener('click',async event=>{
+  const target=event.target.closest('button,a');if(!target)return;
+  if(target.dataset.view){event.preventDefault();view=target.dataset.view;render();return;}
+  if(target.dataset.policyTab){policyTab=target.dataset.policyTab;render();return;}
+  if(target.dataset.chart){chartMetric=target.dataset.chart;render();return;}
+  if(target.dataset.compareChart){compareMetric=target.dataset.compareChart;render();return;}
+  if(target.dataset.shock){
+    const presets={commodity:['commodityPrice',.70],energy:['energyPrice',1.30],demand:['foreignDemand',.85],weather:['weather',.80],supply:['importAvailability',.70]};
+    const [key,multiplier]=presets[target.dataset.shock];scheduleShock(state,{key,multiplier,duration:12});comparison=null;persist();render();toast('Шок запланирован со следующего месяца.');return;
+  }
+  if(target.dataset.removeShock!==undefined){const i=Number(target.dataset.removeShock);if(state.shocks[i]?.start>state.month){state.shocks.splice(i,1);persist();comparison=null;render();}return;}
+  switch(target.dataset.action) {
+    case 'step':await step(1);break;
+    case 'run3':await step(3);break;
+    case 'run12':await step(12);break;
+    case 'controls':mobileOpen=!mobileOpen;render();break;
+    case 'compare-view':view='compare';mobileOpen=false;render();break;
+    case 'compare':await calculateCompare();break;
+    case 'cancel-policy':draft=copy(state.policy);comparison=null;persist();render();break;
+    case 'export':{const payload=JSON.parse(exportSimulation(state));payload.draftPolicy=copy(draft);download(`economy-${date(state.month,true)}.json`,JSON.stringify(payload,null,2));toast('Сохранены счета, параметры, внешние шоки и подготовленные решения.');break;}
+    case 'import':document.getElementById('import-file').click();break;
+    case 'csv':exportCSV();break;
+    case 'new':document.getElementById('new-dialog').showModal();break;
+    case 'checkpoint':
+      checkpoint=copy(state);try{localStorage.setItem(CHECKPOINT,exportSimulation(checkpoint));toast('Точка сравнения сохранена.');}catch(e){toast('Точка сохранена на время этой сессии.');}comparison=null;render();break;
+    case 'restore':if(checkpoint){state=copy(checkpoint);draft=copy(state.policy);comparison=null;persist();render();toast('Эксперимент восстановлен из сохранённой точки.');}break;
+  }
+});
+app.addEventListener('input',event=>{
+  const e=event.target;
+  if(e.dataset.policy)updateDraft(e.dataset.policy,e.value);
+  if(e.dataset.policyNumber&&e.value!=='')updateDraft(e.dataset.policyNumber,e.value);
+  const param=e.dataset.parameter??e.dataset.parameterNumber;
+  if(param&&e.value!=='') {
+    const field=PARAMETER_FIELDS.find(f=>f[0]===param);if(!field)return;
+    const val=Math.max(field[2],Math.min(field[3],Number(e.value)));if(!Number.isFinite(val))return;
+    state.parameters[param]=val;
+    app.querySelector(`[data-parameter="${param}"]`).value=val;
+    const num=app.querySelector(`[data-parameter-number="${param}"]`);if(num!==e)num.value=val;
+    comparison=null;persist();
+  }
+});
+app.addEventListener('change',event=>{
+  const e=event.target;
+  if(e.dataset.policy||e.dataset.policyNumber){render();return;}
+  if(e.dataset.policyCheck){draft[e.dataset.policyCheck]=e.checked;comparison=null;persist();render();}
+  if(e.dataset.world&&e.value!=='') {
+    const val=Math.max(Number(e.min),Math.min(Number(e.max),Number(e.value)));
+    if(Number.isFinite(val)){state.world[e.dataset.world]=val;e.value=val;comparison=null;persist();}
+  }
+  if(e.hasAttribute('data-stochastic')){state.stochastic=e.checked;comparison=null;persist();}
+  if(e.id==='compare-source'){compareSource=e.value;comparison=null;render();}
+  if(e.id==='compare-months'){compareMonths=Number(e.value);comparison=null;render();}
+});
+app.addEventListener('pointermove',event=>{
+  const rect=event.target.closest('[data-chart-tip]');if(!rect)return;
+  const tip=rect.closest('.chart-wrap').querySelector('.chart-tip');if(tip)tip.textContent=rect.dataset.chartTip;
+});
+document.getElementById('new-form').addEventListener('submit',event=>{
+  event.preventDefault();const form=new FormData(event.target);
+  state=createSimulation({resourceMode:form.get('resource')==='true',seed:Number(form.get('seed')),stochastic:form.has('stochastic')});
+  draft=copy(state.policy);comparison=null;view='overview';checkpoint=null;mobileOpen=false;
+  try{localStorage.removeItem(CHECKPOINT);}catch(e){}
+  persist();document.getElementById('new-dialog').close();render();
+});
+document.querySelector('.dialog-close').addEventListener('click',()=>document.getElementById('new-dialog').close());
+document.getElementById('import-file').addEventListener('change',async event=>{
+  const file=event.target.files[0];if(!file)return;
+  try{if(file.size>20*1024*1024)throw new Error('Файл больше 20 МБ');const text=await file.text();const loaded=importSimulation(text);const loadedDraft=sanitizePolicy(JSON.parse(text).draftPolicy??loaded.policy);state=loaded;draft=loadedDraft;comparison=null;view='overview';persist();render();toast('Эксперимент восстановлен.');}
+  catch(e){toast('Не удалось открыть сохранение: '+e.message);}event.target.value='';
+});
+render();
