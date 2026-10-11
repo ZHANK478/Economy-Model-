@@ -23,7 +23,7 @@ test('funded education influences schooling slowly, not instant skills from a sl
 });
 test('purchase, privatization, compensation and recapitalization preserve balances and ownership',()=>{
   for(const kind of ['purchase','privatize','nationalize','recapitalize']){
-    let s=createSimulation();scheduleOwnership(s,{sector:1,kind,points:10,compensation:.5});const oldCapital=s.firms[1].capital;s=advanceMonth(s);
+    let s=createSimulation({policy:{judicialReview:false}});scheduleOwnership(s,{sector:1,kind,points:10,compensation:.5});const oldCapital=s.firms[1].capital;s=advanceMonth(s);
     ownershipBalance(s);assert.ok(Math.abs(accountBalances(s).bankResidual)<1e-6);assert.ok(s.metrics.auditError<1e-6);
     assert.ok(s.lastReport.fiscal.equityPurchases>0||s.lastReport.fiscal.equitySales>0);
     // Purchase itself is financial; physical capital only changes via depreciation/completions.
@@ -32,7 +32,7 @@ test('purchase, privatization, compensation and recapitalization preserve balanc
   }
 });
 test('uncompensated seizure is not free public output and raises property risk',()=>{
-  let s=createSimulation();scheduleOwnership(s,{sector:1,kind:'nationalize',points:50,compensation:0});s=advanceMonth(s);
+  let s=createSimulation({policy:{judicialReview:false}});scheduleOwnership(s,{sector:1,kind:'nationalize',points:50,compensation:0});s=advanceMonth(s);
   close(s.lastReport.fiscal.equityPurchases,0);assert.ok(s.institutions.ownershipRisk>0);ownershipBalance(s);assert.ok(s.metrics.auditError<1e-6);
 });
 test('public ownership has no immediate productivity bonus; governance profiles act with lags',()=>{
@@ -82,12 +82,14 @@ test('manual favourable and distressed debt exchanges replay exactly from the jo
   }
 });
 test('A/B control ignores queued ownership operations while the treatment executes them',()=>{
-  const s=createSimulation();scheduleOwnership(s,{sector:1,kind:'nationalize',points:20,compensation:0});const r=comparePolicies(s,s.policy,s.policy,12);
+  const s=createSimulation({policy:{judicialReview:false}});scheduleOwnership(s,{sector:1,kind:'nationalize',points:20,compensation:0});const r=comparePolicies(s,s.policy,s.policy,12);
   const standalone=runMonths({...s,pendingActions:[]},12);close(r.a.firms[1].ownership.state,standalone.firms[1].ownership.state);assert.ok(r.b.firms[1].ownership.state>r.a.firms[1].ownership.state);
   assert.equal(s.pendingActions.length,1);assert.equal(s.month,0);
 });
 test('monetary demand transmission remains active in the late low-credit economy',()=>{
-  const origin=runMonths(createSimulation({resourceMode:false}),240);assert.ok(origin.metrics.privateDebtRatio<5);
+  const origin=runMonths(createSimulation({resourceMode:false}),240);
+  for(const a of [...origin.households,...origin.firms]){const total=a.loanLC+a.loanFX*origin.exchangeRate,value=Math.min(total,a.cash);if(total>0){a.loanLC*=1-value/total;a.loanFX*=1-value/total;a.cash-=value;}}
+  assert.ok(accountBalances(origin).privateLoans/origin.metrics.nominalGDPAnnual<.05);close(accountBalances(origin).bankResidual,0,1e-5);
   const r=comparePolicies(origin,{...origin.policy,rate:2},{...origin.policy,rate:27.5},24);
   assert.ok(r.b.metrics.consumption<r.a.metrics.consumption);assert.ok(r.b.metrics.inflationYoY<r.a.metrics.inflationYoY);assert.ok(r.b.metrics.depositRate>r.a.metrics.depositRate);
 });

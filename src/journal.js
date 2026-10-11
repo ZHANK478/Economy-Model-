@@ -8,6 +8,7 @@ export function initializeJournal(s) {
 export function appendJournal(s,prev,actions,effectiveWorld) {
   const before=s.journal.at(-1);
   s.journal.push({month:s.month,decisionMonth:prev.month,version:s.version,
+    requestedPolicy:clone(s.requestedPolicy??s.policy),policyReview:clone(s.politics.lastReview),
     policy:clone(s.policy),policyChanges:changesBetween(before?.policy??s.provenance.initialPolicy,s.policy),
     parameters:clone(s.parameters),parameterChanges:changesBetween(before?.parameters??s.provenance.initialParameters,s.parameters),
     world:clone(s.world),worldChanges:changesBetween(before?.world??s.provenance.initialWorld,s.world),

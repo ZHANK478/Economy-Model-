@@ -20,7 +20,7 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   await import('../src/app.js');
   const app=node('app');
   const click=async data=>app.listeners.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
-  const views=['country','overview','economy','fiscal','credit','external','households','ownership','institutions','journal','compare','validation','method'];
+  const views=['country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','journal','compare','validation','method'];
   assert.ok(app.innerHTML.includes('Следующий месяц'));
   assert.ok(app.innerHTML.includes('Общий реальный ВВП'));
   assert.ok(app.innerHTML.includes('Население'));
@@ -33,21 +33,29 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   await click({view:'journal'});assert.ok(app.innerHTML.includes('Скачать журнал'));
   await click({view:'households'});assert.ok(app.innerHTML.includes('Рождения'));assert.ok(app.innerHTML.includes('Продолжительность')||app.innerHTML.includes('продолжительность'));
   await click({view:'validation'});assert.ok(app.innerHTML.includes('360 месяцев'));assert.ok(app.innerHTML.includes('Денежная стабилизация'));
+  await click({policyTab:'Кредит'});
+  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'dollarized',hasAttribute:()=>false}});
+  assert.ok(!app.innerHTML.includes('id="policy-rate"'));assert.ok(!app.innerHTML.includes('id="policy-inflationTarget"'));assert.ok(!app.innerHTML.includes('data-policy-check="liquiditySupport"'));
+  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'discretion',hasAttribute:()=>false}});
   for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
   app.listeners.input({target:{dataset:{policy:'rate'},value:'15'}});
   await click({action:'step'});
-  const persisted=JSON.parse(saved.get('economy-model-v31'));
+  const persisted=JSON.parse(saved.get('economy-model-v4'));
   const state=JSON.parse(persisted.simulation).state;
   assert.equal(state.month,1);assert.equal(state.policy.rate,15);
   assert.equal(state.policy.openProcurement,true);assert.equal(saved.get('economy-model-v3'),legacy);
   for(const view of views){await click({view});assert.ok(!app.innerHTML.includes('NaN'));assert.ok(!app.innerHTML.includes('undefined'));}
   assert.equal(state.journal.length,1);assert.equal(state.journal[0].policy.rate,15);
-  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v31'));
+  await click({view:'infrastructure'});node('network-id').value='roads';node('network-kind').value='networkSale';node('network-points').value='10';
+  await click({action:'network-queue'});assert.ok(app.innerHTML.includes('Операции следующего месяца'));assert.ok(app.innerHTML.includes('Продажа фонда оператору'));
+  const pending=JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.pendingActions;assert.equal(pending.length,1);
+  await click({cancelAction:String(pending[0].id)});
+  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v4'));
   app.listeners.input({target:{dataset:{policy:'rate'},value:'11'}});
   await click({view:'compare'});await click({action:'compare'});
   assert.ok(app.innerHTML.includes('Результаты на конец горизонта'));
-  assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v31')).simulation).state.month,1);
-  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v31')).simulation).state.month,4);
-  await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v31')).simulation).state.month,1);
+  assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.month,1);
+  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.month,4);
+  await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.month,1);
   assert.equal(saved.get('economy-model-v3'),legacy);
 });

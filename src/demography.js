@@ -37,7 +37,8 @@ export function createDemography(population,parameters) {
   const d={female:Array(LAST+1).fill(0),male:Array(LAST+1).fill(0),fertility:parameters.initialFertility,
     mortalityFactor:1,healthAccess:1,familySupport:1,migrationRate:0,pregnancies:[],
     births:0,deaths:0,netMigration:0,populationResidual:0};
-  const ranges=[[0,216,.28,.488],[216,780,.65,.50],[780,LAST+1,.07,.56]];
+  const children=parameters.initialChildShare,elderly=parameters.initialElderlyShare;
+  const ranges=[[0,216,children,.488],[216,780,1-children-elderly,.50],[780,LAST+1,elderly,.56]];
   for(const [from,to,share,femaleShare] of ranges) {
     const weights=Array.from({length:to-from},(_,i)=>from===780?Math.exp(-i/140):1);
     const total=sum(weights);
@@ -56,13 +57,17 @@ export function advanceDemography(s,prev) {
   const realHealth=(fiscal.healthcare??s.base.monthlyGDP*.02)/(prev.consumerPriceIndex/100)/oldPopulation;
   const realFamily=(fiscal.familyBenefits??s.base.monthlyGDP*.005)/(prev.consumerPriceIndex/100)/Math.max(prev.ageCohorts[0],.001);
   const income=Math.max(.2,prev.metrics.realIncomeIndex/100);
-  d.healthAccess+=k.healthAdjustment*(clamp(realHealth/10,.15,3)-d.healthAccess);
+  const privateAccess=Math.max(0,(prev.services?.healthCoverage??1)-(prev.services?.publicHealthDelivered??1));
+  d.healthAccess+=k.healthAdjustment*(clamp(realHealth/10+privateAccess,.15,3)-d.healthAccess);
   d.familySupport+=k.fertilityAdjustment*(clamp(realFamily/(25/2.8),0,5)-d.familySupport);
   const mortalityTarget=clamp(Math.exp(-k.healthMortalityElasticity*Math.log(Math.max(.15,d.healthAccess))-.08*Math.log(income)),.55,1.8);
   d.mortalityFactor+=k.healthAdjustment*(mortalityTarget-d.mortalityFactor);
   const fertilityTarget=clamp(k.initialFertility*Math.exp(-k.fertilityTrend*s.month/12
     +k.fertilityBenefitElasticity*Math.log(Math.max(.2,d.familySupport))+.06*Math.log(income)
-    -.002*Math.max(0,prev.metrics.unemployment-9)-.10*(prev.skills-1)),1,5);
+    -.002*Math.max(0,prev.metrics.unemployment-9)-.10*(prev.skills-1)
+    -k.fertilityHousingElasticity*Math.log(Math.max(.1,prev.services?.housingBurden??.25)/k.initialHousingBurden)
+    +k.fertilityChildcareElasticity*Math.log((.5+(prev.services?.childcareAccess??.5)))
+    +k.fertilityWorkLifeElasticity*(Math.log(40/p.normalWorkweek)+Math.min(p.parentalLeaveMonths,12)/12-1/3)),.5,5);
   d.fertility+=k.fertilityAdjustment*(fertilityTarget-d.fertility);
   const conceived=expectedBirths(d);
   d.births=d.pregnancies.shift();d.pregnancies.push(conceived);
@@ -76,7 +81,8 @@ export function advanceDemography(s,prev) {
     }
     next[0]+=d.births*(sex==='male'?1.05/2.05:1/2.05);d[sex]=next;
   }
-  const desiredMigration=clamp(.004*Math.log(income)-.025*(prev.metrics.unemployment-9)/100,-.01,.01)*p.migrationOpenness/100;
+  const migrationPressure=clamp(.004*Math.log(income)-.025*(prev.metrics.unemployment-9)/100,-.01,.01);
+  const desiredMigration=migrationPressure>0?migrationPressure*p.migrationOpenness/100:migrationPressure;
   d.migrationRate+=k.migrationAdjustment*(desiredMigration-d.migrationRate);
   const requested=oldPopulation*d.migrationRate/12;
   let migrated=0;

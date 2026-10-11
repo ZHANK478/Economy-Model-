@@ -25,8 +25,8 @@ test('effective annual rates compound exactly over twelve months, including depr
     close(monthlyToAnnual(annualToMonthly(r)),r);
   }
 });
-test('initial country has $6000 per capita, 10 million people, 50% public debt and all 23 blocks',()=>{
-  const s=createSimulation();close(s.metrics.gdpPerCapitaReal,6000);close(s.population,10);close(s.metrics.debtRatio,50);assert.equal(MODULES.length,23);checkState(s);
+test('initial country has $6000 per capita, 10 million people, 50% public debt and all 28 blocks',()=>{
+  const s=createSimulation();close(s.metrics.gdpPerCapitaReal,6000);close(s.population,10);close(s.metrics.debtRatio,50);assert.equal(MODULES.length,28);checkState(s);
 });
 test('Leontief solution satisfies q = Aq + f; no double counting of intermediate goods',()=>{
   const f=[100,50,300,20,200],q=solveLeontief(f);

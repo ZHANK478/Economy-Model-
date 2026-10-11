@@ -2,19 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSimulation,advanceMonth,runMonths,sanitizePolicy,scheduleOwnership,replayJournal,exportSimulation,importSimulation} from '../src/engine.js';
 import {fundInstitutionServices,governanceTarget} from '../src/institutions.js';
-import {MODEL_PROFILES,POLICY_FIELDS,POLICY_CHECKS,BASE_POLICY} from '../src/config.js';
+import {MODEL_PROFILES,POLICY_FIELDS,POLICY_CHECKS,POLICY_CHOICES,BASE_POLICY} from '../src/config.js';
 const close=(a,b,t=1e-10)=>assert.ok(Math.abs(a-b)<t,`${a} != ${b}`);
 const reform={registrationProcedures:2,antitrustBudget:.10,courtBudget:.16,soeAuditBudget:.05,
   openProcurement:true,meritAppointments:true,boardAutonomy:true,independentSoeAudit:true,depositPortability:true};
 const capacities=['antitrustCapacity','courtCapacity','soeAuditCapacity'];
 const zeroReturns={governanceEfficiencyElasticity:0,competitionEfficiencyElasticity:0,softBudgetEfficiencyPenalty:0,
-  competitionPriceResponse:0,contractRiskSensitivity:0,bankContestabilitySpread:0};
+  competitionPriceResponse:0,contractRiskSensitivity:0,bankContestabilitySpread:0,laborMarkdown:0,infrastructureCompetitionEffect:0,politicalRiskSensitivity:0};
 
 test('policy controls contain instruments, not selectable institutional outcomes',()=>{
   for(const key of ['competition','soeGovernance','ruleOfLaw','bankCompetition']){
     assert.ok(!(key in BASE_POLICY));assert.ok(!POLICY_FIELDS.some(f=>f[0]===key));
   }
-  for(const key of Object.keys(BASE_POLICY))assert.ok(POLICY_FIELDS.some(f=>f[0]===key)||POLICY_CHECKS.some(f=>f[0]===key));
+  for(const key of Object.keys(BASE_POLICY))assert.ok(POLICY_FIELDS.some(f=>f[0]===key)||POLICY_CHECKS.some(f=>f[0]===key)||POLICY_CHOICES.some(f=>f[0]===key));
   const p=sanitizePolicy({registrationProcedures:2.5,bankEntry:false,competition:100});
   assert.equal(p.registrationProcedures,3);assert.equal(p.bankEntry,false);assert.ok(!('competition' in p));
 });
@@ -66,7 +66,7 @@ test('independent audit and executed appointment rules matter with a lag, not a 
   assert.ok(a.firms[1].governance>b.firms[1].governance);assert.ok(b.firms[1].governance>0);
 });
 test('uncompensated expropriation affects property reliability and delay',()=>{
-  const s=createSimulation(),a=advanceMonth(s);scheduleOwnership(s,{sector:1,kind:'nationalize',points:50,compensation:0});const b=advanceMonth(s);
+  const s=createSimulation({policy:{judicialReview:false}}),a=advanceMonth(s);scheduleOwnership(s,{sector:1,kind:'nationalize',points:50,compensation:0});const b=advanceMonth(s);
   assert.ok(b.metrics.contractReliability<a.metrics.contractReliability);assert.ok(b.metrics.contractDelayDays>a.metrics.contractDelayDays);
 });
 test('bank rules change an endogenous switching proxy, never directly set competition to 100',()=>{

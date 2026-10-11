@@ -16,7 +16,7 @@ export function advanceInstitutionOutcomes(s) {
   const i=s.institutions,p=s.policy,k=s.parameters;
   i.registrationDays=p.registrationProcedures*(2+.65/Math.max(i.antitrustCapacity,.05));
   i.contractDelayDays=180*.65/Math.max(i.courtCapacity,.05)*(1+i.ownershipRisk);
-  i.contractReliability=clamp(i.courtCapacity*(1-i.ownershipRisk),0,.98);
+  i.contractReliability=clamp(i.courtCapacity*(1-i.ownershipRisk)*(.65+.35*s.politics.judicialIndependence),0,.98);
   const entryBarrier=Math.log(18/Math.max(i.registrationDays,1));
   const target=clamp(.60+k.entryCompetitionElasticity*entryBarrier
     +k.antitrustEffectiveness*(i.antitrustCapacity-.65)
@@ -42,7 +42,9 @@ export function governanceTarget(s,f) {
   const ruleExecution=accountability/.65*(.5*Number(p.meritAppointments)+Number(p.boardAutonomy)/3+1/6);
   const publicGovernance=.65+s.parameters.publicAccountabilityEffect*(ruleExecution-1);
   const common=.10*(i.competition-.60)+.10*(i.contractReliability-.65);
-  return clamp(f.ownership.state*publicGovernance+(1-f.ownership.state)*.65+common,.05,.98);
+  const publicShare=f.ownership.state+(f.ownership.municipal??0),cooperative=f.ownership.cooperative??0;
+  const cooperativeGovernance=.65+.08*Number(p.workerRepresentation)*i.contractReliability;
+  return clamp(publicShare*publicGovernance+cooperative*cooperativeGovernance+(1-publicShare-cooperative)*.65+common,.05,.98);
 }
 
 // GDP includes purchases once. This function makes NO cash transfers: the

@@ -25,7 +25,8 @@ export function advanceEducation(s,previousEducationSpending=0) {
   const e=s.education,cpi=s.consumerPriceIndex/100;
   const pupils=(s.ageCohorts[0]/s.population)/.28;
   const perPupil=previousEducationSpending/cpi/Math.max(s.population*pupils,.01);
-  e.access+=1/36*(clamp(perPupil/7.5,.15,4)-e.access);
+  const privateAccess=Math.max(0,(s.services?.educationCoverage??1)-(s.services?.publicEducationDelivered??1));
+  e.access+=1/36*(clamp(perPupil/7.5+privateAccess,.15,4)-e.access);
   const target=clamp(12*Math.pow(e.access,s.parameters.educationElasticity),5,18);
   e.expectedYears+=1/60*(target-e.expectedYears);
   // Stock of adult attainment adjusts only as new educated generations enter.
@@ -40,9 +41,9 @@ export function socialIndicators(s,{wages=2500,netPrimaryIncome=0}={}) {
   const equivalent=perPerson.map((v,i)=>v*Math.sqrt(s.households[i].householdSize));
   const marketEquivalent=market.map((v,i)=>v*Math.sqrt(s.households[i].householdSize));
   const median=weightedQuantile(equivalent,weights),threshold=median*.5;
-  const equity=s.firms.map(f=>Math.max(0,f.capital*(m.investmentPrice??cpi)+f.cash+f.inventory*f.price-f.loanLC-f.loanFX*s.exchangeRate));
+  const equity=s.firms.map(f=>Math.max(0,(f.capital+(f.infrastructureCapital??0))*(m.investmentPrice??cpi)+f.cash+f.inventory*f.price-f.loanLC-f.loanFX*s.exchangeRate));
   const privateBank=Math.max(0,s.bank.equity)*(1-s.bank.stateOwnership);
-  const wealth=s.households.map((h,i)=>h.cash+h.foreignSavingsUSD*s.exchangeRate-h.loanLC-h.loanFX*s.exchangeRate+sum(equity.map((v,j)=>v*s.firms[j].domesticOwners[i]))+privateBank*h.dividendShare);
+  const wealth=s.households.map((h,i)=>h.cash+h.foreignSavingsUSD*s.exchangeRate-h.loanLC-h.loanFX*s.exchangeRate+sum(equity.map((v,j)=>v*(s.firms[j].domesticOwners[i]+s.firms[j].workerOwners[i])))+privateBank*h.dividendShare);
   const wealthPerPerson=wealth.map((v,i)=>v/(s.population*weights[i]));
   const richest=wealth.map((v,i)=>({v,per:wealthPerPerson[i],weight:weights[i]})).sort((a,b)=>b.per-a.per);
   let left=.1,topWealth=0;for(const h of richest){const take=Math.min(left,h.weight);topWealth+=h.v*take/h.weight;left-=take;if(left<=0)break;}
@@ -53,7 +54,7 @@ export function socialIndicators(s,{wages=2500,netPrimaryIncome=0}={}) {
   const gniPPP=gniRealPerCapita*s.parameters.pppConversionFactor;
   const sectorVA=s.firms.map((f,i)=>Math.max(0,f.production*(1-[.20,.20,.33,.32,.165][i]-f.importCoefficient)));
   const totalVA=sum(sectorVA);
-  const stateOutput=sum(sectorVA.map((v,i)=>v*s.firms[i].ownership.state))/Math.max(totalVA,1);
+  const stateOutput=sum(sectorVA.map((v,i)=>v*(s.firms[i].ownership.state+s.firms[i].ownership.municipal)))/Math.max(totalVA,1);
   const incomeTotal=sum(perPerson.map((v,i)=>v*weights[i]));
   return {...humanDevelopmentIndex(m.lifeExpectancy,s.education.meanYears,s.education.expectedYears,gniPPP),
     giniMarket:weightedGini(marketEquivalent,weights)*100,giniDisposable:weightedGini(equivalent,weights)*100,
@@ -66,7 +67,7 @@ export function socialIndicators(s,{wages=2500,netPrimaryIncome=0}={}) {
     meanWageNominal:wages/Math.max(m.employment,.01),meanWageUSD:wages/Math.max(m.employment,.01)/s.exchangeRate,
     meanWageReal:wages/Math.max(m.employment,.01)/cpi,
     meanSchooling:s.education.meanYears,expectedSchooling:s.education.expectedYears,gniPPP,
-    stateAssetShare:sum(equity.map((v,i)=>v*s.firms[i].ownership.state))/Math.max(sum(equity),1)*100,
+    stateAssetShare:sum(equity.map((v,i)=>v*(s.firms[i].ownership.state+s.firms[i].ownership.municipal)))/Math.max(sum(equity),1)*100,
     foreignAssetShare:sum(equity.map((v,i)=>v*s.firms[i].ownership.foreign))/Math.max(sum(equity),1)*100,
     stateOutputShare:stateOutput*100,householdNetWealth:sum(wealth)};
 }
