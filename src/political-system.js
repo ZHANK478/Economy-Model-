@@ -2,6 +2,8 @@ import {BASE_POLICY} from './config.js';
 import {PARTY_FAMILIES,AXES,CONSTITUTIONAL_POLICY_KEYS,BUDGET_KEYS,CB_KEYS,clamp,clone,hash,logistic,distance,platformObject,constitutionFrom,parametersFrom} from './political-config.js';
 import {pollElectorate,conductElection,advanceCitizenship,electorateTotals,makeElectorate,governedPlatform} from './electorate.js';
 import {policyAuthority,createBill,amendBill,acceptAmendment,voteArticle,voteBill,presidentialDecision,referendum,enactBills,rollCall,validatePolicyPatch,validateLegislativeAction} from './legislation.js';
+import {initializeAgenda,generateMonthlyAgenda,expireMonthlyAgenda,decideBill,plannedPolicy} from './political-agenda.js';
+export {plannedPolicy};
 export {policyAuthority,createBill};
 const sum=a=>a.reduce((v,x)=>v+x,0);
 const party=(s,id)=>s.politics.parties.find(x=>x.id===id);
@@ -32,6 +34,9 @@ export function initializePoliticalSystem(s,options={}){
   const {poll}=pollElectorate(s);p.publicSupport=poll.approval;p.hiddenApproval=poll.approval;p.officialApproval=poll.approval;p.presidentApproval=poll.presidentApproval;p.cabinetApproval=poll.cabinetApproval;p.parliamentSupport=coalitionSeats(s)/p.totalSeats;
   p.partyHistory.push({month:0,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:poll.parties.map(x=>({...x,seats:party(s,x.id).seats}))});
   p.initialOptions={constitution:clone(c),parameters:clone(p.parameters),playerFamily:player.family};
+  p.instantRules=options.politicalOptions?.instantRules!==false;
+  p.initialOptions.instantRules=p.instantRules;
+  if(p.instantRules){initializeAgenda(s);generateMonthlyAgenda(s);}
   s.provenance.initialPolicy=clone(s.policy);s.provenance.politicalMode=true;s.provenance.politicalOptions=clone(p.initialOptions);
 }
 export function coalitionSeats(s){return sum(s.politics.parties.filter(x=>s.politics.coalition.includes(x.id)).map(x=>x.seats));}
@@ -49,13 +54,38 @@ function allocateCabinet(s){const p=s.politics,members=p.parties.filter(x=>p.coa
   for(let i=0;i<left&&order.length;i++)posts[order[i%order.length].i]++;members.forEach((x,i)=>x.cabinetPosts=posts[i]);
 }
 export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)throw new Error('Включите политическую игру при создании страны');if(!p.executive.inOffice)throw new Error('Ваше правление завершено');
-  const kinds=['proposeBill','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
+  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
   if(!kinds.includes(command?.kind))throw new Error('Неизвестное политическое действие');
   const c=clone(command);delete c.id;delete c.month;
-  if(c.kind==='proposeBill'){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});}
+  if(['proposeBill','chooseLaw','policyDecision'].includes(c.kind)){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});if(c.actions)c.actions.forEach(validateLegislativeAction);}
   if(c.kind==='parameters')parametersFrom({...p.parameters,...c.values});
   if(c.kind==='partyProgram'&&(!c.platform||AXES.some(k=>!Number.isFinite(c.platform[k])||Math.abs(c.platform[k])>1)))throw new Error('Неверная программа партии');
   const request={...c,id:p.nextCommandId++,month:s.month};p.pendingCommands.push(request);return request;
+}
+// Current-turn decisions are recorded separately from monthly economic flows.
+// Replay executes them before the corresponding advanceMonth, including an
+// unfinished current turn. A failed command rolls back its entire mutation.
+export function executePolitical(s,command){
+  const p0=s.politics,archives=['rollCalls','elections','partyHistory','commandHistory'];
+  const backup=clone({...p0,...Object.fromEntries(archives.map(key=>[key,[]])),bills:[]});
+  for(const key of archives)if(p0[key])backup[key]=p0[key].slice();
+  if(p0.bills)backup.bills=p0.bills.map(b=>['draft','articles','awaitingSignature','referendum','passed'].includes(b.status)||b.id===Number(command?.billId)?clone(b):b);
+  const pending=clone(s.pendingActions),nextAction=s.nextActionId;
+  try{
+    const request=schedulePolitical(s,command),p=s.politics; p.pendingCommands.pop();
+    initializeAgenda(s);const start=p.lastActions.length,events=[];
+    const result=processCommand(s,request,events);
+    p.turnCommands.push(clone(request));p.turnActions.push(...clone(p.lastActions.slice(start)));p.turnEvents.push(...events);
+    p.commandHistory.push({...clone(request),processedMonth:s.month,timing:'currentTurn',status:'processed'});
+    return result;
+  }catch(e){s.politics=backup;s.pendingActions=pending;s.nextActionId=nextAction;throw e;}
+}
+export function enableInstantPolitics(s){
+  if(!s.politics.enabled||s.politics.instantRules||!s.politics.executive.inOffice)return;
+  executePolitical(s,{kind:'activateInstantRules'});
+  // Honor actions already selected in an older save without another month.
+  const queued=clone(s.politics.pendingCommands);s.politics.pendingCommands=[];
+  for(const command of queued){try{executePolitical(s,command.kind==='proposeBill'?{...command,kind:'chooseLaw'}:command.kind==='renewBudget'?{kind:'chooseLaw',renewBudget:true,title:'Бюджет на следующий год'}:command);}catch{/* Invalid legacy selections stay in their old saved history. */}}
 }
 function loseOffice(s,reason,events){const p=s.politics;if(!p.executive.inOffice)return;
   p.executive.inOffice=false;p.executive.reason=reason;p.executive.endedMonth=s.month;
@@ -79,8 +109,8 @@ function offerCoalition(s,command,events){const p=s.politics,x=party(s,command.p
   p.lastActions.push({kind:'coalitionOffer',partyId:x.id,concessions,posts,accepted,programDistance:gap});
   if(!accepted){events.push(`${x.name}: предложение коалиции отклонено из-за программы или прежних нарушений договорённостей.`);return;}
   party(s,p.executive.playerParty).cabinetPosts-=Math.max(0,posts-(8-occupied));p.coalition.push(x.id);x.cabinetPosts=posts;x.coalitionGrievance=0;p.coalitionAgreements.push({partyId:x.id,month:s.month,platform:clone(projected),policy:{...clone(p.lawPolicy),...concessions},posts,initial:false});
-  if(Object.keys(concessions).length)createBill(s,concessions,{title:'Коалиционное соглашение с '+x.name});if(coalitionSeats(s)>p.totalSeats/2)p.executive.formationDeadline=null;
-  events.push(`${x.name} вошла в коалицию. Обещанные изменения ещё требуют закона.`);
+  if(Object.keys(concessions).length){const b=createBill(s,concessions,{title:'Коалиционное соглашение с '+x.name});if(p.instantRules)decideBill(s,b.id,'accept',events);}if(coalitionSeats(s)>p.totalSeats/2)p.executive.formationDeadline=null;
+  events.push(`${x.name} вошла в коалицию. ${p.instantRules?'Предложенные уступки рассмотрены в этом ходу.':'Обещанные изменения ещё требуют закона.'}`);
 }
 function partySplit(s,command){const p=s.politics,parent=party(s,command.partyId??p.executive.playerParty);if(parent?.id!==p.executive.playerParty||!parent.active||p.parties.filter(x=>x.active).length>=16)throw new Error('Можно организовать фракцию только в своей партии; достигнутый предел партий также ограничивает раскол');
   const x=clone(parent);x.id=`p${p.nextPartyId++}`;x.name=String(command.name??parent.name+' · новая фракция').slice(0,80);x.parentIds=[parent.id];x.foundedMonth=s.month;x.cabinetPosts=0;x.coalitionGrievance=0;x.organization*=.35;
@@ -96,6 +126,27 @@ function partyMerge(s,command){const p=s.politics,ids=[...new Set(command.partyI
 }
 function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   switch(command.kind){
+    case 'activateInstantRules':p.initialOptions.instantRules??=false;p.instantRules=true;initializeAgenda(s);generateMonthlyAgenda(s);return;
+    case 'decideBill':return decideBill(s,command.billId,command.decision,events);
+    case 'chooseLaw':{
+      const b=createBill(s,command.patch??{},{constitutionPatch:command.constitutionPatch,title:command.title,sponsor:p.executive.playerParty,actions:command.actions,renewBudget:command.renewBudget});
+      if(command.actions){const ids=new Set(command.actions.map(a=>a.id));s.pendingActions=s.pendingActions.filter(a=>!ids.has(a.id));s.nextActionId=Math.max(s.nextActionId,...command.actions.map(a=>a.id+1));}
+      return decideBill(s,b.id,'accept',events);
+    }
+    case 'policyDecision':{
+      const patch=validatePolicyPatch(command.patch??{}),law={},current=plannedPolicy(s);
+      for(const [key,value] of Object.entries(patch)){
+        if(value===current[key])continue;
+        const authority=policyAuthority(s,key);
+        if(authority==='centralBank')throw new Error('Это решение принимает независимый центральный банк');
+        const divided=c.form==='semiPresidential'&&p.executive.role==='president'&&p.executive.primeMinisterParty!==p.executive.playerParty&&!p.coalition.includes(p.executive.playerParty);
+        if(authority==='executive'&&!divided){p.lawPolicy[key]=value;p.lastDecision={month:s.month,kind:'executive',key,from:current[key],to:value};p.lastActions.push({kind:'executiveDecision',key,from:current[key],to:value});}
+        else if(p.emergency?.ratified&&BUDGET_KEYS.includes(key)&&Math.abs(value-p.lawPolicy[key])<=2){p.emergency.temporaryPolicy??={};p.emergency.temporaryPolicy[key]=value;p.lastActions.push({kind:'emergencyAppropriation',key,value,expires:p.emergency.expires});}
+        else law[key]=value;
+      }
+      if(Object.keys(law).length)return processCommand(s,{kind:'chooseLaw',patch:law,title:command.title},events);
+      return;
+    }
     case 'proposeBill':return createBill(s,command.patch,{constitutionPatch:command.constitutionPatch,title:command.title,sponsor:p.executive.playerParty});
     case 'renewBudget':return createBill(s,{}, {renewBudget:true,title:'Бюджетные ассигнования на следующий год'});
     case 'amend':return amendBill(s,Number(command.billId),Number(command.articleId),command.value);
@@ -127,7 +178,9 @@ function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   }
 }
 export function reviewPoliticalPolicy(s,prev,requested,events){const p=s.politics;
-  p.lastActions=[];p.lastReview=[];p.authorizedActions=[];p.lastSubmittedActions=clone(prev.pendingActions);p.lastCommands=clone(p.pendingCommands);
+  p.lastActions=clone(p.turnActions??[]);events.push(...(p.turnEvents??[]));p.turnCommands=[];p.turnActions=[];p.turnEvents=[];
+  p.lastReview=[];p.authorizedActions=[];p.lastSubmittedActions=clone(prev.pendingActions);p.lastCommands=clone(p.pendingCommands);
+  expireMonthlyAgenda(s,prev.month,events);
   // Property decisions enter the legislative queue before the economy executes
   // any transfer. Submitted and executed actions are stored separately.
   s.pendingActions=[];
@@ -138,7 +191,7 @@ export function reviewPoliticalPolicy(s,prev,requested,events){const p=s.politic
   if(p.emergency&&(s.month>=p.emergency.expires||s.month>p.emergency.ratifyBy&&!p.emergency.ratified)){p.emergency=null;events.push('Временные чрезвычайные полномочия истекли; временные ассигнования прекращены.');}
   const lawPatch={},constitutionPatch={},accepted={...p.lawPolicy};
   for(const [key,value] of Object.entries(requested)){
-    if(value===prev.policy[key])continue;const authority=policyAuthority(s,key);
+    if(value===prev.policy[key]||value===p.lawPolicy[key])continue;const authority=policyAuthority(s,key);
     if(authority==='executive'){
       const divided=p.constitution.form==='semiPresidential'&&p.executive.role==='president'&&p.executive.primeMinisterParty!==p.executive.playerParty&&!p.coalition.includes(p.executive.playerParty);
       if(divided){lawPatch[key]=value;p.lastReview.push({key,requested:value,accepted:accepted[key],reason:'cabinetAndParliament'});}
@@ -148,9 +201,10 @@ export function reviewPoliticalPolicy(s,prev,requested,events){const p=s.politic
     else if(p.emergency?.ratified&&BUDGET_KEYS.includes(key)&&Math.abs(value-p.lawPolicy[key])<=2){p.emergency.temporaryPolicy??={};p.emergency.temporaryPolicy[key]=value;p.lastActions.push({kind:'emergencyAppropriation',key,value,expires:p.emergency.expires});}
     else{(authority==='constitution'?constitutionPatch:lawPatch)[key]=value;p.lastReview.push({key,requested:value,accepted:accepted[key],reason:'pendingLegislation'});}
   }
-  if(Object.keys(lawPatch).length)createBill(s,lawPatch);
-  if(Object.keys(constitutionPatch).length)createBill(s,constitutionPatch,{title:'Изменение прав и конституционных гарантий'});
+  if(Object.keys(lawPatch).length){const b=createBill(s,lawPatch);if(p.instantRules)decideBill(s,b.id,'accept',events);}
+  if(Object.keys(constitutionPatch).length){const b=createBill(s,constitutionPatch,{title:'Изменение прав и конституционных гарантий'});if(p.instantRules)decideBill(s,b.id,'accept',events);}
   for(const a of p.lastSubmittedActions)createBill(s,{}, {actions:[a],title:a.kind==='restructure'?'Обмен государственного долга':'Операция с собственностью'});
+  if(p.instantRules)enactBills(s,events);
   // Laws enacted in this month prevail over the unchanged old UI draft.
   Object.assign(accepted,p.lawPolicy);
   const unconstrained=!accepted.parliamentOversight&&p.legislativeConstraint<.35;
@@ -163,6 +217,7 @@ export function reviewPoliticalPolicy(s,prev,requested,events){const p=s.politic
 }
 function partyDynamics(s,events){const p=s.politics,current=governedPlatform(s);
   for(const x of p.parties.filter(x=>x.active)){
+    if(p.instantRules)x.executiveLoyalty=clamp((x.executiveLoyalty??.5)+.006*((p.coalition.includes(x.id)?.75:.45)-(x.executiveLoyalty??.5)));
     const share=p.poll.parties.find(z=>z.id===x.id)?.share??0;x.organization=clamp(x.organization+.005*(.3+share/25-x.organization),.1,1.5);
     for(const promise of x.promises.filter(z=>z.status==='pending'&&z.due<=s.month)){const achieved=typeof promise.value==='number'?Math.abs(s.policy[promise.key]-promise.value)<=Math.max(.1,Math.abs(promise.value)*.03):s.policy[promise.key]===promise.value;promise.status=achieved?'fulfilled':'broken';if(!achieved)x.brokenPromises++;p.lastActions.push({kind:'promiseReviewed',partyId:x.id,key:promise.key,status:promise.status});}
     if(p.coalition.includes(x.id)&&x.id!==p.executive.playerParty){const agreement=[...p.coalitionAgreements].reverse().find(a=>a.partyId===x.id),target=agreement?.initial?x.platform:agreement?.platform??x.platform,breach=distance(target,current);
@@ -172,7 +227,7 @@ function partyDynamics(s,events){const p=s.politics,current=governedPlatform(s);
   if(s.month%36===0&&p.parties.filter(x=>x.active).length<16&&s.policy.associationFreedom){const groups=makeElectorate(s),unrepresented=groups.filter(g=>Math.min(...p.parties.filter(x=>x.active).map(x=>distance(g.ideal,x.platform)))>p.parameters.newPartyDemand),weight=sum(unrepresented.map(g=>g.weight));
     if(weight>p.poll.eligible*.08){const platform=Object.fromEntries(AXES.map(k=>[k,sum(unrepresented.map(g=>g.weight*g.ideal[k]))/weight])),family=PARTY_FAMILIES.reduce((best,x)=>distance(platformObject(x.platform),platform)<distance(platformObject(best.platform),platform)?x:best,PARTY_FAMILIES[0]);
       const id=`p${p.nextPartyId++}`;p.parties.push({id,family:family.id,name:family.label+' · новая волна '+id.slice(1),color:family.color,leader:'Новый лидер '+id.slice(1),candidateName:'Кандидат '+id.slice(1),platform,organization:.2,competence:.45,candidateCompetence:.45,discipline:.65,active:true,tolerated:false,seats:0,deputies:[],foundedMonth:s.month,parentIds:[],coalitionGrievance:0,brokenPromises:0,promises:[],cabinetPosts:0});events.push('Появилась новая партия, представляющая неудовлетворённый программный спрос.');p.lastActions.push({kind:'partyFounded',partyId:id,unrepresentedShare:weight/p.poll.eligible});}}
-  if(s.month%6===0){const opposition=p.parties.filter(x=>x.active&&x.seats>0&&!p.coalition.includes(x.id)).sort((a,b)=>(p.poll.parties.find(x=>x.id===b.id)?.share??0)-(p.poll.parties.find(x=>x.id===a.id)?.share??0))[0];
+  if(!p.instantRules&&s.month%6===0){const opposition=p.parties.filter(x=>x.active&&x.seats>0&&!p.coalition.includes(x.id)).sort((a,b)=>(p.poll.parties.find(x=>x.id===b.id)?.share??0)-(p.poll.parties.find(x=>x.id===a.id)?.share??0))[0];
     if(opposition&&!p.bills.some(b=>b.sponsor===opposition.id&&['draft','articles','awaitingSignature'].includes(b.status))){const redistribution=opposition.platform.economy<0;createBill(s,redistribution?{transfers:clamp(p.lawPolicy.transfers+.5,0,20)}:{incomeTax:clamp(p.lawPolicy.incomeTax-1,0,50)},{sponsor:opposition.id,title:opposition.name+': '+(redistribution?'поддержка доходов':'снижение подоходного налога')});}}
 }
 function publicEvents(s,flow,events,world){const p=s.politics,r=hash(s.seed,'public-event',s.month);
@@ -191,6 +246,7 @@ export function advancePoliticalSystem(s,prev,events,flow={},world=s.world){
   p.hiddenApproval+=p.parameters.approvalAdjustment*(poll.approval-p.hiddenApproval);p.publicSupport=p.hiddenApproval;
   p.officialApproval=clamp(p.hiddenApproval+(s.policy.freeMedia?0:.35*(1-p.mediaFreedom))+(s.policy.competitiveElections?0:.15));
   partyDynamics(s,events);
+  if(p.instantRules)initializeAgenda(s);
   const budgetBase=prev.metrics.nominalGDPAnnual/12,paid=(key,flowKey)=>flow[flowKey]/Math.max(.001,budgetBase*Math.max(s.policy[key],.001)/100);
   const securityPaid=clamp(paid('securityBudget','politicalSecurity')),patronagePaid=clamp(paid('patronageBudget','politicalPatronage'));
   const economy=clamp(.6+poll.approval-.5-(s.government.defaultActive?.3:0));
@@ -222,6 +278,7 @@ export function advancePoliticalSystem(s,prev,events,flow={},world=s.world){
   if(p.executive.inOffice&&p.executive.role==='president'&&p.executive.legalExposure>0&&p.judicialIndependence>.5&&p.parliamentSupport<.4&&s.month%6===0){try{processCommand(s,{kind:'impeach'},events);}catch{/* No legal majority. */}}
   p.partyHistory.push({month:s.month,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:p.poll.parties.map(x=>({...x,seats:party(s,x.id).seats}))});
   p.nextElection=Math.min(p.nextParliamentElection,p.nextPresidentElection??Infinity,p.scheduledParliament??Infinity);if(p.nextElection<=s.month)p.nextElection=s.month+1;
+  generateMonthlyAgenda(s);
 }
 export function politicalMetrics(s){const p=s.politics;if(!p.enabled)return {};
   const totals=electorateTotals(s),player=p.poll.parties.find(x=>x.id===p.executive.playerParty);
@@ -235,6 +292,7 @@ export function validatePoliticalSystem(s){const p=s.politics;if(Boolean(s.prove
   if(sum(p.parties.map(x=>x.seats))!==p.totalSeats||p.totalSeats<p.allocatedSeatBase||p.totalSeats>p.allocatedSeatBase*2)throw new Error('Не сходится число парламентских мест');
   if(!party(s,p.executive.playerParty)||typeof p.executive.inOffice!=='boolean'||p.coalition.some(id=>!party(s,id)))throw new Error('Повреждена исполнительная власть');
   if(!Array.isArray(p.bills)||!Array.isArray(p.pendingCommands)||!Array.isArray(p.rollCalls)||!p.lawPolicy||!p.citizenship||p.citizenship.residents<0||p.citizenship.naturalized<0)throw new Error('Повреждена политическая история');
+  if(p.instantRules&&(!Array.isArray(p.turnCommands)||!Array.isArray(p.turnActions)||!Array.isArray(p.turnEvents)||!p.initiativeCredits||Object.values(p.initiativeCredits).some(v=>!Number.isFinite(v))||p.parties.some(x=>!valid(x.executiveLoyalty,0,1))||p.turnCommands.some(c=>!Number.isInteger(c.id)||c.id<1||c.month!==s.month)))throw new Error('Повреждены решения текущего хода или лояльность партий');
   const citizenship=p.citizenship;if(!valid(citizenship.integration,0,1)||!Array.isArray(citizenship.arrivals)||!Array.isArray(citizenship.naturalizations)||[...citizenship.arrivals,...citizenship.naturalizations].some(b=>!Number.isInteger(b.month)||b.month>s.month||!valid(b.people))||Math.abs(sum(citizenship.arrivals.map(b=>b.people))-citizenship.residents)>1e-8||Math.abs(sum(citizenship.naturalizations.map(b=>b.people))-citizenship.naturalized)>1e-8)throw new Error('Повреждены когорты гражданства');
   if(!Array.isArray(p.economicHistory)||!p.economicHistory.length||p.economicHistory.some(h=>!Number.isInteger(h.month)||!valid(h.national,0)||!Array.isArray(h.groups)||h.groups.length!==5||h.groups.some(x=>!valid(x))))throw new Error('Повреждена память экономического опыта');
   if(new Set(p.bills.map(b=>b.id)).size!==p.bills.length)throw new Error('Повторяющиеся идентификаторы законов');

@@ -6,7 +6,7 @@ import {apportion,integerVotes,legislatureSeats,rankedCount} from '../src/electi
 import {createBill,voteArticle,voteBill,presidentialDecision,amendBill,rollCall,referendum} from '../src/legislation.js';
 import {electorateTotals,makeElectorate,advanceCitizenship,conductElection,pollElectorate} from '../src/electorate.js';
 import {coalitionSeats,validatePoliticalSystem} from '../src/political-system.js';
-const country=(constitution={},other={})=>createSimulation({politicalMode:true,politicalOptions:{constitution},...other});
+const country=(constitution={},other={})=>createSimulation({politicalMode:true,politicalOptions:{constitution,instantRules:false},...other});
 const sum=a=>a.reduce((v,x)=>v+x,0);
 test('seeded monthly draws represent rare events without adjacent-month hash clustering',()=>{const values=Array.from({length:10000},(_,month)=>hash(11,'rare-event',month));assert.ok(values.every(x=>x>=0&&x<1));const rare=values.filter(x=>x<.005).length;assert.ok(rare>25&&rare<80);assert.ok(Math.abs(sum(values)/values.length-.5)<.015);});
 function adopt(s,billId){schedulePolitical(s,{kind:'voteBill',billId});if(s.politics.executive.role==='president')schedulePolitical(s,{kind:'sign',billId});return advanceMonth(s);}

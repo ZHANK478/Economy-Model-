@@ -15,6 +15,7 @@ export function appendJournal(s,prev,actions,effectiveWorld) {
     stochastic:s.stochastic,shocks:clone(s.shocks),effectiveWorld:clone(effectiveWorld),
     actions:clone(actions),submittedActions:clone(s.politics.enabled?s.politics.lastSubmittedActions:prev.pendingActions),nextActionId:prev.nextActionId,
     politicalCommands:clone(s.politics.enabled?s.politics.lastCommands:[]),nextCommandId:s.politics.nextCommandId??null,
+    turnPoliticalCommands:clone(s.politics.enabled?prev.politics.turnCommands??[]:[]),
     politicalResults:clone(s.politics.enabled?s.politics.lastActions:[]),politicalElections:clone(s.politics.elections.filter(e=>e.month===s.month)),
     politicalRollCalls:clone(s.politics.enabled?s.politics.rollCalls.filter(e=>e.month===s.month):[]),
     politicalState:s.politics.enabled?{role:s.politics.executive.role,inOffice:s.politics.executive.inOffice,coalition:clone(s.politics.coalition),constitution:clone(s.politics.constitution),parameters:clone(s.politics.parameters),partyPrograms:s.politics.parties.map(x=>({id:x.id,platform:clone(x.platform)}))}:null,

@@ -1,8 +1,8 @@
 import {createDemography,advanceDemography,demographicMetrics,cohortTotals} from './demography.js';
 import {VERSION,SECTORS,INPUTS,GROUPS,BASE_POLICY,POLICY_FIELDS,POLICY_CHECKS,POLICY_CHOICES,PARAMETERS,WORLD,MODEL_PROFILES} from './config.js';
 import {initializePolitics,reviewPolicy,advancePolitics,politicsMetrics} from './politics.js';
-import {initializePoliticalSystem,schedulePolitical,validatePoliticalSystem} from './political-system.js';
-export {schedulePolitical};
+import {initializePoliticalSystem,schedulePolitical,executePolitical,validatePoliticalSystem} from './political-system.js';
+export {schedulePolitical,executePolitical};
 import {initializeMonetary,advanceMonetary,fixedExchange,hasDiscretionaryCB,monetaryMetrics} from './monetary.js';
 import {initializeLabor,advanceLabor,laborWageShares,laborMetrics} from './labor.js';
 import {initializeInfrastructure,prepareInfrastructure,infrastructurePlans,completeInfrastructure,settleInfrastructure,synchronizeInfrastructure,infrastructureMetrics,scheduleNetwork,executeNetworkTransfers} from './infrastructure.js';
@@ -331,7 +331,7 @@ export function advanceMonth(state,policy=state.policy) {
   // Historical entries are immutable. Copy live accounts, not an ever-growing
   // journal on every month; callers' histories are never modified.
   const archiveKeys=['rollCalls','elections','partyHistory','commandHistory'];
-  const livePolitics=state.politics.enabled?{...state.politics,...Object.fromEntries(archiveKeys.map(k=>[k,[]])),bills:state.politics.bills.filter(b=>!['enacted','withdrawn'].includes(b.status))}:state.politics;
+  const livePolitics=state.politics.enabled?{...state.politics,...Object.fromEntries(archiveKeys.map(k=>[k,[]])),bills:state.politics.bills.filter(b=>!['enacted','withdrawn','expired','declined'].includes(b.status))}:state.politics;
   const s=copy({...state,politics:livePolitics,history:[],journal:[]}),prev=state;
   if(state.politics.enabled){for(const key of archiveKeys)s.politics[key]=state.politics[key].slice();const active=new Map(s.politics.bills.map(b=>[b.id,b]));s.politics.bills=state.politics.bills.map(b=>active.get(b.id)??b);}
   s.history=state.history.slice();s.journal=state.journal.slice();
@@ -902,13 +902,18 @@ export function scheduleRestructuring(s,{haircut=.30,extension=60}={}) {
 }
 export function replayJournal(s) {
   const p=s.provenance;
-  let result=createSimulation({resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions:p.politicalOptions});
+  const politicalOptions=p.politicalOptions?{...p.politicalOptions,instantRules:p.politicalOptions.instantRules??false}:p.politicalOptions;
+  let result=createSimulation({resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
   for(const entry of s.journal){
     result.parameters=copy(entry.parameters);result.world=copy(entry.world);result.shocks=copy(entry.shocks);result.stochastic=entry.stochastic;result.pendingNote=entry.note;
-    if(result.politics.enabled){result.pendingActions=copy(entry.submittedActions??[]);result.nextActionId=entry.nextActionId??result.nextActionId;result.politics.pendingCommands=copy(entry.politicalCommands??[]);result.politics.nextCommandId=entry.nextCommandId??result.politics.nextCommandId;}
+    if(result.politics.enabled){
+      for(const command of entry.turnPoliticalCommands??[]){result.politics.nextCommandId=command.id;executePolitical(result,command);}
+      result.pendingActions=copy(entry.submittedActions??[]);result.nextActionId=entry.nextActionId??result.nextActionId;result.politics.pendingCommands=copy(entry.politicalCommands??[]);result.politics.nextCommandId=entry.nextCommandId??result.politics.nextCommandId;
+    }
     else for(const a of entry.actions)if(a.id){if(a.kind==='restructure')scheduleRestructuring(result,a);else if(a.network)scheduleNetwork(result,a);else scheduleOwnership(result,a);}
     result=advanceMonth(result,entry.requestedPolicy??entry.policy);
   }
+  if(result.politics.enabled)for(const command of s.politics.turnCommands??[]){result.politics.nextCommandId=command.id;executePolitical(result,command);}
   return result;
 }
 export function importSimulation(text) {

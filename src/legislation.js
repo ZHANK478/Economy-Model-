@@ -27,6 +27,14 @@ export function validateLegislativeAction(a){
 const titleOf=key=>POLICY_FIELDS.find(x=>x[0]===key)?.[1]??POLICY_CHECKS.find(x=>x[0]===key)?.[1]??POLICY_CHOICES.find(x=>x[0]===key)?.[1]??key;
 const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
 const fingerprintOf=(patch,constitutionPatch,actions)=>JSON.stringify(canonical([patch,constitutionPatch,actions]));
+export function approvedPolicy(s){
+  if(!s.politics.enabled)return {...s.policy};
+  const p=s.politics,result={...p.lawPolicy};
+  const bills=p.bills.filter(b=>b.status==='passed').slice();
+  if(p.instantRules)bills.sort((a,b)=>(a.decisionSequence??a.id)-(b.decisionSequence??b.id));
+  for(const b of bills)Object.assign(result,b.patch);
+  return {...result,...p.emergency?.temporaryPolicy};
+}
 export function createBill(s,patch={},options={}){
   const p=s.politics,validated=validatePolicyPatch(patch),constitutionPatch=options.constitutionPatch??{};
   if(options.actions){if(!Array.isArray(options.actions))throw new Error('Операции должны быть списком');options.actions.forEach(validateLegislativeAction);}
@@ -34,12 +42,19 @@ export function createBill(s,patch={},options={}){
   if(Object.keys(validated).some(key=>policyAuthority(s,key)==='centralBank'))throw new Error('Операционная ставка и банковские нормативы независимого ЦБ не устанавливаются обычным законом');
   const kind=Object.keys(constitutionPatch).length||Object.keys(validated).some(k=>CONSTITUTIONAL_POLICY_KEYS.includes(k))?'constitutional':options.actions?.length?'property':options.renewBudget||Object.keys(validated).some(k=>BUDGET_KEYS.includes(k))?'budget':'ordinary';
   const fingerprint=fingerprintOf(validated,constitutionPatch,options.actions??[]);
-  const existing=p.bills.find(b=>b.fingerprint===fingerprint&&(['draft','articles','awaitingSignature','referendum','passed'].includes(b.status)||['rejected','vetoed'].includes(b.status)&&b.parliamentId===p.lastParliamentElection&&s.month-b.month<6));if(existing)return existing;
+  const existing=!options.monthlyInitiative&&p.bills.find(b=>b.fingerprint===fingerprint&&(['draft','articles','awaitingSignature','referendum','passed'].includes(b.status)||['rejected','vetoed'].includes(b.status)&&b.parliamentId===p.lastParliamentElection&&s.month-b.month<6));if(existing)return existing;
   if(!Object.keys(validated).length&&!Object.keys(constitutionPatch).length&&!options.actions?.length&&!options.renewBudget)throw new Error('В законопроекте нет статей');
   const bill={id:p.nextBillId++,month:s.month,parliamentId:p.lastParliamentElection,title:String(options.title??(kind==='constitutional'?'Изменение конституционных правил':kind==='budget'?'Бюджетный пакет':kind==='property'?'Операция с собственностью':'Изменение экономических правил')).slice(0,160),sponsor:options.sponsor??p.executive.playerParty,kind,status:'draft',revision:0,fingerprint,patch:validated,constitutionPatch:clone(constitutionPatch),actions:clone(options.actions??[]),renewBudget:Boolean(options.renewBudget),articles:[],amendments:[],votes:[],finalVote:null};
-  for(const [key,value] of Object.entries(validated))bill.articles.push({id:bill.articles.length+1,key,label:titleOf(key),value,status:'pending'});
-  for(const [key,value] of Object.entries(constitutionPatch))bill.articles.push({id:bill.articles.length+1,key:'constitution.'+key,label:'Конституция: '+key,value,status:'pending'});
-  for(const a of bill.actions)bill.articles.push({id:bill.articles.length+1,key:'action.'+a.id,label:'Передача собственности / обмен долга',value:a,status:'pending'});
+  const before=approvedPolicy(s);
+  bill.monthlyInitiative=Boolean(options.monthlyInitiative);
+  for(const [key,value] of Object.entries(validated))bill.articles.push({id:bill.articles.length+1,key,label:titleOf(key),before:before[key],value,status:'pending'});
+  for(const [key,value] of Object.entries(constitutionPatch))bill.articles.push({id:bill.articles.length+1,key:'constitution.'+key,label:'Конституция: '+key,before:p.constitution[key],value,status:'pending'});
+  for(const a of bill.actions){
+    const asset=a.network?s.networks.find(n=>n.id===a.network):s.firms[a.sector];
+    const publicShare=a.network?asset.public/Math.max(.001,asset.public+asset.municipal+asset.private)*100:asset?.ownership.state*100;
+    const before=a.kind==='restructure'?`Государственный долг: ${s.metrics.debtRatio.toFixed(1)}% ВВП`:`Государственная доля: ${publicShare.toFixed(1)}%`;
+    bill.articles.push({id:bill.articles.length+1,key:'action.'+a.id,label:a.kind==='restructure'?'Обмен государственного долга':asset.name,before,value:a,status:'pending'});
+  }
   if(options.renewBudget&&!bill.articles.length)bill.articles.push({id:1,key:'renewBudget',label:'Продление бюджетных ассигнований на год',value:true,status:'pending'});
   p.bills.push(bill);p.lastActions.push({kind:'billSubmitted',billId:bill.id,title:bill.title,sponsor:bill.sponsor});
   for(const party of p.parties.filter(x=>x.active&&x.seats>0&&x.id!==bill.sponsor)){
@@ -50,20 +65,21 @@ export function createBill(s,patch={},options={}){
   }
   return bill;
 }
-function resetVotes(bill){bill.revision++;bill.status='draft';bill.finalVote=null;bill.fingerprint=fingerprintOf(bill.patch,bill.constitutionPatch,bill.actions);for(const a of bill.articles){a.status='pending';delete a.vote;}bill.votes=[];}
+function resetVotes(bill){delete bill.executiveResponse;delete bill.decidedMonth;bill.revision++;bill.status='draft';bill.finalVote=null;bill.fingerprint=fingerprintOf(bill.patch,bill.constitutionPatch,bill.actions);for(const a of bill.articles){a.status='pending';delete a.vote;}bill.votes=[];}
 const voteSummary=r=>{const {deputies,...summary}=r;return summary;};
 export function amendBill(s,id,articleId,value){const b=s.politics.bills.find(x=>x.id===id);if(!b||!['draft','articles','rejected','vetoed'].includes(b.status))throw new Error('Этот закон уже нельзя править');const a=b.articles.find(x=>x.id===articleId);if(!a||a.key.startsWith('action.')||a.key==='renewBudget')throw new Error('Операцию или чистое продление нельзя подменить числом; внесите содержательный альтернативный бюджет');
   const field=POLICY_FIELDS.find(f=>f[0]===a.key);if(JSON.stringify(value)===JSON.stringify(a.value)||field&&Math.abs(value-a.value)<field[4]/2)throw new Error('Поправка должна содержательно менять статью; прежние голоса сохраняются');
   if(a.key.startsWith('constitution.')){const k=a.key.slice(13);constitutionFrom({...s.politics.constitution,...b.constitutionPatch,[k]:value});b.constitutionPatch[k]=value;}
   else if(a.key!=='renewBudget'){validatePolicyPatch({[a.key]:value});b.patch[a.key]=value;}a.value=value;resetVotes(b);s.politics.lastActions.push({kind:'articleAmended',billId:id,articleId,value});return b;}
 export function acceptAmendment(s,id,amendmentId){const b=s.politics.bills.find(x=>x.id===id),a=b?.amendments.find(x=>x.id===amendmentId);if(!a||a.status!=='offered')throw new Error('Поправка недоступна');amendBill(s,id,a.articleId,a.value);a.status='accepted';s.politics.parties.find(x=>x.id===a.partyId).negotiatedBill=id;}
-function projectedPlatform(s,bill,article){const patch=article?article.key in BASE_POLICY?{[article.key]:article.value}:{}:bill.patch;return governedPlatform({...s,policy:{...s.policy,...patch}});}
+function projectedPlatform(s,bill,article){const patch=article?article.key in BASE_POLICY?{[article.key]:article.value}:{}:bill.patch;return governedPlatform({...s,policy:{...(s.politics.instantRules?approvedPolicy(s):s.policy),...patch}});}
 export function rollCall(s,bill,{article=null,override=false,confidence=false,impeachment=false}={}){
-  const p=s.politics,c=p.constitution,old=governedPlatform(s),next=projectedPlatform(s,bill,article),constitutional=bill.kind==='constitutional';
+  const p=s.politics,c=p.constitution,old=governedPlatform(p.instantRules?{...s,policy:approvedPolicy(s)}:s),next=projectedPlatform(s,bill,article),constitutional=bill.kind==='constitutional';
   const counts={yes:0,no:0,abstain:0},parties=[],deputies=[];
   for(const party of p.parties.filter(x=>x.seats>0)){
     const coalition=p.coalition.includes(party.id),alignment=distance(party.platform,old)-distance(party.platform,next),negotiated=party.negotiatedBill===bill.id;
     let utility=(coalition?.9:-.45)+5*alignment+.65*(negotiated?1:0)+.3*(party.id===bill.sponsor?1:0)-party.coalitionGrievance;
+    if(p.instantRules)utility+=1.5*((party.executiveLoyalty??.6)-.6);
     if(constitutional){const weakensRights=Object.entries(bill.patch).some(([k,v])=>CONSTITUTIONAL_POLICY_KEYS.includes(k)&&v===false);utility+=(weakensRights?-2*party.platform.liberty:party.platform.liberty*.35);if(bill.constitutionPatch.form)utility-=.3;}
     if(override)utility-=.35;if(confidence)utility=coalition?1.4-party.coalitionGrievance*2:-1.2;
     if(impeachment)utility=(p.executive.legalExposure>0?1.4:-4)+(coalition?-.7:0);
@@ -110,7 +126,8 @@ export function referendum(s,id){const p=s.politics,b=p.bills.find(x=>x.id===id)
   b.referendum={month:s.month,yesShare:voters?counts[0]/voters*100:0,eligible:Math.round(eligible*1e6),voters,yesVotes:counts[0],noVotes:counts[1],passed:counts[0]>voters/2};b.status=b.referendum.passed?'passed':'rejected';p.lastActions.push({kind:'referendum',billId:id,result:clone(b.referendum)});
 }
 export function enactBills(s,events){const p=s.politics;
-  for(const b of p.bills.filter(x=>x.status==='passed')){
+  const accepted=p.bills.filter(x=>x.status==='passed');if(p.instantRules)accepted.sort((a,b)=>(a.decisionSequence??a.id)-(b.decisionSequence??b.id));
+  for(const b of accepted){
     const unprotected=Object.entries(b.patch).some(([k,v])=>CONSTITUTIONAL_POLICY_KEYS.includes(k)&&v===false);
     if(b.kind!=='constitutional'&&unprotected){b.status='blockedByCourt';events.push('Суд остановил неконституционный закон.');continue;}
     p.lawPolicy={...p.lawPolicy,...b.patch};
