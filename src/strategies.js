@@ -17,7 +17,7 @@ export const STRATEGIES=[
 export function strategyPolicy(strategy,state) {
   const policy={...BASE_POLICY,...strategy.patch};
   if(strategy.rule) {
-    const neutral=((1+state.expectedInflation)*1.03-1)*100;
+    const neutral=((1+state.expectedInflation)*(1+state.parameters.neutralRealRate)-1)*100;
     const target=Math.max(0,Math.min(40,neutral+.5*(state.metrics.inflationYoY-policy.inflationTarget)-.2*(state.metrics.unemployment-9)));
     policy.rate=state.policy.rate+.25*(target-state.policy.rate);
   }

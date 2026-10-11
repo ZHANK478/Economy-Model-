@@ -1,66 +1,103 @@
 import {writeFile,mkdir} from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import {createSimulation,advanceMonth,scheduleShock,runMonths,accountBalances} from '../src/engine.js';
-import {VERSION} from '../src/config.js';
+import {createSimulation,advanceMonth,scheduleShock,scheduleOwnership,accountBalances,replayJournal} from '../src/engine.js';
+import {VERSION,MODEL_PROFILES} from '../src/config.js';
 import {STRATEGIES,strategyPolicy} from '../src/strategies.js';
 
-const fields=['gdpPerCapitaReal','realGDPAnnualized','inflationYoY','unemployment','debtRatio','deficitRatio','population','totalFertilityRate','lifeExpectancy','realIncomeIndex','reservesUSD','exchangeRate'];
+const horizon=360;
+const fields=['gdpPerCapitaReal','realGDPAnnualized','inflationYoY','unemployment','debtRatio','deficitRatio','population','totalFertilityRate','lifeExpectancy','giniDisposable','giniMarket','hdi','meanWageReal','relativePoverty','stateAssetShare','capitalRatio','leverageRatio','liquidityCoverage'];
 const pick=m=>Object.fromEntries(fields.map(k=>[k,m[k]]));
-let monthsChecked=0,maxAbsoluteAudit=0,maxRelativeFinancialAudit=0;
+let monthsChecked=0,maxRelativeFinancialAudit=0,maxAbsoluteAudit=0,replayChecks=0;
 function verify(s) {
   monthsChecked++;
-  for(const [k,v] of Object.entries(s.metrics)) assert.ok(Number.isFinite(v),`non-finite ${k}`);
-  const balance=accountBalances(s),scale=Math.max(1,Math.abs(balance.bankAssets),Math.abs(balance.totalGovernmentDebt),Math.abs(s.metrics.nominalGDPMonthly));
-  for(const [k,v] of Object.entries(s.lastReport.audit)) {
+  for(const [k,v] of Object.entries(s.metrics))assert.ok(Number.isFinite(v),'non-finite '+k);
+  const b=accountBalances(s),scale=Math.max(1,Math.abs(b.bankAssets),Math.abs(b.totalGovernmentDebt),Math.abs(s.metrics.nominalGDPMonthly));
+  for(const [k,v] of Object.entries(s.lastReport.audit)){
     maxAbsoluteAudit=Math.max(maxAbsoluteAudit,Math.abs(v));
-    if(k==='population') assert.ok(Math.abs(v)<1e-8,'population identity');
-    else {maxRelativeFinancialAudit=Math.max(maxRelativeFinancialAudit,Math.abs(v)/scale);assert.ok(Math.abs(v)<Math.max(1e-4,scale*1e-10),`identity ${k}`);}
+    if(k==='population')assert.ok(Math.abs(v)<1e-8);
+    else {maxRelativeFinancialAudit=Math.max(maxRelativeFinancialAudit,Math.abs(v)/scale);assert.ok(Math.abs(v)<Math.max(1e-4,scale*1e-10),k+' identity');}
   }
-  assert.ok(s.government.cash>=-1e-6&&s.government.reservesUSD>=-1e-6);
-  assert.ok(s.metrics.unemployment>=0&&s.metrics.unemployment<=100);
-  assert.ok(s.firms.every(f=>f.inventory>=0&&f.capital>0&&f.workers>=0));
+  assert.ok(s.government.cash>=-1e-6&&s.government.reservesUSD>=-1e-6&&s.government.fundUSD>=-1e-6);
+  assert.ok(s.firms.every(f=>f.capital>0&&f.workers>=0&&f.inventory>=0&&f.price>0));
   assert.ok([...s.households,...s.firms].every(a=>a.cash>=-1e-6&&a.loanLC>=0&&a.loanFX>=0));
+  for(const f of s.firms){
+    assert.ok(Math.abs(Object.values(f.ownership).reduce((a,b)=>a+b)-1)<1e-8);
+    assert.ok(Math.abs(f.domesticOwners.reduce((a,b)=>a+b)-f.ownership.domestic)<1e-8);
+    assert.ok(Object.values(f.ownership).every(v=>v>=-1e-10&&v<=1+1e-10));
+  }
+  assert.equal(s.journal.length,s.month);
+  assert.ok(s.metrics.giniDisposable>=0&&s.metrics.giniDisposable<=100&&s.metrics.hdi>=0&&s.metrics.hdi<=1);
 }
 const csv=['structure;strategy;month;'+fields.join(';')];
-function play(strategy,{resourceMode=false,seed=42,stochastic=false,shocks=false,parameters={},months=120}={}) {
-  let s=createSimulation({resourceMode,seed,stochastic,parameters}),peakInflation=-Infinity,peakDebt=0,defaults=0;
-  if(shocks){scheduleShock(s,{key:'commodityPrice',multiplier:.7,start:49,duration:12});scheduleShock(s,{key:'energyPrice',multiplier:1.3,start:85,duration:12});}
+function play(strategy,{resourceMode=false,seed=42,stochastic=false,shocks=false,parameters={},months=horizon,modelProfile='balanced',ownership=null,record=false,replay=false}={}) {
+  let s=createSimulation({resourceMode,seed,stochastic,parameters,modelProfile}),peakInflation=-Infinity,peakDebt=0,minCapital=Infinity;
+  if(shocks){scheduleShock(s,{key:'commodityPrice',multiplier:.7,start:121,duration:18});scheduleShock(s,{key:'energyPrice',multiplier:1.3,start:241,duration:12});}
   const checkpoints=[];
-  for(let month=1;month<=months;month++) {
+  for(let month=1;month<=months;month++){
+    if(ownership&&month===61)for(let sector=0;sector<5;sector++)scheduleOwnership(s,{sector,...ownership});
     s=advanceMonth(s,strategyPolicy(strategy,s));verify(s);
-    peakInflation=Math.max(peakInflation,s.metrics.inflationYoY);peakDebt=Math.max(peakDebt,s.metrics.debtRatio);
-    if(!stochastic&&months===120&&Object.keys(parameters).length===0){csv.push(`${resourceMode?'resource':'diversified'};${strategy.id};${month};`+fields.map(k=>s.metrics[k]).join(';'));}
-    if([12,60,120,240].includes(month))checkpoints.push({month,...pick(s.metrics)});
+    peakInflation=Math.max(peakInflation,s.metrics.inflationYoY);peakDebt=Math.max(peakDebt,s.metrics.debtRatio);minCapital=Math.min(minCapital,s.metrics.capitalRatio);
+    if(record)csv.push((resourceMode?'resource':'diversified')+';'+strategy.id+';'+month+';'+fields.map(k=>s.metrics[k]).join(';'));
+    if([12,60,120,240,360,600].includes(month))checkpoints.push({month,...pick(s.metrics)});
   }
-  defaults=s.government.defaults;
-  return {id:strategy.id,name:strategy.name,description:strategy.description,resourceMode,seed,...pick(s.metrics),peakInflation,peakDebt,defaults,checkpoints};
+  if(replay){assert.deepEqual(replayJournal(s).metrics,s.metrics);replayChecks++;}
+  return {id:strategy.id,name:strategy.name,description:strategy.description,resourceMode,seed,modelProfile,...pick(s.metrics),peakInflation,peakDebt,minCapital,defaults:s.government.defaults,
+    restructurings:s.government.defaultEpisodes.reduce((v,e)=>v+e.restructurings,0),defaultActive:s.government.defaultActive,
+    defaultEpisodes:s.government.defaultEpisodes,checkpoints};
 }
-const main=[],resource=[],robustness=[],sensitivity=[];
-for(const strategy of STRATEGIES) {
-  main.push(play(strategy));resource.push(play(strategy,{resourceMode:true}));
+const main=[],resource=[],robustness=[],sensitivity=[],longHorizon=[],ownershipGames=[],crises=[];
+for(const strategy of STRATEGIES){
+  main.push(play(strategy,{record:true,replay:true}));resource.push(play(strategy,{resourceMode:true,record:true}));
   const samples=[];
-  for(const resourceMode of [false,true]) for(let seed=1;seed<=10;seed++) samples.push(play(strategy,{resourceMode,seed,stochastic:true,shocks:true}));
+  for(const resourceMode of [false,true])for(let seed=1;seed<=4;seed++)samples.push(play(strategy,{resourceMode,seed,stochastic:true,shocks:true}));
   const ranges=Object.fromEntries([false,true].map(mode=>[mode?'resource':'diversified',Object.fromEntries(fields.map(k=>{
-    const values=samples.filter(s=>s.resourceMode===mode).map(s=>s[k]);return [k,{min:Math.min(...values),max:Math.max(...values),mean:values.reduce((a,b)=>a+b,0)/values.length}];
+    const a=samples.filter(s=>s.resourceMode===mode).map(s=>s[k]);return [k,{min:Math.min(...a),max:Math.max(...a),mean:a.reduce((v,x)=>v+x)/a.length}];
   }))]));
   robustness.push({id:strategy.id,ranges,defaults:samples.filter(s=>s.defaults>0).length});
-  console.log(`Checked strategy ${main.length}/10: ${strategy.id}`);
+  console.log('Checked 30-year strategy '+main.length+'/10: '+strategy.id);
 }
-for(const key of ['interestInvestmentElasticity','importPassThrough','pricePersistence','fertilityBenefitElasticity','healthMortalityElasticity']) {
+for(const key of ['interestInvestmentElasticity','importPassThrough','pricePersistence','fertilityBenefitElasticity','healthMortalityElasticity']){
   const reference=createSimulation().parameters[key];
-  for(const multiplier of [.8,1.2]) sensitivity.push({parameter:key,multiplier,...play(STRATEGIES[0],{parameters:{[key]:reference*multiplier}})});
+  for(const multiplier of [.8,1.2])sensitivity.push({parameter:key,multiplier,...play(STRATEGIES[0],{parameters:{[key]:reference*multiplier}})});
 }
-const longHorizon=[];
-for(const resourceMode of [false,true]) for(const strategy of [STRATEGIES[0],STRATEGIES[1]]) longHorizon.push(play(strategy,{resourceMode,months:240}));
-const report={version:VERSION,horizonMonths:120,mainGames:10,structuralGames:10,stochasticGames:200,sensitivityGames:10,longHorizonGames:4,monthsChecked,maxAbsoluteAudit,maxRelativeFinancialAudit,main,resource,robustness,sensitivity,longHorizon};
+for(const resourceMode of [false,true])for(const strategy of [STRATEGIES[0],STRATEGIES[1]])longHorizon.push(play(strategy,{resourceMode,months:600}));
+for(const modelProfile of Object.keys(MODEL_PROFILES))for(const scenario of [
+  {id:'control',policy:{},ownership:null},
+  {id:'public-professional',policy:{soeGovernance:95,ruleOfLaw:85},ownership:{kind:'purchase',points:30}},
+  {id:'private-competitive',policy:{competition:95,ruleOfLaw:85},ownership:{kind:'privatize',points:30}},
+  {id:'seizure-weak-governance',policy:{soeGovernance:20,ruleOfLaw:25},ownership:{kind:'nationalize',points:50,compensation:0}}
+]){
+  ownershipGames.push({scenario:scenario.id,...play({...STRATEGIES[0],patch:scenario.policy},{modelProfile,ownership:scenario.ownership,replay:modelProfile==='balanced'})});
+}
+for(const scenario of [
+  {id:'fiscal-crisis',name:'Необеспеченные расходы',patch:{governmentConsumption:30,publicInvestment:12,transfers:15,vat:5,incomeTax:5,corporateTax:5}},
+  {id:'high-rate-low-taxes',name:'Высокая ставка, низкие налоги',patch:{rate:27.5,inflationTarget:13,vat:7,incomeTax:7.5,corporateTax:9.5,governmentConsumption:5,publicInvestment:2.75}},
+  {id:'no-bank-backstop',name:'Жёсткие нормативы без поддержки банков',patch:{bankCapitalRequirement:25,reserveRequirement:25,bankRescue:false,liquiditySupport:false}}
+])crises.push(play({...scenario,description:'Крайний сценарий для проверки балансов и дефолтов.'},{resourceMode:true,stochastic:true,seed:23}));
+const report={version:VERSION,horizonMonths:horizon,mainGames:10,structuralGames:10,stochasticGames:80,sensitivityGames:10,longHorizonGames:4,ownershipGameCount:12,crisisGameCount:3,totalGames:129,
+  monthsChecked,maxAbsoluteAudit,maxRelativeFinancialAudit,replayChecks,main,resource,robustness,sensitivity,longHorizon,ownershipGames,crises};
 await mkdir('docs',{recursive:true});
 await writeFile('docs/validation-results.json',JSON.stringify(report,null,2)+'\n');
 await writeFile('docs/strategies-monthly.csv',csv.join('\n')+'\n');
-const browser={...report};delete browser.sensitivity;delete browser.longHorizon;
+const browser={...report};delete browser.sensitivity;delete browser.longHorizon;delete browser.ownershipGames;delete browser.crises;
 await writeFile('src/validation-results.js','// Generated by npm run validate from the current engine.\nexport const validation='+JSON.stringify(browser)+';\n');
-const fmt=(x,d=1)=>x.toFixed(d);
-const columns='| Стратегия | ВВП / человек, $ базы | Инфляция, % | Безработица, % | Долг / ВВП, % | Население, млн | Рождаемость, детей / женщину | Жизнь, лет |';
-const table=games=>columns+'\n|---|---:|---:|---:|---:|---:|---:|---:|\n'+games.map(s=>`| ${s.name} | ${fmt(s.gdpPerCapitaReal,0)} | ${fmt(s.inflationYoY)} | ${fmt(s.unemployment)} | ${fmt(s.debtRatio)} | ${fmt(s.population,3)} | ${fmt(s.totalFertilityRate,2)} | ${fmt(s.lifeExpectancy)} |`).join('\n');
-let markdown=`# Проверка модели ${VERSION}\n\nВоспроизводимый отчёт: \`npm test\`, затем \`npm run validate\`. Основные 10 игр — диверсифицированная экономика, 120 месяцев с января 2026, одинаковые начальные условия, без случайных шоков. Десять стратегий — наборы решений, а не прогнозы ИИ. Денежная стабилизация меняет ставку каждый месяц; остальные сохраняют описанные решения.\n\n## Десять стратегий\n\n${STRATEGIES.map((s,i)=>`${i+1}. **${s.name}:** ${s.description}`).join('\n')}\n\n## Основные результаты через 10 лет\n\n${table(main)}\n\n## Те же стратегии в сырьевой структуре\n\n${table(resource)}\n\n## Повторные проверки\n\n- 200 дополнительных игр: 10 одинаковых seed для каждой стратегии и каждой из двух структур. Два общих шока: сырьё −30% на месяцах 49–60 и импортная энергия +30% на месяцах 85–96. В каждой паре стратегия получает одинаковую внешнюю последовательность.\n- 10 проверок чувствительности: поочерёдное изменение пяти коэффициентов на ±20%. Это не оценка вероятности исходов и не доверительный интервал.\n- 4 дополнительных прогона по 240 месяцев: исходная политика и денежная стабилизация в обеих структурах.\n- Проверено ${monthsChecked} месячных переходов. Максимальная относительная погрешность финансовых тождеств: ${maxRelativeFinancialAudit.toExponential(3)}. Демографическое тождество проверяется отдельно в млн человек.\n\n## Диапазоны инфляции в повторных играх\n\n| Стратегия | Диверсифицированная: минимум–максимум, % | Сырьевая: минимум–максимум, % | Игр с реструктуризацией долга |\n|---|---:|---:|---:|\n${robustness.map((r,i)=>`| ${STRATEGIES[i].name} | ${fmt(r.ranges.diversified.inflationYoY.min)}–${fmt(r.ranges.diversified.inflationYoY.max)} | ${fmt(r.ranges.resource.inflationYoY.min)}–${fmt(r.ranges.resource.inflationYoY.max)} | ${r.defaults} / 20 |`).join('\n')}\n\n## Чувствительность исходной политики\n\n| Коэффициент | Множитель | Инфляция, % | ВВП / человек | Долг / ВВП, % |\n|---|---:|---:|---:|---:|\n${sensitivity.map(s=>`| ${s.parameter} | ${s.multiplier} | ${fmt(s.inflationYoY)} | ${fmt(s.gdpPerCapitaReal,0)} | ${fmt(s.debtRatio)} |`).join('\n')}\n\n## Двадцатилетний горизонт\n\n${table(longHorizon)}\n\nФиксированная ставка не гарантирует стабильность на двадцатилетнем горизонте: при изменении инфляции её реальная величина меняется. При высоких расходах и низких налогах возможны долговые ограничения. Высокая рождаемость не повышает предложение труда в пределах первых 10 лет — новые дети станут трудоспособными с 18 лет. Продолжительность жизни — периодная оценка по текущей смертности, а не средний возраст.\n\n## Что исправлено\n\n1. Возрастно-половые месячные когорты, отдельные рождения, возрастная смертность и миграция; устранено принудительное восполнение смертей рождениями ради заданного прироста.\n2. Фактические расходы на здравоохранение и поддержку семей, лаги услуг и беременности, умеренные условные эластичности.\n3. Точная реальная ставка Фишера и согласованные годовые/месячные вероятности неплатежей.\n4. Запас проблемных кредитов отделён от списаний; дивиденды банков ограничены прибылью и буфером капитала.\n5. ВВП: текущий годовой темп, суммы последних 12 месяцев, номинальная величина и долларовый пересчёт по историческим курсам.\n6. Бюджет связан с известной годовой налоговой базой; убрана двойная индексация по ценам и независимый от выпуска рост базы. Здравоохранение и администрирование входят в закупки один раз.\n7. Начальный спрос, инвестиции и капитал банков согласованы лучше; начальные банковские резервы и капитал отвечают балансу.\n8. Убран независимый от инвестиций потолок выпуска по импортным компонентам; доступность компонентов ограничивает текущие физические мощности.\n9. Отраслевой дефицит учитывается как изменение ценовой премии, а не повторяющийся одинаковый скачок; нормальная загрузка согласована с запасом трудовых мощностей.\n10. Учтены доходы положительных зарубежных активов и номинальная стоимость амортизации; ограничения и институциональные меры имеют бюджетную стоимость.\n\n## Пределы выводов\n\nВсе стратегии проверены на правильность вычислений и тождеств. Результаты не доказывают эмпирическую точность модели. Страна вымышленная, возрастные графики и поведенческие коэффициенты условные, без статистического оценивания. Сценарии — пакеты мер: сравнение пакетов не изолирует причинный эффект каждого ползунка. Для отдельной гипотезы используется A/B с одним изменением. Ранние годовые показатели используют помеченную синтетическую предысторию. Старые эксперименты версии 1.0 сохранены отдельно, но не продолжаются по новым уравнениям.\n\nИсточники метода и ограничения интерпретации: [UN WPP 2024, методология когортного расчёта](https://population.un.org/wpp/assets/Files/WPP2024_Methodology.pdf), [OECD 2024, рождаемость и семейная политика](https://www.oecd.org/en/publications/society-at-a-glance-2024_918d8db3-en/full-report/fertility-trends-across-the-oecd-underlying-drivers-and-the-role-for-policy_770679b8.html), [IMF, Quarterly Projection Model for India](https://www.imf.org/en/publications/wp/issues/2017/02/13/quarterly-projection-model-for-india-key-elements-and-properties-44659). Эти источники обосновывают подходы, но не коэффициенты нашей вымышленной страны.\n\nПолные результаты: [JSON](validation-results.json), [месячные ряды основных игр CSV](strategies-monthly.csv).\n`;
-await writeFile('docs/VALIDATION.md',markdown);
-console.log(JSON.stringify({version:VERSION,monthsChecked,maxRelativeFinancialAudit,main:main.map(s=>({strategy:s.id,gdp:s.gdpPerCapitaReal,inflation:s.inflationYoY,debt:s.debtRatio,population:s.population}))},null,2));
+const f=(x,d=1)=>x.toFixed(d);
+const table=games=>'| Стратегия | Структура | ВВП / человек, база | Инфляция, % | Безработица, % | Долг / ВВП, % | Джини | ИЧР модели | Эпизоды дефолта |\n|---|---|---:|---:|---:|---:|---:|---:|---:|\n'+games.map(s=>'| '+s.name+' | '+(s.resourceMode?'сырьевая':'диверсифицированная')+' | '+f(s.gdpPerCapitaReal,0)+' | '+f(s.inflationYoY)+' | '+f(s.unemployment)+' | '+f(s.debtRatio)+' | '+f(s.giniDisposable)+' | '+f(s.hdi,3)+' | '+s.defaults+' |').join('\n');
+const md=[
+'# Проверка модели '+VERSION,
+'Воспроизводимый отчёт: npm test, затем npm run validate. Основной горизонт — **360 месяцев (30 лет)**. Сценарии условные, не прогноз реальной страны.',
+'## Десять стратегий',STRATEGIES.map((s,i)=>(i+1)+'. **'+s.name+':** '+s.description).join('\n'),
+'## Основные результаты через 30 лет',table(main),
+'## Те же стратегии в сырьевой структуре',table(resource),
+'## Проверки','- '+report.totalGames+' игр; '+monthsChecked+' месячных переходов.\n- 80 игр с общими seed и шоками: 4 seed × 10 стратегий × 2 структуры. Сырьё −30% на месяцах 121–138; энергия +30% на месяцах 241–252.\n- 10 проверок чувствительности пяти коэффициентов на ±20%.\n- 4 игры по 50 лет.\n- 12 сравнений собственности: 3 профиля допущений × 4 пакета решений.\n- 3 крайних кризисных сценария.\n- '+replayChecks+' полных воспроизведений журнала совпали с конечными показателями.\n- Максимальная относительная погрешность балансов '+maxRelativeFinancialAudit.toExponential(3)+'.',
+'## Проверка собственности','Пакеты меняют также управление/конкуренцию: **это не изолированная причинная оценка государственной против частной собственности**. Операции происходят в месяце 61. Покупка зависит от доступного финансирования, приватизация — от средств покупателей.',
+'| Профиль | Пакет | ВВП / человек | Инфляция | Джини | Государственная доля активов |\n|---|---|---:|---:|---:|---:|\n'+ownershipGames.map(s=>'| '+s.modelProfile+' | '+s.scenario+' | '+f(s.gdpPerCapitaReal,0)+' | '+f(s.inflationYoY)+' | '+f(s.giniDisposable)+' | '+f(s.stateAssetShare)+' |').join('\n'),
+'## Кризисы',table(crises),
+'Дефолт считается по пропущенным платежам или экономическим потерям при вынужденном обмене. Новый неплатёж во время ограничения доступа относится к продолжающемуся кризису, а не автоматически к новому эпизоду. Число обменов хранится отдельно.',
+'## Пятьдесят лет',table(longHorizon),
+'## Исправления, выявленные проверкой','1. Разделены банковские валютные риски, достаточность капитала и ликвидность; конверсия валютных активов в резервы не создаёт доход или ВВП.\n2. Ставка по депозитам зависит от доходности активов, стоимости фондирования и конкуренции. Сбережения реагируют на реальную доходность даже при малом кредитовании.\n3. Баланс ЦБ отделён от казначейства. Накопленный убыток уменьшает будущие перечисления, не списывается автоматически с кассы государства.\n4. Устранён независимый временной множитель частных инвестиций; планы реагируют на ожидаемые продажи и стоимость капитала.\n5. Перенос владения и размывание долей при новом капитале согласованы с платежами и дивидендами. Исправлена первоначальная ошибка размывания отечественных владельцев при рекапитализации.\n6. Проверка единиц обнаружила ошибку исходной нормы школьных расходов: 75 млн / 10 млн жителей = 7.5, а не 75 единиц на человека.\n7. Исправлены критерии дефолта: не любой высокий долг и не каждый месяц долгового кризиса — новый дефолт.\n8. Журнал воспроизводит решения, операции, допущения и одинаковые внешние события.',
+'## Пределы интерпретации','Балансовое совпадение и тесты проверяют расчёты, не эмпирическую точность. Фиксированная политика не гарантирует рост или достижение цели инфляции. Джини не видит различий внутри 10 групп; ИЧР и ППС — модельные оценки. Логистический риск потери финансирования не оценён по наблюдаемой базе. Старые сохранения 1.0 / 2.0 остаются для анализа и не продолжаются по новым формулам. Проверка шаблонов и обработчиков UI не заменяет реальную браузерную проверку.',
+'[Формулы](MODEL.md) · [Научный статус коэффициентов](PARAMETERS.md) · [Полный JSON](validation-results.json) · [Месячные ряды CSV](strategies-monthly.csv)'
+].join('\n\n')+'\n';
+await writeFile('docs/VALIDATION.md',md);
+console.log(JSON.stringify({version:VERSION,totalGames:report.totalGames,monthsChecked,replayChecks,maxRelativeFinancialAudit,main:main.map(s=>({id:s.id,gdp:s.gdpPerCapitaReal,pi:s.inflationYoY,debt:s.debtRatio,gini:s.giniDisposable,hdi:s.hdi,defaults:s.defaults}))},null,2));

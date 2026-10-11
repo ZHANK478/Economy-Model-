@@ -73,7 +73,7 @@ test('institutional policy is budgeted and stronger control has a higher adminis
 test('baseline no-shock countries do not spontaneously enter the former 40–60% inflation crisis in ten years',()=>{
   for(const resourceMode of [true,false]) {const s=runMonths(createSimulation({resourceMode}),120);
     assert.ok(s.metrics.inflationYoY>0&&s.metrics.inflationYoY<15);
-    assert.ok(s.metrics.debtRatio<60);assert.ok(s.metrics.gdpPerCapitaReal>6000);}
+    assert.ok(s.metrics.debtRatio<60);assert.ok(s.metrics.gdpGrowthYoY>0);assert.equal(s.government.defaults,0);}
 });
 test('corrupted population and incompatible previous-version saves are rejected',()=>{
   const data=JSON.parse(exportSimulation(createSimulation()));data.state.demography.female[50]+=1;

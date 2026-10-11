@@ -25,8 +25,8 @@ test('effective annual rates compound exactly over twelve months, including depr
     close(monthlyToAnnual(annualToMonthly(r)),r);
   }
 });
-test('initial country has $6000 per capita, 10 million people, 50% public debt and all 20 blocks',()=>{
-  const s=createSimulation();close(s.metrics.gdpPerCapitaReal,6000);close(s.population,10);close(s.metrics.debtRatio,50);assert.equal(MODULES.length,20);checkState(s);
+test('initial country has $6000 per capita, 10 million people, 50% public debt and all 23 blocks',()=>{
+  const s=createSimulation();close(s.metrics.gdpPerCapitaReal,6000);close(s.population,10);close(s.metrics.debtRatio,50);assert.equal(MODULES.length,23);checkState(s);
 });
 test('Leontief solution satisfies q = Aq + f; no double counting of intermediate goods',()=>{
   const f=[100,50,300,20,200],q=solveLeontief(f);
@@ -93,7 +93,8 @@ test('VAT is a one-off index shock, not a recurring monthly tax-price jump',()=>
 });
 test('interventions cannot spend unavailable reserves or treasury balances',()=>{
   let s=createSimulation();s.government.reservesUSD=25;
-  s=advanceMonth(s,{...s.policy,fxIntervention:500});close(s.government.reservesUSD,0);assert.ok(s.lastReport.events.some(x=>x.includes('Интервенция ограничена')));checkState(s);
+  s.centralBank.equity=s.government.reservesUSD+s.bank.centralBorrowing-s.bank.reserves;
+  s=advanceMonth(s,{...s.policy,fxIntervention:500});close(s.lastReport.fiscal.reserveSale,25*s.exchangeRate);assert.ok(s.lastReport.events.some(x=>x.includes('Интервенция ограничена')));checkState(s);
 });
 test('old sovereign coupons are fixed after a policy-rate change',()=>{
   const s=createSimulation(),a=advanceMonth(s),b=advanceMonth(s,{...s.policy,rate:20});
