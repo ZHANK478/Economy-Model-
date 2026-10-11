@@ -100,6 +100,14 @@ test('old sovereign coupons are fixed after a policy-rate change',()=>{
   close(a.government.domesticBonds[0].rate,b.government.domesticBonds[0].rate);
   assert.ok(b.government.domesticBonds.filter(x=>x.maturity>60).every(x=>x.rate>=.20));
 });
+test('a foreign-rate shock reprices new external bonds while old coupons remain fixed',()=>{
+  const s=createSimulation();scheduleShock(s,{key:'globalRate',multiplier:2,duration:12});
+  const b=advanceMonth(s,{...s.policy,governmentConsumption:35,publicInvestment:15,transfers:20});
+  const newlyIssued=b.government.externalBonds.filter(x=>x.maturity>84);
+  assert.ok(newlyIssued.length>0);
+  assert.ok(newlyIssued.every(x=>Math.abs(x.rate-(.08+b.lastReport.fiscal.sovereignSpread))<1e-10));
+  close(b.government.externalBonds[0].rate,.065);checkState(b);
+});
 test('transfers are financial redistributions, not directly added to GDP',()=>{
   const s=advanceMonth(createSimulation(),{...createSimulation().policy,transfers:10});
   const g=s.lastReport.gdp;close(s.metrics.nominalGDPMonthly,g.consumption+g.investment+g.government+g.exports-g.imports+g.inventories);

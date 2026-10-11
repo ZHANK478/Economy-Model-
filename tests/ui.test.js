@@ -18,20 +18,24 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   await import('../src/app.js');
   const app=node('app');
   const click=async data=>app.listeners.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
-  const views=['overview','economy','fiscal','credit','external','households','compare','method'];
+  const views=['overview','economy','fiscal','credit','external','households','compare','validation','method'];
   assert.ok(app.innerHTML.includes('Следующий месяц'));
+  assert.ok(app.innerHTML.includes('Общий реальный ВВП'));
+  assert.ok(app.innerHTML.includes('Население'));
+  await click({view:'households'});assert.ok(app.innerHTML.includes('Рождения'));assert.ok(app.innerHTML.includes('Продолжительность')||app.innerHTML.includes('продолжительность'));
+  await click({view:'validation'});assert.ok(app.innerHTML.includes('120 месяцев'));assert.ok(app.innerHTML.includes('Денежная стабилизация'));
   for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
   app.listeners.input({target:{dataset:{policy:'rate'},value:'15'}});
   await click({action:'step'});
-  const persisted=JSON.parse(saved.get('economy-model-v1'));
+  const persisted=JSON.parse(saved.get('economy-model-v2'));
   const state=JSON.parse(persisted.simulation).state;
   assert.equal(state.month,1);assert.equal(state.policy.rate,15);
   for(const view of views){await click({view});assert.ok(!app.innerHTML.includes('NaN'));assert.ok(!app.innerHTML.includes('undefined'));}
-  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v1'));
+  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v2'));
   app.listeners.input({target:{dataset:{policy:'rate'},value:'11'}});
   await click({view:'compare'});await click({action:'compare'});
   assert.ok(app.innerHTML.includes('Результаты на конец горизонта'));
-  assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v1')).simulation).state.month,1);
-  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v1')).simulation).state.month,4);
-  await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v1')).simulation).state.month,1);
+  assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v2')).simulation).state.month,1);
+  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v2')).simulation).state.month,4);
+  await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v2')).simulation).state.month,1);
 });

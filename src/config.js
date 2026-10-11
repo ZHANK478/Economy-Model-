@@ -1,4 +1,4 @@
-export const VERSION = '1.0.0';
+export const VERSION = '2.0.0';
 export const SECTORS = [
   { id:'agriculture', name:'Сельское хозяйство', color:'#9dbd70' },
   { id:'resources', name:'Добыча и энергия', color:'#e8b76b' },
@@ -20,9 +20,9 @@ export const GROUPS = [
   {id:'high',name:'Высокие доходы',population:.1,mpc:.68,wageShare:.22,transferShare:.03,dividendShare:.75}
 ];
 export const BASE_POLICY = {
-  rate:11, inflationTarget:5, vat:15, incomeTax:12, corporateTax:20,
-  royalty:18, tariff:0, governmentConsumption:14, publicInvestment:4,
-  transfers:4.5, education:1.5, businessSupport:0, minimumWage:100,
+  rate:8.25, inflationTarget:5, vat:18, incomeTax:18, corporateTax:25,
+  royalty:18, tariff:0, governmentConsumption:7, publicInvestment:3,
+  transfers:3, education:1.5, healthcare:2, familyBenefits:.5, businessSupport:0, minimumWage:100,
   energyTariff:100, fxIntervention:0, reserveRequirement:5,
   bankCapitalRequirement:10, foreignBorrowingShare:25,
   stabilizationSaving:35, taxEnforcement:60, competition:60,
@@ -30,7 +30,7 @@ export const BASE_POLICY = {
   liquiditySupport:true
 };
 export const POLICY_FIELDS = [
-  ['rate','Ключевая ставка',0,40,.25,'% годовых','Кредит','Влияет на новые кредиты сразу, на старые — по мере пересмотра ставок.'],
+  ['rate','Ключевая ставка',0,40,.25,'% годовых','Кредит','Новые кредитные ставки меняются постепенно; старые кредиты пересматриваются ещё медленнее.'],
   ['inflationTarget','Цель по инфляции',0,15,.5,'% годовых','Кредит','Якорь ожиданий; результат зависит от доверия.'],
   ['reserveRequirement','Резервное требование',0,25,.5,'% депозитов','Кредит','Потребность банков в ликвидности.'],
   ['bankCapitalRequirement','Требование к капиталу',4,25,.5,'% рискованных активов','Кредит','Ограничивает новые кредиты при нехватке капитала.'],
@@ -39,33 +39,37 @@ export const POLICY_FIELDS = [
   ['corporateTax','Налог на прибыль',0,45,.5,'%','Налоги','Начисляется на положительную прибыль после процентов и износа.'],
   ['royalty','Сырьевая рента',0,50,1,'% выручки добычи','Налоги','Изменяет бюджет и доходность добывающей отрасли.'],
   ['tariff','Импортная пошлина',0,30,.5,'%','Налоги','Повышает цену импортных товаров и компонентов.'],
-  ['taxEnforcement','Налоговый контроль',0,100,1,'индекс / 100','Налоги','Постепенно меняет соблюдение правил и долю неформальной экономики.'],
-  ['governmentConsumption','Государственные закупки',0,35,.5,'% опорного ВВП','Бюджет','Годовой бюджет делится на 12 и индексируется по ценам. Образование задаётся отдельно.'],
-  ['publicInvestment','Инфраструктура',0,15,.25,'% опорного ВВП','Бюджет','Сначала спрос на строительство; ввод объектов через 12–24 месяца.'],
-  ['transfers','Пособия и пенсии',0,20,.25,'% опорного ВВП','Бюджет','Перевод дохода семьям; сам перевод не входит в ВВП.'],
-  ['education','Образование',0,8,.25,'% опорного ВВП','Бюджет','Текущие закупки услуг; квалификация меняется медленно.'],
-  ['businessSupport','Поддержка предприятий',0,8,.25,'% опорного ВВП','Бюджет','Денежный трансферт фирмам, не дополнительный выпуск.'],
+  ['taxEnforcement','Налоговый контроль',0,100,1,'индекс / 100','Налоги','Улучшает собираемость и сокращает теневой сектор; администрирование требует бюджетных закупок.'],
+  ['governmentConsumption','Государственные закупки',0,35,.5,'% ВВП за 12 мес.','Бюджет','Доля известного ВВП последних 12 месяцев; месячный бюджет = годовая сумма / 12. Социальные услуги отдельно.'],
+  ['publicInvestment','Инфраструктура',0,15,.25,'% ВВП за 12 мес.','Бюджет','Сначала спрос на строительство; ввод объектов через 12–24 месяца.'],
+  ['transfers','Пособия и пенсии',0,20,.25,'% ВВП за 12 мес.','Бюджет','Перевод дохода семьям; сам перевод не входит в ВВП.'],
+  ['education','Образование',0,8,.25,'% ВВП за 12 мес.','Бюджет','Текущие закупки услуг; квалификация меняется медленно.'],
+  ['healthcare','Здравоохранение',0,10,.25,'% ВВП за 12 мес.','Бюджет','Оплаченные услуги на человека постепенно меняют возрастную смертность.'],
+  ['familyBenefits','Поддержка семей с детьми',0,6,.25,'% ВВП за 12 мес.','Бюджет','Трансферты семьям; умеренное влияние на рождаемость с задержкой.'],
+  ['businessSupport','Поддержка предприятий',0,8,.25,'% ВВП за 12 мес.','Бюджет','Денежный трансферт фирмам, не дополнительный выпуск.'],
   ['foreignBorrowingShare','Внешнее финансирование',0,80,1,'% новых займов','Бюджет','Валютный риск; доступность зависит от долгов и доверия.'],
   ['stabilizationSaving','Сбережение сырьевой ренты',0,100,1,'% ренты','Бюджет','Пополняет валютный фонд при наличии средств казначейства.'],
   ['minimumWage','Минимальная зарплата',60,200,1,'индекс, старт = 100','Структура','Влияет на нижнюю часть зарплат и издержки найма.'],
   ['energyTariff','Регулируемый энерготариф',50,180,1,'индекс, старт = 100','Структура','Изменение тарифа постепенно переносится в цены.'],
-  ['competition','Конкурентная политика',0,100,1,'индекс / 100','Структура','Постепенно меняет наценки и производительность.'],
+  ['competition','Конкурентная политика',0,100,1,'индекс / 100','Структура','Постепенно меняет наценки и производительность; проведение политики требует бюджетных закупок.'],
   ['migrationOpenness','Миграционная открытость',0,100,1,'индекс / 100','Структура','Миграция реагирует на доходы и занятость с задержкой.'],
   ['fxIntervention','Валютная интервенция',-500,500,25,'млн $ / месяц','Валюта','Плюс: продажа резервов для поддержки валюты. Минус: покупка валюты.'],
   ['capitalControls','Ограничения капитала',0,100,1,'индекс / 100','Валюта','Сдерживают отток, но снижают приток инвестиций.']
 ];
 export const PARAMETERS = {
-  annualPopulationGrowth:.012, annualDepreciation:.06, annualInfrastructureDepreciation:.03,
+  initialFertility:2.6, fertilityTrend:.004, fertilityAdjustment:.035, fertilityBenefitElasticity:.04,
+  mortalityImprovement:.005, healthAdjustment:1/36, healthMortalityElasticity:.18, migrationAdjustment:.05, pregnancyDelay:9,
+  annualDepreciation:.06, annualInfrastructureDepreciation:.03,
   annualTechnicalProgress:.009, wageAdjustment:.14, employmentAdjustment:.24,
   pricePersistence:.70, expectationAdjustment:.10, investmentAdjustment:.16,
   ratePassThrough:.20, oldLoanRepricing:.07, importPassThrough:.18,
-  demandPriceResponse:.025, scarcityPriceResponse:.045, interestInvestmentElasticity:3.0,
+  demandPriceResponse:.012, scarcityPriceResponse:.02, interestInvestmentElasticity:3.0,
   interestConsumptionElasticity:1.2, exportElasticity:.65, importElasticity:.45,
   wealthConsumption:.003, dividendPayout:.70, inventoryTarget:.12, inventoryAdjustment:.12,
   privateInvestmentDelay:6, publicInvestmentDelay:18, skillsAdjustment:.012,
   capitalCapacityElasticity:.42, infrastructureElasticity:.08,
-  exchangeFlowSensitivity:.035, exchangeInterestSensitivity:.05,
-  defaultSensitivity:.06, maximumPublicDebtRatio:1.8, sovereignRiskSensitivity:.12,
+  exchangeFlowSensitivity:.015, exchangeInterestSensitivity:.025, exchangeParityAdjustment:.015,
+  defaultSensitivity:.40, maximumPublicDebtRatio:1.8, sovereignRiskSensitivity:.12,
   stochasticAmplitude:1
 };
 export const PARAMETER_FIELDS = [
@@ -80,11 +84,14 @@ export const PARAMETER_FIELDS = [
   ['investmentAdjustment','Скорость пересмотра инвестиций',.02,.5,.02],
   ['exchangeFlowSensitivity','Чувствительность курса к валютным потокам',.005,.12,.005],
   ['privateInvestmentDelay','Ввод частного капитала, месяцев',1,24,1],
-  ['publicInvestmentDelay','Ввод инфраструктуры, месяцев',3,48,1]
+  ['publicInvestmentDelay','Ввод инфраструктуры, месяцев',3,48,1],
+  ['initialFertility','Базовая рождаемость, детей на женщину',1,5,.1],
+  ['fertilityBenefitElasticity','Влияние реальной поддержки семей на рождаемость',0,.2,.01],
+  ['healthMortalityElasticity','Влияние услуг здравоохранения на смертность',0,.5,.01]
 ];
 export const WORLD = {commodityPrice:100,energyPrice:100,foreignDemand:100,globalRate:4,weather:100,importAvailability:100};
 export const MODULES = [
-  ['Население и рабочая сила','Естественный прирост, миграция, участие в рынке труда.'],
+  ['Население и рабочая сила','Возрастно-половые месячные когорты, рождения, смертность, миграция и участие в труде.'],
   ['Отраслевое производство','Пять отраслей, собственные мощности, работники и цены.'],
   ['Межотраслевые связи','Матрица затрат Леонтьева; дефицит компонентов ограничивает выпуск.'],
   ['Капитал и производительность','Износ, очередь ввода инвестиций, инфраструктура и навыки.'],
