@@ -1,4 +1,4 @@
-export const VERSION = '3.0.0';
+export const VERSION = '3.1.0';
 export const SECTORS = [
   { id:'agriculture', name:'Сельское хозяйство', color:'#9dbd70' },
   { id:'resources', name:'Добыча и энергия', color:'#e8b76b' },
@@ -26,9 +26,9 @@ export const GROUPS = Array.from({length:10},(_,i)=>({
   householdSize:[4.6,4.4,4.1,3.8,3.5,3.3,3.1,2.9,2.7,2.5][i]
 }));
 export const MODEL_PROFILES={
-  balanced:{name:'Управление и конкуренция',governanceProductivity:.006,competitionProductivity:.004,softBudgetPenalty:.006},
-  competition:{name:'Сильная роль конкуренции',governanceProductivity:.004,competitionProductivity:.008,softBudgetPenalty:.008},
-  institutions:{name:'Сильная роль институтов',governanceProductivity:.010,competitionProductivity:.003,softBudgetPenalty:.010}
+  balanced:{name:'Управление и конкуренция',governanceWeight:1,competitionWeight:1,softBudgetWeight:1},
+  competition:{name:'Сильная роль конкуренции',governanceWeight:.75,competitionWeight:2,softBudgetWeight:1.3},
+  institutions:{name:'Сильная роль институтов',governanceWeight:1.5,competitionWeight:.75,softBudgetWeight:1.6}
 };
 export const BASE_POLICY = {
   rate:8.25, inflationTarget:5, vat:18, incomeTax:18, corporateTax:25,
@@ -36,11 +36,25 @@ export const BASE_POLICY = {
   transfers:3, education:1.5, healthcare:2, familyBenefits:.5, businessSupport:0, minimumWage:100,
   energyTariff:100, fxIntervention:0, reserveRequirement:5,
   bankCapitalRequirement:10, foreignBorrowingShare:25,
-  stabilizationSaving:35, taxEnforcement:60, competition:60,
+  stabilizationSaving:35, taxEnforcement:60,
+  registrationProcedures:6, antitrustBudget:.05, courtBudget:.08, soeAuditBudget:.025,
+  openProcurement:false, meritAppointments:true, boardAutonomy:true, independentSoeAudit:true,
+  bankEntry:true, depositPortability:false, rateDisclosure:true,
   capitalControls:0, migrationOpenness:60, bankRescue:true,
-  liquiditySupport:true, incomeTaxProgressivity:0, soeGovernance:65, ruleOfLaw:65,
-  bankCompetition:60, automaticRestructuring:true
+  liquiditySupport:true, incomeTaxProgressivity:0, automaticRestructuring:true
 };
+export const POLICY_CHECKS=[
+  ['liquiditySupport','Ликвидность от центрального банка','Кредит','Кредит ЦБ при недостатке резервов; это долг банка, не его капитал.'],
+  ['bankRescue','Спасение банков за счёт бюджета','Кредит','Рекапитализация за средства казначейства.'],
+  ['bankEntry','Разрешать вход новых банков','Кредит','Отмена запрета на вход при соблюдении нормативов. Не гарантирует появление новых банков.'],
+  ['depositPortability','Отмена штрафа за смену банка','Кредит','Облегчает перемещение вкладов; эффект ограничен доступными альтернативами и состоянием банков.'],
+  ['rateDisclosure','Обязательное раскрытие ставок','Кредит','Единые условия раскрытия доходности. Сам размер ставки государство не задаёт.'],
+  ['automaticRestructuring','Переговоры после неплатежа','Бюджет','После дефолта можно попытаться обменять обязательства.'],
+  ['openProcurement','Открытые государственные закупки','Структура','Доступ к закупкам без исключительных прав поставщиков; фактическая конкуренция меняется постепенно.'],
+  ['meritAppointments','Конкурс руководителей госпредприятий','Структура','Правило назначения, а не выбор их фактической квалификации. Исполнение зависит от аудита и судов.'],
+  ['boardAutonomy','Операционная самостоятельность правлений','Структура','Без прямого вмешательства в ежедневные решения; результат зависит от подотчётности.'],
+  ['independentSoeAudit','Независимый аудит госпредприятий','Структура','Оплаченные проверки только при этом правиле превращаются в независимый контроль.']
+];
 export const POLICY_FIELDS = [
   ['rate','Ключевая ставка',0,40,.25,'% годовых','Кредит','Новые кредитные ставки меняются постепенно; старые кредиты пересматриваются ещё медленнее.'],
   ['inflationTarget','Цель по инфляции',0,15,.5,'% годовых','Кредит','Якорь ожиданий; результат зависит от доверия.'],
@@ -64,10 +78,10 @@ export const POLICY_FIELDS = [
   ['stabilizationSaving','Сбережение сырьевой ренты',0,100,1,'% ренты','Бюджет','Пополняет валютный фонд при наличии средств казначейства.'],
   ['minimumWage','Минимальная зарплата',60,200,1,'индекс, старт = 100','Структура','Влияет на нижнюю часть зарплат и издержки найма.'],
   ['energyTariff','Регулируемый энерготариф',50,180,1,'индекс, старт = 100','Структура','Изменение тарифа постепенно переносится в цены.'],
-  ['competition','Конкурентная политика',0,100,1,'индекс / 100','Структура','Постепенно меняет наценки и производительность; проведение политики требует бюджетных закупок.'],
-  ['soeGovernance','Управление госпредприятиями',0,100,1,'индекс / 100','Структура','Профессиональное управление меняется постепенно; реформы требуют расходов.'],
-  ['ruleOfLaw','Предсказуемость прав собственности',0,100,1,'индекс / 100','Структура','Влияет на риск вложений. Изъятие без компенсации временно увеличивает риск.'],
-  ['bankCompetition','Конкуренция за вкладчиков',0,100,1,'индекс / 100','Кредит','Депозитная ставка зависит также от доходности активов и потребности в фондировании.'],
+  ['registrationProcedures','Обязательные процедуры регистрации бизнеса',1,20,1,'процедур','Структура','Вы задаёте число процедур. Фактический срок зависит также от исполнительной способности; это не число фирм.'],
+  ['antitrustBudget','Регистрация и надзор за конкуренцией',0,.5,.025,'% ВВП за 12 мес.','Структура','Бюджет регистрации и надзора; только оплаченные услуги поддерживают исполнительную способность. Эффект условный, не гарантирован.'],
+  ['courtBudget','Суды и реестр собственности',0,1,.025,'% ВВП за 12 мес.','Структура','Оплаченные услуги меняют скорость исполнения договоров с задержкой. Компенсация изъятий задаётся при операции.'],
+  ['soeAuditBudget','Аудит государственных предприятий',0,.5,.025,'% ВВП за 12 мес.','Структура','Покрытие проверками зависит от оплаченных услуг и размера государственного портфеля. Назначить качество на 100 нельзя.'],
   ['migrationOpenness','Миграционная открытость',0,100,1,'индекс / 100','Структура','Миграция реагирует на доходы и занятость с задержкой.'],
   ['fxIntervention','Валютная интервенция',-500,500,25,'млн $ / месяц','Валюта','Плюс: продажа резервов для поддержки валюты. Минус: покупка валюты.'],
   ['capitalControls','Ограничения капитала',0,100,1,'индекс / 100','Валюта','Сдерживают отток, но снижают приток инвестиций.']
@@ -91,6 +105,11 @@ export const PARAMETERS = {
   liquidityOutflowRate:.10, minimumLeverageRatio:.03, fxPortfolioShare:.25,
   expectationsAnchor:.65, wealthAnnuity:.0015, educationElasticity:.12,
   governanceAdjustment:1/36, ownershipDisruption:.04, ownershipRiskDecay:1/60,
+  institutionCapacityAdjustment:1/24, competitionAdjustment:1/24, bankContestabilityAdjustment:1/12,
+  institutionServiceProductivity:.65, entryCompetitionElasticity:.12, antitrustEffectiveness:.25,
+  procurementCompetitionEffect:.08, publicAccountabilityEffect:.30, governanceEfficiencyElasticity:.20, competitionEfficiencyElasticity:.10,
+  softBudgetEfficiencyPenalty:.15, competitionPriceResponse:.008, contractRiskSensitivity:.03,
+  bankContestabilitySpread:.025,
   refinancingRiskIntercept:-5, refinancingDebtCoefficient:2,
   refinancingServiceCoefficient:3, restructuringDelay:3, marketExclusionMonths:24,
   pppConversionFactor:1.65, absolutePovertyRealMonthly:90
@@ -118,6 +137,17 @@ export const PARAMETER_FIELDS = [
   ,['fxRiskWeight','Эквивалентный вес открытой валютной позиции',0,2,.1]
   ,['educationElasticity','Эластичность школьного охвата по реальным расходам',0,.4,.02]
   ,['refinancingRiskIntercept','Константа условного риска потери финансирования',-8,-2,.25]
+  ,['institutionServiceProductivity','Бюджет → исполнительная способность · допущение',0,1,.05]
+  ,['entryCompetitionElasticity','Сокращение процедур → доступ к рынку · допущение',0,.3,.01]
+  ,['antitrustEffectiveness','Эффект надзора на доступ к рынку · допущение',0,.5,.025]
+  ,['procurementCompetitionEffect','Эффект открытых закупок · допущение',0,.2,.01]
+  ,['publicAccountabilityEffect','Подотчётность → управление госдолями · допущение',0,.5,.025]
+  ,['governanceEfficiencyElasticity','Управление → уровень эффективности · допущение',0,.5,.025]
+  ,['competitionEfficiencyElasticity','Доступ к рынку → уровень эффективности · допущение',0,.3,.01]
+  ,['softBudgetEfficiencyPenalty','Поддержка убытков → эффективность · допущение',0,.4,.025]
+  ,['competitionPriceResponse','Доступ к рынку → наценка · допущение',0,.02,.001]
+  ,['contractRiskSensitivity','Ненадёжность договоров → риск вложений · допущение',0,.1,.005]
+  ,['bankContestabilitySpread','Доступ и смена банка → депозитная маржа · допущение',0,.05,.005]
 ];
 export const WORLD = {commodityPrice:100,energyPrice:100,foreignDemand:100,globalRate:4,weather:100,importAvailability:100};
 export const MODULES = [

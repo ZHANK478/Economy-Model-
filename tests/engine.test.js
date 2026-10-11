@@ -66,7 +66,7 @@ test('public investment first creates spending; infrastructure is added only at 
   const c=comparePolicies(s,s.policy,high,24);assert.ok(c.b.infrastructure>c.a.infrastructure);
 });
 test('education affects skills gradually; institutions and demography have active state',()=>{
-  const s=createSimulation(),b=runMonths(s,24,{...s.policy,education:5,taxEnforcement:100,competition:100});
+  const s=createSimulation(),b=runMonths(s,24,{...s.policy,education:5,taxEnforcement:100,registrationProcedures:2,antitrustBudget:.1});
   assert.ok(b.skills>s.skills);assert.ok(b.institutions.informality<s.institutions.informality);assert.ok(b.institutions.competition>s.institutions.competition);
   assert.ok(b.population>s.population);assert.notEqual(b.ageCohorts[2],s.ageCohorts[2]);
 });

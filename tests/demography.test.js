@@ -67,7 +67,7 @@ test('additional public services and family transfers appear in budgets without 
   assert.ok(Math.abs(s.lastReport.audit.nominalGDP)<1e-7);
 });
 test('institutional policy is budgeted and stronger control has a higher administrative share',()=>{
-  const s=createSimulation(),a=advanceMonth(s),b=advanceMonth(s,{...s.policy,taxEnforcement:100,competition:100});
+  const s=createSimulation(),a=advanceMonth(s),b=advanceMonth(s,{...s.policy,taxEnforcement:100,antitrustBudget:.1});
   assert.ok(b.lastReport.fiscal.institutionCost>a.lastReport.fiscal.institutionCost);
 });
 test('baseline no-shock countries do not spontaneously enter the former 40–60% inflation crisis in ten years',()=>{

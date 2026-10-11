@@ -12,7 +12,7 @@ export const STRATEGIES=[
   {id:'social',name:'Здоровье и семьи',description:'Здравоохранение 5%, поддержка семей 3%, пособия 5%, образование 3%.',patch:{healthcare:5,familyBenefits:3,transfers:5,education:3}},
   {id:'tax-cuts',name:'Снижение налогов',description:'НДС 8%, доходы 6%, прибыль 10%; расходы исходные.',patch:{vat:8,incomeTax:6,corporateTax:10}},
   {id:'protection',name:'Пошлины и ограничения капитала',description:'Пошлина 20%, ограничения капитала 70/100.',patch:{tariff:20,capitalControls:70}},
-  {id:'institutions',name:'Налоговое администрирование и конкуренция',description:'Налоговый контроль 95/100, конкуренция 95/100, с их бюджетной стоимостью.',patch:{taxEnforcement:95,competition:95}}
+  {id:'institutions',name:'Доступ к рынку и исполнение правил',description:'Налоговый контроль 95/100; 2 процедуры регистрации, открытые закупки, надзор 0,1%, суды 0,16%, аудит 0,05% ВВП; перенос вкладов без штрафа.',patch:{taxEnforcement:95,registrationProcedures:2,openProcurement:true,antitrustBudget:.10,courtBudget:.16,soeAuditBudget:.05,depositPortability:true}}
 ];
 export function strategyPolicy(strategy,state) {
   const policy={...BASE_POLICY,...strategy.patch};
