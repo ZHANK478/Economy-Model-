@@ -13,6 +13,11 @@ export function appendJournal(s,prev,actions,effectiveWorld) {
     parameters:clone(s.parameters),parameterChanges:changesBetween(before?.parameters??s.provenance.initialParameters,s.parameters),
     world:clone(s.world),worldChanges:changesBetween(before?.world??s.provenance.initialWorld,s.world),
     stochastic:s.stochastic,shocks:clone(s.shocks),effectiveWorld:clone(effectiveWorld),
-    actions:clone(actions),note:s.pendingNote,events:clone(s.lastReport.events),outcome:clone(s.metrics)});
+    actions:clone(actions),submittedActions:clone(s.politics.enabled?s.politics.lastSubmittedActions:prev.pendingActions),nextActionId:prev.nextActionId,
+    politicalCommands:clone(s.politics.enabled?s.politics.lastCommands:[]),nextCommandId:s.politics.nextCommandId??null,
+    politicalResults:clone(s.politics.enabled?s.politics.lastActions:[]),politicalElections:clone(s.politics.elections.filter(e=>e.month===s.month)),
+    politicalRollCalls:clone(s.politics.enabled?s.politics.rollCalls.filter(e=>e.month===s.month):[]),
+    politicalState:s.politics.enabled?{role:s.politics.executive.role,inOffice:s.politics.executive.inOffice,coalition:clone(s.politics.coalition),constitution:clone(s.politics.constitution),parameters:clone(s.politics.parameters),partyPrograms:s.politics.parties.map(x=>({id:x.id,platform:clone(x.platform)}))}:null,
+    note:s.pendingNote,events:clone(s.lastReport.events),outcome:clone(s.metrics)});
   s.pendingNote='';s.pendingActions=[];
 }

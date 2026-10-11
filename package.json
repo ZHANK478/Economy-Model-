@@ -1,6 +1,6 @@
 {
   "name": "economy-model",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,8 @@
     "build": "node scripts/build.mjs",
     "start": "python -m http.server 8000",
     "validate": "node scripts/validate.mjs",
-    "validate:extensions": "node scripts/validate-extensions.mjs"
+    "validate:extensions": "node scripts/validate-extensions.mjs",
+    "validate:politics": "node scripts/validate-politics.mjs"
   },
   "engines": {
     "node": ">=20"

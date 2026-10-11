@@ -1,6 +1,7 @@
 // Disaggregated institutional proxies. NOT estimated V-Dem scores or causal GDP coefficients.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const fiscalKeys=['vat','incomeTax','corporateTax','governmentConsumption','publicInvestment','transfers','healthcare','education'];
+import {reviewPoliticalPolicy,advancePoliticalSystem,politicalMetrics} from './political-system.js';
 export function initializePolitics(s){
   const p=s.policy;
   s.politics={judicialIndependence:p.protectedJudges?.65:.20,mediaFreedom:p.freeMedia?.70:.20,
@@ -9,6 +10,7 @@ export function initializePolitics(s){
     publicSupport:.58,parliamentSupport:.60,nextElection:48,elections:[],lastReview:[]};
 }
 export function reviewPolicy(s,prev,requested,events){
+  if(s.politics.enabled)return reviewPoliticalPolicy(s,prev,requested,events);
   const accepted={...requested},a=s.politics;
   const change=fiscalKeys.reduce((v,key)=>v+Math.abs(requested[key]-prev.policy[key]),0);
   // A rejection is a legislative constraint, never an extra economic penalty.
@@ -19,7 +21,7 @@ export function reviewPolicy(s,prev,requested,events){
   a.lastReview=Object.keys(requested).filter(key=>accepted[key]!==requested[key]).map(key=>({key,requested:requested[key],accepted:accepted[key],reason:'parliament'}));
   return accepted;
 }
-export function advancePolitics(s,prev,events){
+export function advancePolitics(s,prev,events,flow={},world=s.world){
   const a=s.politics,p=s.policy,k=s.parameters,step=k.politicalAdjustment;
   const targets={judicialIndependence:p.protectedJudges?.85:.15,mediaFreedom:p.freeMedia?.85:.12,
     electoralIntegrity:p.competitiveElections?.85:.10,legislativeConstraint:p.parliamentOversight?.85:.10,
@@ -29,6 +31,7 @@ export function advancePolitics(s,prev,events){
     *a.judicialIndependence*s.institutions.courtCapacity;
   const corruptionTarget=clamp(.35-.22*detection-.12*a.civilService,0,.5);
   a.corruption+=step*(corruptionTarget-a.corruption);
+  if(a.enabled){advancePoliticalSystem(s,prev,events,flow,world);return;}
   const incomeChange=Math.log(Math.max(.1,s.metrics.realIncomeIndex)/Math.max(.1,prev.metrics.realIncomeIndex));
   const supportTarget=clamp(.58+incomeChange*4-.008*(s.metrics.unemployment-9)
     -.004*Math.max(0,s.metrics.inflationYoY-10)-.35*a.corruption
@@ -48,5 +51,5 @@ export function politicsMetrics(s){const a=s.politics;
     electoralIntegrity:a.electoralIntegrity*100,legislativeConstraint:a.legislativeConstraint*100,civilFreedom:a.civilFreedom*100,
     corruptionRisk:a.corruption*100,publicSupport:a.publicSupport*100,parliamentSupport:a.parliamentSupport*100,
     electoralDemocracyProxy:(a.electoralIntegrity*a.civilFreedom*a.mediaFreedom)**(1/3)*100,
-    executiveConstraintProxy:Math.sqrt(a.legislativeConstraint*a.judicialIndependence)*100};
+    executiveConstraintProxy:Math.sqrt(a.legislativeConstraint*a.judicialIndependence)*100,...politicalMetrics(s)};
 }

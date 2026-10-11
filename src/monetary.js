@@ -13,8 +13,9 @@ export function advanceMonetary(s,prev,w,events){
     s.monetary.peg=prev.exchangeRate;
     events.push('Изменён денежный режим. Существующие номинальные договоры сохраняются; их ставка пересматривается с задержкой.');
   }
-  if(regime==='discretion')s.monetary.effectiveRate=s.policy.rate;
-  else if(regime==='rule')s.monetary.effectiveRate=clamp(s.parameters.neutralRealRate*100+s.policy.inflationTarget
+  const independent=s.politics.enabled&&s.politics.constitution.independentCB;
+  if(regime==='discretion'&&!independent)s.monetary.effectiveRate=s.policy.rate;
+  else if(regime==='rule'||regime==='discretion'&&independent)s.monetary.effectiveRate=clamp(s.parameters.neutralRealRate*100+s.policy.inflationTarget
     +1.5*(prev.metrics.inflationYoY-s.policy.inflationTarget)+.5*prev.metrics.outputGap,0,40);
   else if(fixedExchange(s))s.monetary.effectiveRate=w.globalRate;
   else s.monetary.effectiveRate=clamp(w.globalRate+prev.expectedInflation*100-2

@@ -20,7 +20,7 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   await import('../src/app.js');
   const app=node('app');
   const click=async data=>app.listeners.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
-  const views=['country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','journal','compare','validation','method'];
+  const views=['country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','elections','parties','constitution','journal','compare','validation','method'];
   assert.ok(app.innerHTML.includes('Следующий месяц'));
   assert.ok(app.innerHTML.includes('Общий реальный ВВП'));
   assert.ok(app.innerHTML.includes('Население'));
@@ -40,22 +40,22 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
   app.listeners.input({target:{dataset:{policy:'rate'},value:'15'}});
   await click({action:'step'});
-  const persisted=JSON.parse(saved.get('economy-model-v4'));
+  const persisted=JSON.parse(saved.get('economy-model-v5'));
   const state=JSON.parse(persisted.simulation).state;
-  assert.equal(state.month,1);assert.equal(state.policy.rate,15);
-  assert.equal(state.policy.openProcurement,true);assert.equal(saved.get('economy-model-v3'),legacy);
+  assert.equal(state.month,1);assert.equal(state.policy.rate,8.25);
+  assert.equal(state.policy.openProcurement,false);assert.ok(state.politics.bills.some(b=>b.patch.openProcurement===true));assert.equal(saved.get('economy-model-v3'),legacy);
   for(const view of views){await click({view});assert.ok(!app.innerHTML.includes('NaN'));assert.ok(!app.innerHTML.includes('undefined'));}
-  assert.equal(state.journal.length,1);assert.equal(state.journal[0].policy.rate,15);
+  assert.equal(state.journal.length,1);assert.equal(state.journal[0].requestedPolicy.rate,15);assert.equal(state.journal[0].policy.rate,8.25);
   await click({view:'infrastructure'});node('network-id').value='roads';node('network-kind').value='networkSale';node('network-points').value='10';
   await click({action:'network-queue'});assert.ok(app.innerHTML.includes('Операции следующего месяца'));assert.ok(app.innerHTML.includes('Продажа фонда оператору'));
-  const pending=JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.pendingActions;assert.equal(pending.length,1);
+  const pending=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.pendingActions;assert.equal(pending.length,1);
   await click({cancelAction:String(pending[0].id)});
-  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v4'));
+  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v5'));
   app.listeners.input({target:{dataset:{policy:'rate'},value:'11'}});
   await click({view:'compare'});await click({action:'compare'});
   assert.ok(app.innerHTML.includes('Результаты на конец горизонта'));
-  assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.month,1);
-  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.month,4);
-  await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v4')).simulation).state.month,1);
+  assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
+  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,4);
+  await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
   assert.equal(saved.get('economy-model-v3'),legacy);
 });

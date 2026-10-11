@@ -90,7 +90,7 @@ for(const resourceMode of [false,true])for(const assumption of assumptions)for(c
   {id:'no-service-funding',patch:{antitrustBudget:0,courtBudget:0,soeAuditBudget:0}}
 ])institutionGames.push({assumption:assumption.id,...play({...scenario,name:scenario.id,description:'Условное сравнение инструментов и отдачи, не оценка реальной страны.'},{resourceMode,parameters:assumption.parameters,replay:scenario.id==='combined'})});
 console.log('Checked '+institutionGames.length+' institutional scenarios, including zero-return hypotheses.');
-const report={version:VERSION,horizonMonths:horizon,mainGames:10,structuralGames:10,stochasticGames:80,sensitivityGames:10,longHorizonGames:4,ownershipGameCount:12,crisisGameCount:3,institutionGameCount:institutionGames.length,totalGames:129+institutionGames.length,
+const report={version:VERSION,mode:"laboratory",horizonMonths:horizon,mainGames:10,structuralGames:10,stochasticGames:80,sensitivityGames:10,longHorizonGames:4,ownershipGameCount:12,crisisGameCount:3,institutionGameCount:institutionGames.length,totalGames:129+institutionGames.length,
   monthsChecked,maxAbsoluteAudit,maxRelativeFinancialAudit,replayChecks,main,resource,robustness,sensitivity,longHorizon,ownershipGames,crises,institutionGames};
 await mkdir('docs',{recursive:true});
 await writeFile('docs/validation-results.json',JSON.stringify(report,null,2)+'\n');

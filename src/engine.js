@@ -1,6 +1,8 @@
 import {createDemography,advanceDemography,demographicMetrics,cohortTotals} from './demography.js';
 import {VERSION,SECTORS,INPUTS,GROUPS,BASE_POLICY,POLICY_FIELDS,POLICY_CHECKS,POLICY_CHOICES,PARAMETERS,WORLD,MODEL_PROFILES} from './config.js';
 import {initializePolitics,reviewPolicy,advancePolitics,politicsMetrics} from './politics.js';
+import {initializePoliticalSystem,schedulePolitical,validatePoliticalSystem} from './political-system.js';
+export {schedulePolitical};
 import {initializeMonetary,advanceMonetary,fixedExchange,hasDiscretionaryCB,monetaryMetrics} from './monetary.js';
 import {initializeLabor,advanceLabor,laborWageShares,laborMetrics} from './labor.js';
 import {initializeInfrastructure,prepareInfrastructure,infrastructurePlans,completeInfrastructure,settleInfrastructure,synchronizeInfrastructure,infrastructureMetrics,scheduleNetwork,executeNetworkTransfers} from './infrastructure.js';
@@ -264,6 +266,8 @@ export function createSimulation(options={}) {
   s.metrics.capitalRatio=bankCapital(s)*100;s.metrics.bankLiquidity=s.bank.reserves/deposits(s)*100;
   s.metrics.foreignDebtRatio=externalDebtUSD(s)/s.metrics.nominalGDPAnnual*100;
   s.metrics={...s.metrics,...socialIndicators(s),...institutionMetrics(s),...politicsMetrics(s),...laborMetrics(s),...infrastructureMetrics(s),...servicesMetrics(s),...monetaryMetrics(s),investmentPrice:1,liquidityCoverage:bankLiquidityCoverage(s)*100,leverageRatio:bankLeverage(s)*100,debtInDefault:0,refinancingRisk:refinancingRisk(s).annualProbability*100};
+  initializePoliticalSystem(s,options);
+  s.metrics={...s.metrics,...politicsMetrics(s)};
   s.history[s.history.length-1]={...s.metrics,consumerPriceIndex:100,synthetic:false};
   return s;
 }
@@ -323,9 +327,13 @@ export function scheduleShock(s,{key,multiplier,start=s.month+1,duration=12}) {
 }
 
 export function advanceMonth(state,policy=state.policy) {
+  if(state.politics.enabled&&!state.politics.executive.inOffice)return copy(state);
   // Historical entries are immutable. Copy live accounts, not an ever-growing
   // journal on every month; callers' histories are never modified.
-  const s=copy({...state,history:[],journal:[]}),prev=state;
+  const archiveKeys=['rollCalls','elections','partyHistory','commandHistory'];
+  const livePolitics=state.politics.enabled?{...state.politics,...Object.fromEntries(archiveKeys.map(k=>[k,[]])),bills:state.politics.bills.filter(b=>!['enacted','withdrawn'].includes(b.status))}:state.politics;
+  const s=copy({...state,politics:livePolitics,history:[],journal:[]}),prev=state;
+  if(state.politics.enabled){for(const key of archiveKeys)s.politics[key]=state.politics[key].slice();const active=new Map(s.politics.bills.map(b=>[b.id,b]));s.politics.bills=state.politics.bills.map(b=>active.get(b.id)??b);}
   s.history=state.history.slice();s.journal=state.journal.slice();
   const requestedPolicy=sanitizePolicy(policy);s.policy=requestedPolicy; s.month++;
   const events=[];
@@ -335,7 +343,7 @@ export function advanceMonth(state,policy=state.policy) {
   advanceMonetary(s,prev,w,events);
   const effectiveRate=s.monetary.effectiveRate;
   const flow={tax:0,vat:0,tariff:0,incomeTax:0,corporateTax:0,royalty:0,
-    purchases:0,transfers:0,familyBenefits:0,healthcare:0,education:0,childcare:0,infrastructureMaintenance:0,concessionGuarantees:0,institutionCost:0,antitrust:0,courts:0,soeAudits:0,businessSupport:0,interest:0,bankRescue:0,centralIncome:0,
+    purchases:0,transfers:0,familyBenefits:0,healthcare:0,education:0,childcare:0,infrastructureMaintenance:0,concessionGuarantees:0,institutionCost:0,antitrust:0,courts:0,soeAudits:0,politicalElections:0,politicalSecurity:0,politicalPatronage:0,businessSupport:0,interest:0,bankRescue:0,centralIncome:0,
     domesticIssued:0,externalIssued:0,domesticRedeemed:0,externalRedeemed:0,
     reserveSale:0,fundWithdrawal:0,fundDeposit:0,domesticHaircut:0,externalHaircut:0,
     interestCapitalized:0,unfunded:0,sovereignSpread:0,stateDividends:0,equityPurchases:0,equitySales:0,networkPurchases:0,networkSales:0,externalEquityRevaluation:0,reserveConversion:0};
@@ -481,7 +489,7 @@ export function advanceMonth(state,policy=state.policy) {
   // Budget shares refer to the known trailing-year nominal GDP. No second CPI
   // indexation and no imposed real growth unrelated to the actual tax base.
   const budgetBase=prev.metrics.nominalGDPAnnual/12;
-  const administrationShare=.05+.25*Math.pow(p.taxEnforcement/100,2)+p.antitrustBudget+p.courtBudget+p.soeAuditBudget;
+  const administrationShare=.05+.25*Math.pow(p.taxEnforcement/100,2)+p.antitrustBudget+p.courtBudget+p.soeAuditBudget+p.electionAdministration+p.securityBudget+p.patronageBudget;
   const purchaseShare=p.governmentConsumption+p.publicInvestment+p.education+p.healthcare+p.childcareBudget+p.infrastructureMaintenance+administrationShare;
   const requestedPurchases=budgetBase*purchaseShare/100;
   const requestedTransfers=budgetBase*p.transfers/100*(.6+.4*(s.ageCohorts[2]/s.population)/.07);
@@ -645,6 +653,9 @@ export function advanceMonth(state,policy=state.policy) {
   flow.antitrust=flow.purchases*p.antitrustBudget/Math.max(purchaseShare,.001);
   flow.courts=flow.purchases*p.courtBudget/Math.max(purchaseShare,.001);
   flow.soeAudits=flow.purchases*p.soeAuditBudget/Math.max(purchaseShare,.001);
+  flow.politicalElections=flow.purchases*p.electionAdministration/Math.max(purchaseShare,.001);
+  flow.politicalSecurity=flow.purchases*p.securityBudget/Math.max(purchaseShare,.001);
+  flow.politicalPatronage=flow.purchases*p.patronageBudget/Math.max(purchaseShare,.001);
   flow.institutionRequested={antitrust:budgetBase*p.antitrustBudget/100,courts:budgetBase*p.courtBudget/100,soeAudits:budgetBase*p.soeAuditBudget/100};
   fundInstitutionServices(s,flow,gUnit);
   settleServices(s,prev,flow,servicePlans,alpha,servicePrice,gUnit);
@@ -841,7 +852,7 @@ export function advanceMonth(state,policy=state.policy) {
   s.incomeHistory.push({month:s.month,population:s.population,cpi,net:s.households.map(h=>Math.max(0,h.income-h.interestPaid)),market:s.households.map(h=>Math.max(0,h.marketIncome-h.interestPaid)),synthetic:false});
   s.incomeHistory=s.incomeHistory.slice(-12);
   s.metrics={...s.metrics,...socialIndicators(s,{wages:totalWages,netPrimaryIncome})};
-  advancePolitics(s,prev,events);
+  advancePolitics(s,prev,events,flow,w);
   s.metrics={...s.metrics,...politicsMetrics(s),...laborMetrics(s),...servicesMetrics(s),...infrastructureMetrics(s),...monetaryMetrics(s),energyPriceIndex:s.firms[1].price*100};
   if(fixedExchange(s)&&s.metrics.monetaryReserveCoverage<100)events.push('Фиксированный денежный режим: валютных активов недостаточно для полного покрытия расчётных резервов банков. Ликвидность не восполняется кредитом ЦБ.');
   if(alpha<.95) events.push(`Производственные ограничения: исполнено ${(alpha*100).toFixed(1)}% конечных заказов.`);
@@ -867,11 +878,19 @@ export function advanceMonth(state,policy=state.policy) {
 
 export function runMonths(s,count,policy=s.policy) {
   if(!Number.isInteger(count)||count<0||count>600) throw new Error('Горизонт: от 0 до 600 месяцев');
-  let result=copy(s);for(let i=0;i<count;i++) result=advanceMonth(result,policy);return result;
+  let result=copy(s);for(let i=0;i<count;i++){if(result.politics.enabled&&!result.politics.executive.inOffice)break;result=advanceMonth(result,i===0||!result.politics.enabled?policy:result.policy);}return result;
 }
 
 export function comparePolicies(s,policyA,policyB,months=24) {
-  const control=copy(s);control.pendingActions=[];
+  const control=copy(s);control.pendingActions=[];if(control.politics.enabled)control.politics.pendingCommands=[];
+  if(s.politics.enabled){
+    if(!Number.isInteger(months)||months<0||months>600)throw new Error('Горизонт: от 0 до 600 месяцев');
+    const forecast=(origin,policy)=>{let r=copy(origin);for(let i=0;i<months&&r.politics.executive.inOffice;i++){
+      for(const b of r.politics.bills.filter(b=>b.month>s.month&&b.sponsor===r.politics.executive.playerParty&&['draft','articles'].includes(b.status))){schedulePolitical(r,{kind:'voteBill',billId:b.id});if(r.politics.executive.role==='president')schedulePolitical(r,{kind:'sign',billId:b.id});}
+      r=advanceMonth(r,i===0?policy:r.policy);
+    }return r;};
+    return {a:forecast(control,policyA),b:forecast(s,policyB),originMonth:s.month,months,politicalProtocol:'attemptOwnLaws'};
+  }
   return {a:runMonths(control,months,policyA),b:runMonths(s,months,policyB),originMonth:s.month,months};
 }
 
@@ -883,10 +902,11 @@ export function scheduleRestructuring(s,{haircut=.30,extension=60}={}) {
 }
 export function replayJournal(s) {
   const p=s.provenance;
-  let result=createSimulation({resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic});
+  let result=createSimulation({resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions:p.politicalOptions});
   for(const entry of s.journal){
     result.parameters=copy(entry.parameters);result.world=copy(entry.world);result.shocks=copy(entry.shocks);result.stochastic=entry.stochastic;result.pendingNote=entry.note;
-    for(const a of entry.actions)if(a.id){if(a.kind==='restructure')scheduleRestructuring(result,a);else if(a.network)scheduleNetwork(result,a);else scheduleOwnership(result,a);}
+    if(result.politics.enabled){result.pendingActions=copy(entry.submittedActions??[]);result.nextActionId=entry.nextActionId??result.nextActionId;result.politics.pendingCommands=copy(entry.politicalCommands??[]);result.politics.nextCommandId=entry.nextCommandId??result.politics.nextCommandId;}
+    else for(const a of entry.actions)if(a.id){if(a.kind==='restructure')scheduleRestructuring(result,a);else if(a.network)scheduleNetwork(result,a);else scheduleOwnership(result,a);}
     result=advanceMonth(result,entry.requestedPolicy??entry.policy);
   }
   return result;
@@ -894,7 +914,7 @@ export function replayJournal(s) {
 export function importSimulation(text) {
   const data=JSON.parse(text);
   if(data.format!=='economy-model') throw new Error('Несовместимый формат сохранения');
-  if(data.version!==VERSION||data.state?.version!==VERSION) throw new Error('Несовместимая версия: прошлые эксперименты нельзя продолжить по новым уравнениям 4.0. Старый файл сохраняется для анализа.');
+  if(data.version!==VERSION||data.state?.version!==VERSION) throw new Error('Несовместимая версия: прошлые эксперименты нельзя продолжить по новым уравнениям 5.0. Старый файл сохраняется для анализа.');
   const s=data.state;
   if(!Number.isInteger(s.month)||s.month<0||s.month>12000||!Array.isArray(s.firms)||s.firms.length!==5||!Array.isArray(s.households)||s.households.length!==10||!Array.isArray(s.history)||s.history.length<13||!Array.isArray(s.journal)||s.journal.length!==s.month||!s.provenance||!Array.isArray(s.pendingActions)) throw new Error('Повреждённое состояние или журнал');
   const check=v=>{
@@ -911,6 +931,7 @@ export function importSimulation(text) {
   const validatedPolicy=sanitizePolicy(s.policy);
   if(Object.keys(validatedPolicy).some(k=>s.policy[k]!==validatedPolicy[k]))throw new Error('Повреждена политика сохранения');
   validateExtendedState(s);
+  validatePoliticalSystem(s);
   s.policy=validatedPolicy;
   const tolerance=Math.max(1e-4,Math.abs(bankAssets(s))*1e-10);
   const centralResidual=s.government.reservesUSD*s.exchangeRate+s.bank.centralBorrowing-s.bank.reserves-s.centralBank.equity;

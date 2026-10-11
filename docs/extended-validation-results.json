@@ -1,5 +1,6 @@
 {
-  "version": "4.0.0",
+  "version": "5.0.0",
+  "mode": "laboratory",
   "date": "2026-10-11",
   "totalGames": 97,
   "monthsChecked": 37080,
