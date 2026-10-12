@@ -36,6 +36,7 @@ export function initializePoliticalSystem(s,options={}){
   p.initialOptions={constitution:clone(c),parameters:clone(p.parameters),playerFamily:player.family};
   p.instantRules=options.politicalOptions?.instantRules!==false;
   p.initialOptions.instantRules=p.instantRules;
+  if(options.politicalOptions?.agendaSlots!==undefined){if(![1,3].includes(options.politicalOptions.agendaSlots))throw new Error('Неверное число инициатив');p.agendaSlots=options.politicalOptions.agendaSlots;p.initialOptions.agendaSlots=p.agendaSlots;}
   if(p.instantRules){initializeAgenda(s);generateMonthlyAgenda(s);}
   s.provenance.initialPolicy=clone(s.policy);s.provenance.politicalMode=true;s.provenance.politicalOptions=clone(p.initialOptions);
 }
@@ -54,7 +55,7 @@ function allocateCabinet(s){const p=s.politics,members=p.parties.filter(x=>p.coa
   for(let i=0;i<left&&order.length;i++)posts[order[i%order.length].i]++;members.forEach((x,i)=>x.cabinetPosts=posts[i]);
 }
 export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)throw new Error('Включите политическую игру при создании страны');if(!p.executive.inOffice)throw new Error('Ваше правление завершено');
-  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
+  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
   if(!kinds.includes(command?.kind))throw new Error('Неизвестное политическое действие');
   const c=clone(command);delete c.id;delete c.month;
   if(['proposeBill','chooseLaw','policyDecision'].includes(c.kind)){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});if(c.actions)c.actions.forEach(validateLegislativeAction);}
@@ -127,6 +128,13 @@ function partyMerge(s,command){const p=s.politics,ids=[...new Set(command.partyI
 function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   switch(command.kind){
     case 'activateInstantRules':p.initialOptions.instantRules??=false;p.instantRules=true;initializeAgenda(s);generateMonthlyAgenda(s);return;
+    case 'setAgendaSlots':{
+      if(![1,3].includes(command.slots))throw new Error('Неверное число инициатив');
+      p.agendaSlots=command.slots;
+      const live=p.bills.filter(b=>b.monthlyInitiative&&b.month===s.month&&!b.executiveResponse&&['draft','articles','awaitingSignature','referendum'].includes(b.status));
+      for(const b of live.slice(command.slots)){b.status='withdrawn';b.executiveResponse={decision:'agendaMigration',month:s.month};p.initiativeCredits[b.sponsor]=(p.initiativeCredits[b.sponsor]??0)+1;}
+      return;
+    }
     case 'decideBill':return decideBill(s,command.billId,command.decision,events);
     case 'chooseLaw':{
       const b=createBill(s,command.patch??{},{constitutionPatch:command.constitutionPatch,title:command.title,sponsor:p.executive.playerParty,actions:command.actions,renewBudget:command.renewBudget});

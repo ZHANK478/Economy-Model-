@@ -117,3 +117,25 @@ test('a coalition policy concession votes in the same turn, and supporting an ex
   const b=createBill(s,{healthcare:2.5},{sponsor:outside.id,monthlyInitiative:true}),before=outside.coalitionGrievance;
   executePolitical(s,{kind:'decideBill',billId:b.id,decision:'accept'});assert.ok(outside.coalitionGrievance<before);
 });
+
+
+test('single-initiative games retain seat quotas and exactly replay decisions across government forms',()=>{
+  for(const form of ['presidential','parliamentary','semiPresidential']){
+    let s=country(form,{agendaSlots:1});
+    for(let month=0;month<24&&s.politics.executive.inOffice;month++){
+      const proposals=s.politics.bills.filter(b=>b.monthlyInitiative&&b.month===s.month&&b.status==='draft');assert.equal(proposals.length,1);
+      executePolitical(s,{kind:'decideBill',billId:proposals[0].id,decision:month%5===0?'reject':'accept'});s=advanceMonth(s);
+    }
+    const loaded=importSimulation(exportSimulation(s)),replay=replayJournal(loaded);assert.deepEqual(replay.metrics,loaded.metrics);assert.deepEqual(replay.politics,loaded.politics);
+  }
+  const s=country('presidential',{agendaSlots:1}),counts={};
+  for(let month=0;month<120;month++){s.month=month;generateMonthlyAgenda(s);const b=s.politics.bills.find(b=>b.monthlyInitiative&&b.month===month);assert.ok(b);counts[b.sponsor]=(counts[b.sponsor]??0)+1;}
+  for(const x of s.politics.parties.filter(x=>x.seats>0))assert.ok(Math.abs((counts[x.id]??0)-120*x.seats/s.politics.totalSeats)<=2,x.id);
+});
+test('switching an old agenda to one proposal archives surplus without penalizing loyalty and replays',()=>{
+  let s=country(),loyalty=s.politics.parties.map(x=>x.executiveLoyalty);assert.equal(s.politics.bills.filter(b=>b.monthlyInitiative).length,3);
+  executePolitical(s,{kind:'setAgendaSlots',slots:1});assert.equal(s.politics.bills.filter(b=>b.monthlyInitiative&&b.status==='draft').length,1);assert.deepEqual(s.politics.parties.map(x=>x.executiveLoyalty),loyalty);
+  assert.deepEqual(replayJournal(s).politics,s.politics);
+  const b=s.politics.bills.find(b=>b.monthlyInitiative&&b.status==='draft');executePolitical(s,{kind:'decideBill',billId:b.id,decision:'reject'});s=advanceMonth(s);assert.equal(s.politics.bills.filter(b=>b.monthlyInitiative&&b.month===1).length,1);assert.deepEqual(replayJournal(s).politics,s.politics);
+  assert.throws(()=>executePolitical(s,{kind:'setAgendaSlots',slots:2}));
+});

@@ -3,6 +3,7 @@ import {clamp,clone,hash} from './political-config.js';
 import {createBill,voteBill,presidentialDecision,referendum,approvedPolicy} from './legislation.js';
 
 export const MONTHLY_INITIATIVES=3;
+export const unresolvedInitiatives=s=>s.politics.enabled&&s.politics.executive.inOffice?s.politics.bills.filter(b=>b.monthlyInitiative&&b.month===s.month&&!b.executiveResponse&&['draft','articles','awaitingSignature','referendum'].includes(b.status)):[];
 const unresolved=['draft','articles','awaitingSignature','referendum'];
 export const plannedPolicy=approvedPolicy;
 export function initializeAgenda(s){
@@ -84,9 +85,10 @@ export function generateMonthlyAgenda(s){
   initializeAgenda(s);p.agendaMonth=s.month;
   const eligible=p.parties.filter(x=>x.active&&x.seats>0&&candidateArticles(s,x).length);
   const total=eligible.reduce((v,x)=>v+x.seats,0);if(!total)return;
-  for(const x of eligible)p.initiativeCredits[x.id]=(p.initiativeCredits[x.id]??0)+MONTHLY_INITIATIVES*x.seats/total;
+  for(const x of eligible)p.initiativeCredits[x.id]=(p.initiativeCredits[x.id]??0)+(p.agendaSlots??MONTHLY_INITIATIVES)*x.seats/total;
+  const slots=p.agendaSlots??MONTHLY_INITIATIVES;
   const used=new Set();
-  for(let slot=0;slot<MONTHLY_INITIATIVES;slot++){
+  for(let slot=0;slot<slots;slot++){
     const candidates=eligible.map(x=>({party:x,articles:candidateArticles(s,x).filter(a=>!used.has(a.key))})).filter(x=>x.articles.length);
     if(!candidates.length)break;
     candidates.sort((a,b)=>p.initiativeCredits[b.party.id]-p.initiativeCredits[a.party.id]||hash(s.seed,s.month,a.party.id)-hash(s.seed,s.month,b.party.id));

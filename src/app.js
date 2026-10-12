@@ -6,6 +6,7 @@ import {VERSION,POLICY_FIELDS,POLICY_CHECKS,POLICY_CHOICES,PARAMETER_FIELDS,MODU
 import {createBrowserStorage} from './storage.js';
 import {extendedViews} from './extended-views.js';
 import {politicalViews,handlePoliticalAction} from './political-views.js';
+import {unresolvedInitiatives} from './political-agenda.js';
 import {policyAuthority,executiveDescription,executePolitical,enableInstantPolitics,plannedPolicy} from './political-system.js';
 
 const STORE='economy-model-v5',CHECKPOINT='economy-checkpoint-v5';
@@ -21,7 +22,7 @@ const pct=x=>n(x,1)+'%';
 const months=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const date=(month,short=false)=>short?`${String(month%12+1).padStart(2,'0')}.${2026+Math.floor(month/12)}`:`${months[month%12]} ${2026+Math.floor(month/12)}`;
 const iconCheck='<span class="tick">✓</span>';
-let state=createSimulation({politicalMode:true}),draft=copy(state.policy),checkpoint=null,comparison=null;
+let state=createSimulation({politicalMode:true,politicalOptions:{agendaSlots:1}}),draft=copy(state.policy),checkpoint=null,comparison=null;
 let view='politics',policyTab='Кредит',chartMetric='gdpPerCapitaReal',compareMetric='gdpPerCapitaReal',compareMonths=24,compareSource='current',journalPage=0;
 let comparisonBase=null;
 let mobileOpen=false,busy=false,toastTimer,saveStatus='Сохраняется на этом устройстве';
@@ -31,7 +32,7 @@ try {
   const snap=await storage.get(CHECKPOINT);if(snap) checkpoint=importSimulation(snap);
 } catch(e) {setTimeout(()=>toast('Не удалось прочитать сохранение. Открыты исходные условия.'),0);}
 if(!state.politics.enabled)view='country';
-if(state.politics.enabled){const edits=Object.fromEntries(Object.entries(draft).filter(([key,value])=>value!==state.policy[key]));enableInstantPolitics(state);draft={...plannedPolicy(state),...edits};}
+if(state.politics.enabled){const edits=Object.fromEntries(Object.entries(draft).filter(([key,value])=>value!==state.policy[key]));enableInstantPolitics(state);if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});draft={...plannedPolicy(state),...edits};}
 
 function toast(message) {
   const el=document.getElementById('toast');el.textContent=message;el.classList.add('visible');
@@ -69,18 +70,18 @@ function chart(series,key,{compare=false}={}) {
   let out=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(metricNames[key])}, помесячный график">`;
   for(let i=0;i<5;i++) {
     const val=lo+(hi-lo)*i/4,py=y(val);
-    out+=`<line x1="${left}" y1="${py}" x2="${W-right}" y2="${py}" stroke="#e8ede3"/><text x="${left-9}" y="${py+4}" text-anchor="end" fill="#849083" font-size="10">${n(val,key==='hdi'?3:key==='gdpPerCapitaReal'?0:1)}</text>`;
+    out+=`<line x1="${left}" y1="${py}" x2="${W-right}" y2="${py}" stroke="#e8effb"/><text x="${left-9}" y="${py+4}" text-anchor="end" fill="#456794" font-size="10">${n(val,key==='hdi'?3:key==='gdpPerCapitaReal'?0:1)}</text>`;
   }
   if(!compare&&data[0].points.length>1) {
     const line=data[0].points.map(p=>`${x(p.month)},${y(p[key])}`).join(' ');
-    out+=`<defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#86b095" stop-opacity=".24"/><stop offset="100%" stop-color="#86b095" stop-opacity="0"/></linearGradient></defs><polygon points="${x(from)},${H-bottom} ${line} ${x(to)},${H-bottom}" fill="url(#chart-fill)"/>`;
+    out+=`<defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#456794" stop-opacity=".24"/><stop offset="100%" stop-color="#456794" stop-opacity="0"/></linearGradient></defs><polygon points="${x(from)},${H-bottom} ${line} ${x(to)},${H-bottom}" fill="url(#chart-fill)"/>`;
   }
   data.forEach((s,j)=>{
     const poly=s.points.map(p=>`${x(p.month)},${y(p[key])}`).join(' ');
-    out+=`<polyline points="${poly}" fill="none" stroke="${j===0?'#347b62':'#bc8b47'}" stroke-width="2.4" ${j===0&&compare?'stroke-dasharray="5 4"':''} stroke-linecap="round" stroke-linejoin="round"/>`;
-    const end=s.points.at(-1);if(end) out+=`<circle cx="${x(end.month)}" cy="${y(end[key])}" r="3.5" fill="${j===0?'#347b62':'#bc8b47'}" stroke="white" stroke-width="2"/>`;
+    out+=`<polyline points="${poly}" fill="none" stroke="${j===0?'#17386b':'#c52b39'}" stroke-width="2.4" ${j===0&&compare?'stroke-dasharray="5 4"':''} stroke-linecap="round" stroke-linejoin="round"/>`;
+    const end=s.points.at(-1);if(end) out+=`<circle cx="${x(end.month)}" cy="${y(end[key])}" r="3.5" fill="${j===0?'#17386b':'#c52b39'}" stroke="white" stroke-width="2"/>`;
   });
-  for(let i=0;i<5;i++) {const month=Math.round(from+(to-from)*i/4);out+=`<text x="${x(month)}" y="${H-10}" fill="#849083" text-anchor="middle" font-size="10">${date(month,true)}</text>`;}
+  for(let i=0;i<5;i++) {const month=Math.round(from+(to-from)*i/4);out+=`<text x="${x(month)}" y="${H-10}" fill="#456794" text-anchor="middle" font-size="10">${date(month,true)}</text>`;}
   const first=data[0].points;
   first.forEach((p,i)=>{
     const next=first[i+1],before=first[i-1];const width=Math.max(6,((next?x(next.month):W-right)-(before?x(before.month):left))/2);
@@ -93,7 +94,7 @@ function spark(key) {
   const pts=state.history.filter(x=>x.month>=0).slice(-18);if(pts.length<2) return '';
   const values=pts.map(p=>p[key]),lo=Math.min(...values),hi=Math.max(...values),range=Math.max(hi-lo,.001);
   const points=values.map((v,i)=>`${i/(values.length-1)*65},${26-(v-lo)/range*23}`).join(' ');
-  return `<svg class="spark" viewBox="0 0 65 29" aria-hidden="true"><polyline points="${points}" fill="none" stroke="#609b75" stroke-width="1.4"/></svg>`;
+  return `<svg class="spark" viewBox="0 0 65 29" aria-hidden="true"><polyline points="${points}" fill="none" stroke="#456794" stroke-width="1.4"/></svg>`;
 }
 function cards() {
   const m=state.metrics,prev=previous();
@@ -135,7 +136,7 @@ function draftBaseRate(){
 function sidebar() {
   const changes=pending();
   const stopped=state.politics.enabled&&!state.politics.executive.inOffice;
-  return `<aside class="sidebar ${mobileOpen?'open':''}"><div class="sidebar-head"><div><span class="eyebrow">ВАША РОЛЬ · ${state.politics.enabled?'ИСПОЛНИТЕЛЬНАЯ ВЛАСТЬ':'ГОСУДАРСТВО'}</span><h2>Экономическая политика</h2></div>${mobileOpen?'<button class="dark-button" data-action="controls" aria-label="Закрыть">×</button>':''}</div>
+  return `<aside class="sidebar policy-panel"><div class="sidebar-head"><div><span class="eyebrow">ВАША РОЛЬ · ${state.politics.enabled?'ИСПОЛНИТЕЛЬНАЯ ВЛАСТЬ':'ГОСУДАРСТВО'}</span><h2>Экономическая политика</h2></div>${mobileOpen?'<button class="dark-button" data-action="controls" aria-label="Закрыть">×</button>':''}</div>
     <p class="small muted">${state.politics.enabled?esc(executiveDescription(state))+'<br>Выберите значение — голосование и результат появятся сразу.':'Решения действуют со следующего месяца. Реакция экономики занимает время.'}</p>
     <div class="policy-tabs">${['Кредит','Налоги','Бюджет','Валюта','Структура','Инфраструктура','Услуги','Труд','Институты'].map(t=>`<button data-policy-tab="${t}" class="${t===policyTab?'active':''}">${t}</button>`).join('')}</div>
     ${decisionFeedback()}<div id="policy-controls">${policyControls()}</div>
@@ -143,16 +144,14 @@ function sidebar() {
     ${policyTab==='Структура'?'<p class="small muted">Здесь задаются правила и бюджеты. Фактические сроки, исполнение и управление — в разделе «Институты», их нельзя установить ползунком.</p>':''}
     <div class="policy-foot"><div class="policy-summary"><span>Ожидаемая реальная базовая ставка</span><strong id="real-rate">${n(realInterestRate(draftBaseRate()/100,state.expectedInflation)*100,1)}%</strong></div>
       <div id="pending-note" class="policy-pending">${changes.length?`Изменено решений: ${changes.length}`:'Текущая политика сохранена'}</div>
-      ${state.politics.enabled?`<button class="secondary wide" data-view="politics">Предложения партий · ${state.politics.bills.filter(b=>b.monthlyInitiative&&b.month===state.month&&['draft','articles'].includes(b.status)).length}</button>`:''}
-      <button class="primary wide" data-action="step" ${busy||stopped?'disabled':''}>${busy?'Вычисление…':stopped?'Правление завершено':'Следующий месяц'} <span aria-hidden="true">→</span></button>
-      <details class="sidebar-more"><summary>Другие действия</summary><p class="small muted">Пропуск месяцев оставляет новые предложения партий без ответа.</p><div style="display:flex;gap:8px"><button class="secondary" data-action="run3" ${busy||stopped?'disabled':''}>+3 месяца</button><button class="secondary" data-action="run12" ${busy||stopped?'disabled':''}>+12 месяцев</button></div>
+      <details class="sidebar-more"><summary>Другие действия</summary>
       <button class="secondary wide" data-action="compare-view">Сравнить с прежней политикой</button>
       <button class="secondary wide" data-action="cancel-policy" id="cancel-policy" ${changes.length?'':'disabled'}>Сбросить неподтверждённый ввод</button>
       <label class="field">Гипотеза или причина решения<textarea id="decision-note" data-note maxlength="1000" placeholder="Например: снизить инфляцию, сохранив занятость">${esc(state.pendingNote)}</textarea></label>
       </details></div></aside>`;
 }
 function row(label,value,meta='') {return `<div class="data-row"><div>${label}${meta?`<div class="meta">${meta}</div>`:''}</div><b>${value}</b></div>`;}
-function bar(label,value,display,color='#89b899') {return `<div class="bar-row"><div class="bar-title"><span>${label}</span><b>${display}</b></div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,Math.min(100,value))}%;background:${color}"></div></div></div>`;}
+function bar(label,value,display,color='#a8bce0') {return `<div class="bar-row"><div class="bar-title"><span>${label}</span><b>${display}</b></div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,Math.min(100,value))}%;background:${color}"></div></div></div>`;}
 function country() {
   const m=state.metrics,annualPopulation=state.history.filter(r=>r.month>=state.month-11).reduce((v,r)=>v+r.population,0)/12;
   const development=m.hdi>=.8?'очень высокий':m.hdi>=.7?'высокий':m.hdi>=.55?'средний':'низкий';
@@ -205,7 +204,7 @@ function overview() {
   return `<section class="panel" style="margin-bottom:20px"><h2>Общий ВВП страны</h2><div class="two-cols"><div>${row('Реальный ВВП · последние 12 месяцев',money(m.realGDPRolling)+' млрд $ базы')}${row('Реальный ВВП · текущий годовой темп',money(m.realGDPAnnualized)+' млрд $ базы','Последний месячный выпуск × 12')}</div><div>${row('Номинальный ВВП · последние 12 месяцев',money(m.nominalGDPAnnual)+' млрд нац. валюты')}${row('ВВП в долларах · последние 12 месяцев',money(m.gdpUSDRolling)+' млрд $','Каждый месячный поток пересчитан по курсу своего месяца')}</div></div></section>`+chartPanel()+`<div class="two-cols"><section class="panel"><div class="panel-head"><h2>Отчёт за месяц</h2><span class="eyebrow">${date(state.month,true)}</span></div>${report()}</section>
     <section class="panel"><div class="panel-head"><h2>Устойчивость</h2><span class="badge">${state.resourceMode?'Сырьевой экспорт':'Диверсификация'}</span></div>
     ${bar('Резервы / месяцы импорта',m.reserveMonths/12*100,n(m.reserveMonths,1)+' мес.')}
-    ${bar('Капитал банков / норматив',m.capitalRatio/state.policy.bankCapitalRequirement/2*100,pct(m.capitalRatio/state.policy.bankCapitalRequirement*100),m.capitalRatio<state.policy.bankCapitalRequirement?'#c69864':'#89b899')}
+    ${bar('Капитал банков / норматив',m.capitalRatio/state.policy.bankCapitalRequirement/2*100,pct(m.capitalRatio/state.policy.bankCapitalRequirement*100),m.capitalRatio<state.policy.bankCapitalRequirement?'#c52b39':'#a8bce0')}
     ${bar('Исполнение конечных заказов',m.fulfillment,pct(m.fulfillment))}
     ${bar('Доверие к политике',m.confidence,n(m.confidence,0)+' / 100')}
     <div class="audit-ok" style="margin-top:20px">${iconCheck} Балансы сходятся · погрешность ${n(m.auditError,8)} млн</div></section></div>
@@ -286,16 +285,27 @@ function methodology() {
     <section class="panel"><h2>Проверка учёта за последний месяц</h2><p class="small muted">Остатки тождеств, млн. Малые значения порядка 10⁻⁹ — погрешность вычислений.</p>${Object.keys(audit).length?Object.entries(audit).map(([key,val])=>row(({population:'Баланс населения (млн человек)',centralBank:'Баланс центрального банка',bankBalance:'Банковский баланс',nominalGDP:'ВВП: номинальное тождество',realGDP:'ВВП: реальное тождество',goods:'Баланс товаров',externalNFA:'Чистые внешние активы / текущий счёт',governmentCash:'Движение казначейского счёта',governmentDebt:'Движение госдолга'})[key]??key,`<span class="audit-code">${val.toExponential(3)}</span>`)).join(''):'<p class="small muted">Полный набор проверок появится после первого месяца.</p>'}</section>
     <section class="panel"><span class="eyebrow">УСТОЙЧИВОСТЬ ГИПОТЕЗ</span><h2 style="margin-top:5px">Изменить допущения</h2><p class="small muted">Это параметры исследователя, а не действия правительства. Они применяются к последующим ходам. Сравнение из сохранённой точки использует параметры этой точки.</p>${PARAMETER_FIELDS.map(([key,label,min,max,step])=>`<div class="parameter-control"><label for="param-${key}">${label}</label><input type="range" id="param-${key}" min="${min}" max="${max}" step="${step}" value="${state.parameters[key]}" data-parameter="${key}"><input type="number" min="${min}" max="${max}" step="${step}" value="${state.parameters[key]}" data-parameter-number="${key}" aria-label="${label}, значение"></div>`).join('')}</section>`;
 }
+const CATEGORIES={
+  decisions:{label:'Решения',default:'politics',views:[['politics','Предложение месяца'],['policy','Ваши законы и бюджет'],['ownership','Собственность'],['journal','История решений'],['compare','Сравнение стратегий']]},
+  statistics:{label:'Статистика',default:'country',views:[['country','Паспорт страны'],['overview','Динамика'],['economy','Производство'],['fiscal','Бюджет'],['credit','Банки'],['external','Внешний мир'],['households','Население'],['infrastructure','Инфраструктура'],['services','Услуги'],['labor','Труд'],['validation','Проверки модели'],['method','Формулы и допущения']]},
+  political:{label:'Политика',default:'government',views:[['government','Власть и полномочия'],['parties','Партии и коалиция'],['elections','Выборы'],['constitution','Конституция'],['institutions','Исполнение правил']]},
+  security:{label:'Безопасность',default:'security',views:[['security','Институты и кризисы']]}
+};
 function render() {
-  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date})};
-  const nav=[['country','Паспорт страны'],['politics','Власть и законы'],['elections','Выборы'],['parties','Партии и коалиция'],['constitution','Конституция'],['overview','Обзор'],['economy','Производство'],['fiscal','Бюджет'],['credit','Банки'],['external','Внешний мир'],['households','Население'],['ownership','Собственность'],['infrastructure','Инфраструктура'],['services','Услуги'],['labor','Труд и профсоюзы'],['institutions','Исполнение правил'],['journal','Журнал решений'],['compare','Гипотезы A / B'],['validation','Проверка: 30 лет'],['method','Модель']];
-  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brandmark">M</span><span>МАКРОЭКОНОМИЧЕСКАЯ<br>ЛАБОРАТОРИЯ</span></div><div class="top-actions"><span class="badge"><span class="status-dot"></span><span id="save-status">${esc(saveStatus)}</span></span><button data-action="export">Сохранить файл</button><button data-action="import">Открыть</button><button data-action="new">Новая страна</button>${legacySave?'<button data-action="legacy-export">Скачать прежнее сохранение</button>':''}</div></header>
-    <div class="workspace">${sidebar()}<main class="main"><div class="page-head"><div><span class="eyebrow">ВЫМЫШЛЕННАЯ СТРАНА · ${state.resourceMode?'СЫРЬЕВАЯ ЭКОНОМИКА':'ДИВЕРСИФИЦИРОВАННАЯ ЭКОНОМИКА'}</span><h1>Экономическая лаборатория</h1><p class="intro">Изменяйте политику. Наблюдайте последствия. Проверяйте гипотезы.</p></div><div class="datebox"><div class="label">${state.month===0?'НАЧАЛО ЭКСПЕРИМЕНТА':'ЗАВЕРШЁННЫЙ МЕСЯЦ'}</div><div class="month">${date(state.month)}</div><span class="badge">Ход ${state.month}</span></div></div>
-    ${legacySave?'<div class="callout" style="margin-bottom:16px">Версия 5.0: отдельные выборы, партии, коалиции и принятие законов. Для новых правил начат новый эксперимент. Прежнее сохранение оставлено отдельно, его можно скачать кнопкой вверху.</div>':''}${state.politics.enabled&&!state.politics.executive.inOffice?`<div class="callout warning"><strong>Ваше правление завершено</strong>${esc(state.politics.executive.reason)}. <button data-view="politics">Итоговый отчёт</button> <button data-action="new">Новая страна</button></div>`:''}${cards()}<nav class="view-tabs" aria-label="Разделы модели">${nav.filter(([key])=>['country','politics','parties','overview','journal'].includes(key)).map(([key,label])=>`<button data-view="${key}" class="${view===key?'active':''}" aria-current="${view===key?'page':'false'}">${({country:'Страна',politics:'Законы',parties:'Парламент',overview:'Экономика',journal:'История'})[key]??label}</button>`).join('')}<details class="nav-more"><summary>Другие разделы${!['country','politics','parties','overview','journal'].includes(view)?' · '+esc(nav.find(x=>x[0]===view)?.[1]??''):''}</summary><div>${nav.filter(([key])=>!['country','politics','parties','overview','journal'].includes(key)).map(([key,label])=>`<button data-view="${key}" class="${view===key?'active':''}">${label}</button>`).join('')}</div></details></nav>
-    <div id="view-content">${views[view]()}</div><div class="section-actions" style="margin-top:20px"><button data-action="checkpoint">Сохранить точку ${checkpoint?'· '+date(checkpoint.month,true):''}</button>${checkpoint?'<button data-action="restore">Вернуться к точке</button>':''}<button data-action="csv">Скачать ряды CSV</button></div>
-    <footer class="footer-note">Условная макроэкономическая модель · Все суммы в национальной валюте, если не указано иное.<br>Коэффициенты не оценены по статистике страны. <a href="#" data-view="method">Формулы, месячный учёт и ограничения →</a></footer></main></div>
-    <div class="mobile-controls"><button data-action="controls">Политика ${pending().length?'· '+pending().length:''}</button><button class="primary" data-action="step" ${busy||state.politics.enabled&&!state.politics.executive.inOffice?'disabled':''}>${busy?'Вычисление…':'Следующий месяц →'}</button></div></div>`;
+  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date})};
+  const category=Object.keys(CATEGORIES).find(key=>CATEGORIES[key].views.some(([id])=>id===view))??'decisions',group=CATEGORIES[category];
+  const waiting=unresolvedInitiatives(state).length>0,stopped=state.politics.enabled&&!state.politics.executive.inOffice;
+  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brandmark">Р</span><span>РЕСПУБЛИКА<br><small>Экономическая лаборатория</small></span></div><div class="top-actions"><button data-action="export">Сохранить</button><button data-action="import">Открыть</button><button data-action="new">Новая игра</button>${legacySave?'<button data-action="legacy-export">Прежнее сохранение</button>':''}</div></header>
+    <div class="workspace"><main class="main"><div class="turn-header"><div><span class="eyebrow">${state.politics.enabled?esc(executiveDescription(state)):'Экономическая лаборатория'}</span><div class="turn-date">${date(state.month)} <span>Ход ${state.month}</span></div></div><div class="turn-action"><button class="primary" data-action="step" ${busy||stopped||waiting?'disabled':''}>${busy?'Расчёт…':stopped?'Правление завершено':'Следующий месяц →'}</button>${waiting?'<span class="turn-hint">Сначала рассмотрите предложение партии</span>':''}</div></div>
+    <nav class="category-tabs" aria-label="Основные разделы">${Object.entries(CATEGORIES).map(([key,c])=>`<button data-category="${key}" class="${category===key?'active':''}" aria-current="${category===key?'page':'false'}">${c.label}${key==='decisions'&&waiting?' <span class="notification-dot" aria-label="Требуется решение"></span>':''}</button>`).join('')}</nav>
+    <nav class="subsection-tabs" aria-label="Подразделы: ${group.label}">${group.views.map(([key,label])=>`<button data-view="${key}" class="${view===key?'active':''}" aria-current="${view===key?'page':'false'}">${label}</button>`).join('')}</nav>
+    <div class="page-title"><h1>${group.views.find(([id])=>id===view)?.[1]??group.label}</h1>${category==='decisions'&&view==='politics'?'<p>Одно предложение — один ответ. Голосование проходит в этом ходу.</p>':''}</div>
+    ${stopped?`<div class="callout warning"><strong>Ваше правление завершено.</strong> ${esc(state.politics.executive.reason)} <button data-view="government">Итоговый отчёт</button></div>`:''}
+    ${view==='overview'?cards():''}${['ownership','infrastructure','fiscal','institutions','constitution','security'].includes(view)?decisionFeedback():''}<div id="view-content">${views[view]()}</div>
+    <details class="save-tools"><summary>Сохранения и выгрузка</summary><div class="section-actions"><button data-action="checkpoint">Сохранить точку ${checkpoint?'· '+date(checkpoint.month,true):''}</button>${checkpoint?'<button data-action="restore">Вернуться к точке</button>':''}<button data-action="csv">Скачать статистику CSV</button>${!state.politics.enabled?'<button data-action="run3">+3 месяца</button><button data-action="run12">+12 месяцев</button>':''}</div></details>
+    <footer class="footer-note"><span id="save-status">${esc(saveStatus)}</span> · <a href="#" data-view="method">О модели</a></footer></main></div></div>`;
 }
+
 function updateDraft(key,val) {
   const field=POLICY_FIELDS.find(x=>x[0]===key);if(!field||!Number.isFinite(Number(val))) return;
   draft[key]=Math.max(field[2],Math.min(field[3],Number(val)));
@@ -337,7 +347,10 @@ function decisionFeedback(){
   return `<div class="decision-feedback" role="status"><strong>${b.byDecree?'Принято указом':b.status==='passed'||b.status==='enacted'?'Закон принят':b.status==='rejected'?'Парламент отклонил закон':b.status==='vetoed'?'Вето президента':'Предложение отклонено'}</strong><span>${esc(b.title)}</span>${b.articles.map(a=>`<span>${esc(policyValue(a.key,a.before))} → ${esc(policyValue(a.key,a.value))}</span>`).join('')}${vote?`<span>За: ${vote.yes} · против: ${vote.no} · воздержались: ${vote.abstain}</span>`:''}${b.partyReaction?`<small>Лояльность партии: ${pct(b.partyReaction.before*100)} → ${pct(b.partyReaction.after*100)}</small>`:''}<small>${b.status==='passed'?'Изменения — при расчёте следующего месяца.':'Результат показан без перехода месяца.'}</small></div>`;
 }
 async function step(count) {
-  if(busy)return;busy=true;render();await new Promise(r=>setTimeout(r,0));
+  if(busy)return;
+  if(state.politics.enabled&&unresolvedInitiatives(state).length){view='politics';render();toast('Рассмотрите предложение партии: поддержите его или откажите.');return;}
+  if(state.politics.enabled)count=1;
+  busy=true;render();await new Promise(r=>setTimeout(r,0));
   try {if(state.politics.enabled)for(const key of pending())commitChoice(key);state=runMonths(state,count,state.politics.enabled?state.policy:draft);if(state.politics.enabled){draft=plannedPolicy(state);view='politics';}comparison=null;comparisonBase=null;mobileOpen=false;persist();}
   catch(e){toast('Расчёт остановлен: '+e.message);console.error(e);}
   busy=false;render();
@@ -360,8 +373,9 @@ function exportCSV() {
 app.addEventListener('click',async event=>{
   const target=event.target.closest('button,a');if(!target)return;
   if(target.dataset.politicalAction){try{comparisonBase??=copy(state);handlePoliticalAction(state,target.dataset,id=>document.getElementById(id));draft=plannedPolicy(state);comparison=null;persist();render();toast('Результат решения показан в этом ходу.');}catch(e){toast(e.message);}return;}
+  if(target.dataset.category){view=CATEGORIES[target.dataset.category]?.default??'politics';render();return;}
   if(target.dataset.view){event.preventDefault();view=target.dataset.view;render();return;}
-  if(target.dataset.policyTab){policyTab=target.dataset.policyTab;render();return;}
+  if(target.dataset.policyTab){view='policy';policyTab=target.dataset.policyTab;render();return;}
   if(target.dataset.chart){chartMetric=target.dataset.chart;render();return;}
   if(target.dataset.compareChart){compareMetric=target.dataset.compareChart;render();return;}
   if(target.dataset.journalPage!==undefined){journalPage=Number(target.dataset.journalPage);render();return;}
@@ -391,7 +405,7 @@ app.addEventListener('click',async event=>{
     case 'new':document.getElementById('new-dialog').showModal();break;
     case 'checkpoint':
       checkpoint=copy(state);try{await storage.set(CHECKPOINT,JSON.stringify({format:'economy-model',version:VERSION,state:checkpoint}));toast('Точка сравнения сохранена.');}catch(e){toast('Точка сохранена только на время этой сессии. Скачайте файл.');}comparison=null;render();break;
-    case 'restore':if(checkpoint){state=copy(checkpoint);enableInstantPolitics(state);draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparisonBase=null;comparison=null;persist();render();toast('Эксперимент восстановлен из сохранённой точки.');}break;
+    case 'restore':if(checkpoint){state=copy(checkpoint);enableInstantPolitics(state);if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparisonBase=null;comparison=null;persist();render();toast('Эксперимент восстановлен из сохранённой точки.');}break;
   }
 });
 app.addEventListener('input',event=>{
@@ -435,7 +449,7 @@ document.getElementById('new-form').addEventListener('submit',async event=>{
   const profile=form.get('demography')??'young';
   const profiles={young:{initialFertility:2.6,initialChildShare:.28,initialElderlyShare:.07},transition:{initialFertility:1.8,initialChildShare:.22,initialElderlyShare:.14},aging:{initialFertility:1.3,initialChildShare:.17,initialElderlyShare:.23}};
   const constitution={form:form.get('governmentForm')??'presidential',playerRole:form.get('playerRole')??'president',regime:form.get('politicalRegime')??'democracy',electoralSystem:form.get('electoralSystem')??'pr',presidentSystem:form.get('presidentSystem')??'twoRound',seats:Number(form.get('seats')??120),threshold:Number(form.get('threshold')??4),parliamentTerm:Number(form.get('parliamentTerm')??48),presidentTerm:Number(form.get('presidentTerm')??48),parliamentOffset:Number(form.get('parliamentOffset')??24),confidence:form.get('confidence')??'constructive',independentCB:form.get('independentCB')==='true',termLimit:Number(form.get('termLimit')??2),naturalizationYears:Number(form.get('naturalizationYears')??5)};
-  try{state=createSimulation({resourceMode:form.get('resource')==='true',seed:Number(form.get('seed')),stochastic:form.has('stochastic'),modelProfile:form.get('modelProfile')??'balanced',parameters:profiles[profile]??profiles.young,politicalMode:form.get('playMode')!=='laboratory',politicalOptions:{constitution,playerFamily:form.get('playerFamily')??'liberal'}});}catch(e){toast(e.message);return;}
+  try{state=createSimulation({resourceMode:form.get('resource')==='true',seed:Number(form.get('seed')),stochastic:form.has('stochastic'),modelProfile:form.get('modelProfile')??'balanced',parameters:profiles[profile]??profiles.young,politicalMode:form.get('playMode')!=='laboratory',politicalOptions:{constitution,agendaSlots:1,playerFamily:form.get('playerFamily')??'liberal'}});}catch(e){toast(e.message);return;}
   draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparison=null;comparisonBase=null;view=state.politics.enabled?'politics':'country';checkpoint=null;mobileOpen=false;journalPage=0;
   try{await storage.set(CHECKPOINT,'');}catch(e){toast('Не удалось очистить прежнюю точку сравнения на устройстве.');}
   persist();document.getElementById('new-dialog').close();render();
@@ -443,7 +457,7 @@ document.getElementById('new-form').addEventListener('submit',async event=>{
 document.querySelector('.dialog-close').addEventListener('click',()=>document.getElementById('new-dialog').close());
 document.getElementById('import-file').addEventListener('change',async event=>{
   const file=event.target.files[0];if(!file)return;
-  try{if(file.size>100*1024*1024)throw new Error('Файл больше 100 МБ');const text=await file.text();const loaded=importSimulation(text);const loadedDraft=sanitizePolicy(JSON.parse(text).draftPolicy??loaded.policy);state=loaded;enableInstantPolitics(state);draft=state.politics.enabled?plannedPolicy(state):loadedDraft;comparison=null;comparisonBase=null;view=state.politics.enabled?'politics':'country';journalPage=0;persist();render();toast('Эксперимент восстановлен.');}
+  try{if(file.size>100*1024*1024)throw new Error('Файл больше 100 МБ');const text=await file.text();const loaded=importSimulation(text);const loadedDraft=sanitizePolicy(JSON.parse(text).draftPolicy??loaded.policy);state=loaded;enableInstantPolitics(state);if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});draft=state.politics.enabled?plannedPolicy(state):loadedDraft;comparison=null;comparisonBase=null;view=state.politics.enabled?'politics':'country';journalPage=0;persist();render();toast('Эксперимент восстановлен.');}
   catch(e){toast('Не удалось открыть сохранение: '+e.message);}event.target.value='';
 });
 render();
