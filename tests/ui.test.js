@@ -17,6 +17,7 @@ test('vertical disclosure, result modals and separate interface exports preserve
  assert.ok(app.innerHTML.includes('data-action="settings-open"'));assert.ok(!app.innerHTML.includes('data-action="export"'));assert.ok(!app.innerHTML.includes('brandmark'));assert.ok(!app.innerHTML.includes('Сохранения и выгрузка'));
  assert.ok(!app.innerHTML.includes('При отказе:'));assert.ok(!app.innerHTML.includes('Решение расходует'));assert.ok(!app.innerHTML.includes('одна попытка для партии'));
  await click({action:'settings-open'});assert.ok(app.innerHTML.includes('id="settings-dialog"'));assert.equal((app.innerHTML.match(/data-action="export"/g)??[]).length,1);assert.ok(app.innerHTML.includes('data-action="usage-export"'));await click({action:'settings-close'});assert.ok(!app.innerHTML.includes('id="settings-dialog"'));await click({action:'proposal-open'});
+ assert.ok(!app.innerHTML.includes('Рабочий стол'));assert.ok(!app.innerHTML.includes('Изменить статью и голосовать снова'));
  assert.ok(app.innerHTML.includes('vertical-navigation'));assert.ok(!app.innerHTML.includes('category-tabs'));
  assert.ok(app.innerHTML.includes('Рейтинг президента'));assert.ok(app.innerHTML.includes('январь 2000'));
  assert.ok(app.innerHTML.includes('id="proposal-dialog"'));const id=app.innerHTML.match(/data-bill-card="(\d+)"/)[1];
@@ -35,16 +36,18 @@ test('vertical disclosure, result modals and separate interface exports preserve
  const count=game().politics.bills.length;assert.ok(app.innerHTML.includes('3 / 3'));
  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'dollarized'}});assert.equal(game().politics.bills.length,count);
  await click({action:'step'});assert.equal(game().month,1);assert.equal(game().journal.length,1);
- const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','politics','elections','parties','constitution','electorate'];
+ const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','infrastructure','services','elections','parties','constitution','electorate'];
  for(const view of views){if(app.innerHTML.includes(`data-view="${view}" class="active"`))await click({view});await click({view});assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(!app.innerHTML.includes('NaN'));assert.ok(!app.innerHTML.includes('undefined'));}
  app.listeners.change({target:{dataset:{policyCheck:'protectedJudges'},checked:false,hasAttribute:()=>false}});assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(app.innerHTML.includes('Не все статьи'));assert.ok(app.innerHTML.includes('<b>80</b>'));await click({action:'result-close'});
  await click({view:'infrastructure'});node('network-id').value='roads';node('network-kind').value='networkSale';node('network-points').value='10';await click({action:'network-queue'});assert.ok(app.innerHTML.includes('id="result-dialog"'));await click({action:'result-close'});
  await click({graph:'budgetBalance'});assert.ok(app.innerHTML.includes('id="trend-dialog"'));await click({action:'trend-close'});
+ await click({view:'parties'});assert.ok(!app.innerHTML.includes('Ваша партия: программа'));assert.ok(!app.innerHTML.includes('Партийные семьи и история'));assert.ok(app.innerHTML.includes('Парламент и коалиции'));
+ await click({view:'credit'});assert.ok(app.innerHTML.includes('Банковская система'));assert.ok(!app.innerHTML.includes('Долговая нагрузка'));assert.ok(!app.innerHTML.includes('Передача ставки'));
  await click({action:'usage-export'});const report=JSON.parse(await lastBlob.text());assert.equal(report.format,'economy-ui-observation');assert.ok(report.summary.targets.some(x=>x.id==='view:country'&&x.opens>0));assert.ok(report.events.some(x=>x.target==='window:result'));assert.ok(report.summary.neverOpened.some(x=>x.id==='graph:giniDisposable'));
  await click({action:'export'});const payload=JSON.parse(await lastBlob.text());assert.ok(payload.uiObservation);assert.ok(!payload.state.uiObservation);assert.equal(payload.state.month,1);
  await click({action:'journal-export'});const journal=JSON.parse(await lastBlob.text());assert.equal(journal.format,'economy-decisions');assert.equal(journal.journal.length,1);
  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v5'));await click({action:'step'});await click({action:'restore'});assert.equal(game().month,1);assert.ok(!app.innerHTML.includes('id="result-dialog"'));
- for(const hidden of ['journal','compare','validation','method','labor']){const before=app.innerHTML;await click({view:hidden});assert.equal(app.innerHTML,before);}
+ for(const hidden of ['journal','compare','validation','method','labor','politics','institutions']){const before=app.innerHTML;await click({view:hidden});assert.equal(app.innerHTML,before);}
  const NativeFormData=globalThis.FormData;
  try{
   globalThis.FormData=class {constructor(target){this.target=target;}get(key){return this.target[key]??null;}};
