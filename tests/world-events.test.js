@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSimulation,advanceMonth,exportSimulation,importSimulation,replayJournal,executePolitical} from '../src/engine.js';
-import {worldEvent} from '../src/world-events.js';
+import {worldEvent,savedWorldEvents} from '../src/world-events.js';
 const options={seed:42,stochastic:false,politicalMode:true,politicalOptions:{livingWorld:true,constitution:{presidentTerm:84,parliamentTerm:84,parliamentOffset:84}}};
 test('seeded world episodes are rare, bounded and include good and bad news',()=>{
  const titles=new Set(),signs=new Set();
@@ -31,3 +31,5 @@ test('activation of the living world on an old game preserves prior history and 
  executePolitical(s,{kind:'setLivingWorld'});assert.equal(s.stochastic,false);assert.equal(s.provenance.initialStochastic,initialStochastic);
  for(let i=0;i<18;i++)s=advanceMonth(s,s.policy);const r=replayJournal(s);assert.equal(r.stochastic,false);assert.equal(r.politics.livingWorld,true);assert.deepEqual(r.metrics,s.metrics);
 });
+
+test('old scheduled world shocks remain visible until their end',()=>{const s={month:10,shocks:[{key:'energyPrice',multiplier:1.3,start:6,duration:12}]};assert.equal(savedWorldEvents(s)[0].title,'Стоимость импортной энергии');assert.equal(savedWorldEvents(s)[0].multiplier,1.3);s.month=18;assert.deepEqual(savedWorldEvents(s),[]);});

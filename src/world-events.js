@@ -20,3 +20,9 @@ export function worldEvent(s){
  const scenario=SCENARIOS[Math.floor(hash(s.seed,'world-kind',block)*SCENARIOS.length)];
  return {id:`world:${s.seed}:${anchor}:${block}`,start,duration,...scenario};
 }
+
+// Old saves can contain manually scheduled shocks. Keep their effects visible.
+export function savedWorldEvents(s){
+ const names={commodityPrice:'Мировые цены на сырьё',energyPrice:'Стоимость импортной энергии',foreignDemand:'Зарубежный спрос',weather:'Урожайность',importAvailability:'Доступность импортных компонентов',globalRate:'Зарубежная процентная ставка'};
+ return (s.shocks??[]).filter(e=>s.month<e.start+e.duration).map((e,i)=>({...e,id:`saved-world:${i}:${e.start}`,title:names[e.key]??'Изменение внешних условий',text:'Внешнее событие из сохранённой партии.'}));
+}

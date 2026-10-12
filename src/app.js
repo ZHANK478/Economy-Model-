@@ -1,3 +1,4 @@
+import {savedWorldEvents} from './world-events.js';
 import {campaignEvent} from './campaign-events.js';
 import {GOVERNMENT_PRESETS,COUNTRY_PRESETS,newGameOptions} from './start-presets.js';
 import {validation} from './validation-results.js';
@@ -236,9 +237,13 @@ function economy(){
  const total=va.reduce((a,b)=>a+b,0);
  return `<section class="panel"><h2>Структура производства</h2><div class="table-wrap"><table class="table"><thead><tr><th>Отрасль</th><th>Доля экономики</th><th>Занятость</th></tr></thead><tbody>${state.firms.map((f,i)=>`<tr><td>${esc(f.name)}</td><td>${pct(total?va[i]/total*100:0)}</td><td>${n(f.workers*1000,0)} тыс.</td></tr>`).join('')}</tbody></table></div></section><section class="panel"><h2>ВВП по расходам</h2>${row('Потребление',money(r.gdp?.consumption??m.consumption)+' млрд')}${row('Инвестиции',money(r.gdp?.investment??m.investment)+' млрд')}${row('Государственные закупки',money(r.gdp?.government??m.governmentPurchases)+' млрд')}${row('Экспорт',money(r.gdp?.exports??m.exports)+' млрд')}${row('− Импорт',money(r.gdp?.imports??m.imports)+' млрд')}${row('Изменение запасов',money(r.gdp?.inventories??0)+' млрд')}${row('ВВП за месяц',money(m.nominalGDPMonthly)+' млрд')}</section>`;
 }
+function worldConditions(){
+ const events=[state.lastReport.worldNews,...savedWorldEvents(state)].filter(Boolean);
+ return events.length?events.map(e=>`<div class="callout"><strong>${esc(e.title)}</strong>${esc(e.text)}<p>${signed((e.multiplier-1)*100,0)}% к обычному уровню · ${e.start>state.month?'начало через '+(e.start-state.month)+' мес.; длительность '+e.duration+' мес.':'осталось '+(e.start+e.duration-state.month)+' мес.'}</p></div>`).join(''):'<p class="small muted">Сейчас нет мировых событий, меняющих условия торговли.</p>';
+}
 function external(){
  const m=state.metrics,e=state.lastReport.external??{};
- return `<section class="panel"><h2>Внешние счета</h2>${row('Курс валюты',n(m.exchangeRate,3)+' ед. / $')}${row('Экспорт',money(e.exportsUSD??0)+' млрд $')}${row('Импорт',money(e.importsUSD??0)+' млрд $')}${row('Текущий счёт',money(m.currentAccountUSD)+' млрд $')}${row('Валютные резервы',money(m.reservesUSD)+' млрд $')}${row('Резервы / импорт',n(m.reserveMonths,1)+' мес.')}${row('Стабилизационный фонд',money(m.fundUSD)+' млрд $')}${state.lastReport.worldNews?`<div class="callout"><strong>${esc(state.lastReport.worldNews.title)}</strong>${esc(state.lastReport.worldNews.text)}<p>${signed((state.lastReport.worldNews.multiplier-1)*100,0)}% к обычному уровню · осталось ${state.lastReport.worldNews.start+state.lastReport.worldNews.duration-state.month} мес.</p></div>`:'<p class="small muted">Сейчас нет мировых событий, меняющих условия торговли.</p>'}</section>`;
+ return `<section class="panel"><h2>Внешние счета</h2>${row('Курс валюты',n(m.exchangeRate,3)+' ед. / $')}${row('Экспорт',money(e.exportsUSD??0)+' млрд $')}${row('Импорт',money(e.importsUSD??0)+' млрд $')}${row('Текущий счёт',money(m.currentAccountUSD)+' млрд $')}${row('Валютные резервы',money(m.reservesUSD)+' млрд $')}${row('Резервы / импорт',n(m.reserveMonths,1)+' мес.')}${row('Стабилизационный фонд',money(m.fundUSD)+' млрд $')}${worldConditions()}</section>`;
 }
 function populationPyramid(){
  const bands=Array.from({length:11},(_,i)=>({label:i===10?'100+':`${i*10}–${i*10+9}`,female:state.demography.female.slice(i*120,i===10?1201:(i+1)*120).reduce((a,b)=>a+b,0),male:state.demography.male.slice(i*120,i===10?1201:(i+1)*120).reduce((a,b)=>a+b,0)})).reverse();
@@ -376,7 +381,7 @@ function render() {
   const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date})};
   detectDecisionResult();
   if(announcedWorldMonth===null)announcedWorldMonth=state.month;
-  if(state.month>announcedWorldMonth){announcedWorldMonth=state.month;const e=state.lastReport.worldNews;if(e?.start===state.month){worldNewsNotice=e;worldNewsOpen=true;}}
+  if(state.month>announcedWorldMonth){announcedWorldMonth=state.month;const e=[state.lastReport.worldNews,...savedWorldEvents(state)].find(e=>e?.start===state.month);if(e){worldNewsNotice=e;worldNewsOpen=true;}}
   const category=Object.keys(CATEGORIES).find(key=>CATEGORIES[key].views.some(([id])=>id===view))??'decisions',group=CATEGORIES[category];
   const initiative=unresolvedInitiatives(state)[0];
   if(initiative&&initiative.id!==announcedProposal){announcedProposal=initiative.id;proposalId=initiative.id;proposalOpen=true;trendMetric=null;}
