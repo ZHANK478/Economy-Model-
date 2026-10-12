@@ -3,3 +3,8 @@ node_modules/
 *.tar.gz
 .DS_Store
 .sites-local/
+android/.gradle/
+android/local.properties
+android/**/build/
+*.apk
+*.aab

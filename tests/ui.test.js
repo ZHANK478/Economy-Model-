@@ -21,9 +21,10 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   const app=node('app');
   const click=async data=>app.listeners.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
   const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','elections','parties','constitution','electorate',];
-  assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(app.innerHTML.includes('mission-control'));assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));
+  assert.ok(app.innerHTML.includes('Рейтинг президента'));assert.ok(app.innerHTML.includes('место '));assert.ok(app.innerHTML.includes('январь 2000'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(app.innerHTML.includes('mission-control'));assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));
   assert.ok(app.innerHTML.includes('Предложения партий'));assert.ok(app.innerHTML.includes('Было'));assert.ok(app.innerHTML.includes('Станет'));
   assert.ok(!app.innerHTML.includes('На следующий месяц:'));assert.ok(app.innerHTML.includes('data-category="decisions"'));assert.ok(app.innerHTML.includes('data-category="security"'));assert.ok(!app.innerHTML.includes('kpis'));assert.equal((app.innerHTML.match(/data-bill-card=/g)||[]).length,1);
+  let nativeSave=null;globalThis.EconomyAndroid={saveFile:(...args)=>{nativeSave=args;}};await click({action:'export'});assert.ok(nativeSave[0].endsWith('01.2000.json'));assert.equal(JSON.parse(nativeSave[1]).state.startYear,2000);delete globalThis.EconomyAndroid;
   await click({action:'proposal-close'});await click({view:'households'});await click({action:'step'});assert.ok(app.innerHTML.includes('Ход 0'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));assert.ok(app.innerHTML.includes('Демография: возраст и пол'));
   const first=app.innerHTML.match(/data-bill-card="(\d+)"/)[1];await click({politicalAction:'adopt',billId:first});await click({action:'proposal-close'});
   await click({category:'security'});assert.ok(app.innerHTML.includes('Чрезвычайные полномочия и конфликт'));assert.ok(!app.innerHTML.includes('Предложения партий'));assert.ok(!app.innerHTML.includes('data-policy="rate"'));
@@ -52,7 +53,7 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   assert.ok(app.innerHTML.includes('За:'));
   await click({view:'parties'});assert.ok(app.innerHTML.includes('Либеральная партия'));assert.ok(app.innerHTML.includes('Голоса на последних выборах'));assert.ok(!app.innerHTML.includes('Свобода и развитие'));
   await click({view:'elections'});assert.ok(app.innerHTML.includes('Одобрение президента'));assert.ok(app.innerHTML.includes('Ваш кандидат'));assert.ok(app.innerHTML.includes('Почему рейтинг и голоса различаются'));
-  for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
+  for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('Рейтинг президента'));assert.ok(app.innerHTML.includes('место '));assert.ok(app.innerHTML.includes('январь 2000'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
   app.listeners.input({target:{dataset:{policy:'rate'},value:'15'}});
   await click({action:'step'});
   const persisted=JSON.parse(saved.get('economy-model-v5'));

@@ -52,6 +52,7 @@ function persist() {
   });
 }
 function download(filename,content,type='application/json') {
+  if(typeof globalThis.EconomyAndroid?.saveFile==='function'){globalThis.EconomyAndroid.saveFile(filename,content,type);return;}
   const url=URL.createObjectURL(new Blob([content],{type}));
   const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -343,6 +344,12 @@ function render() {
     ${state.politics.enabled&&['politics','government','elections'].includes(view)?views.ratings():''}${view==='overview'?cards():''}${['ownership','infrastructure','fiscal','institutions','constitution','security'].includes(view)?decisionFeedback():''}<div id="view-content">${views[view]()}</div>
     <details class="save-tools"><summary>Сохранения и выгрузка</summary><div class="section-actions"><button data-action="checkpoint">Сохранить точку ${checkpoint?'· '+date(checkpoint.month,true):''}</button>${checkpoint?'<button data-action="restore">Вернуться к точке</button>':''}<button data-action="csv">Скачать статистику CSV</button>${!state.politics.enabled?'<button data-action="run3">+3 месяца</button><button data-action="run12">+12 месяцев</button>':''}</div></details>
     <footer class="footer-note"><span id="save-status">${esc(saveStatus)}</span></footer></main></div>${floatingWindows(views)}</div>`;
+  for(const table of app.querySelectorAll?.('table')??[]){
+    if(table.parentElement?.classList.contains('table-scroll'))continue;
+    const scroll=document.createElement('div');scroll.className='table-scroll';scroll.tabIndex=0;
+    scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Таблица: прокрутите вправо для остальных столбцов');
+    table.parentNode.insertBefore(scroll,table);scroll.append(table);
+  }
   bindFloatingWindows();
 }
 
