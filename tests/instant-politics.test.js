@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSimulation,executePolitical,advanceMonth,runMonths,replayJournal,exportSimulation,importSimulation,copy,scheduleOwnership} from '../src/engine.js';
-import {plannedPolicy,enableInstantPolitics,validatePoliticalSystem} from '../src/political-system.js';
+import {plannedPolicy,enableInstantPolitics,validatePoliticalSystem,decisionBudget} from '../src/political-system.js';
 import {generateMonthlyAgenda,MONTHLY_INITIATIVES} from '../src/political-agenda.js';
 import {createBill,rollCall,enactBills} from '../src/legislation.js';
 const country=(form='presidential',extra={})=>createSimulation({politicalMode:true,seed:11,politicalOptions:{constitution:{form},...extra}});
@@ -138,4 +138,21 @@ test('switching an old agenda to one proposal archives surplus without penalizin
   assert.deepEqual(replayJournal(s).politics,s.politics);
   const b=s.politics.bills.find(b=>b.monthlyInitiative&&b.status==='draft');executePolitical(s,{kind:'decideBill',billId:b.id,decision:'reject'});s=advanceMonth(s);assert.equal(s.politics.bills.filter(b=>b.monthlyInitiative&&b.month===1).length,1);assert.deepEqual(replayJournal(s).politics,s.politics);
   assert.throws(()=>executePolitical(s,{kind:'setAgendaSlots',slots:2}));
+});
+
+
+test('three decisions include rejected bills, reserve the initiative and reset only on a new month',()=>{
+ let s=country('presidential',{agendaSlots:1,decisionLimit:3});
+ executePolitical(s,{kind:'chooseLaw',patch:{incomeTax:15}});executePolitical(s,{kind:'chooseLaw',patch:{incomeTax:16}});
+ assert.equal(decisionBudget(s).used,2);const before=copy(s.politics);
+ assert.throws(()=>executePolitical(s,{kind:'chooseLaw',patch:{incomeTax:17}}),/предложения партии/);assert.deepEqual(s.politics,before);
+ const b=s.politics.bills.find(b=>b.monthlyInitiative&&b.status==='draft');executePolitical(s,{kind:'decideBill',billId:b.id,decision:'reject'});assert.equal(decisionBudget(s).remaining,0);
+ assert.throws(()=>executePolitical(s,{kind:'chooseLaw',patch:{incomeTax:17}}),/Все 3/);
+ const saved=importSimulation(exportSimulation(s));assert.equal(decisionBudget(saved).remaining,0);assert.deepEqual(replayJournal(saved).politics,saved.politics);
+ s=advanceMonth(s);assert.equal(decisionBudget(s).remaining,3);assert.deepEqual(replayJournal(s).politics,s.politics);
+});
+test('old current-turn actions migrate to a budget without retroactive charges',()=>{
+ const s=country('presidential',{agendaSlots:1});executePolitical(s,{kind:'chooseLaw',patch:{incomeTax:15}});
+ executePolitical(s,{kind:'setDecisionLimit',limit:3});assert.equal(decisionBudget(s).used,0);
+ executePolitical(s,{kind:'chooseLaw',patch:{incomeTax:16}});assert.equal(decisionBudget(s).used,1);assert.deepEqual(replayJournal(s).politics,s.politics);
 });

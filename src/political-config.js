@@ -44,3 +44,8 @@ export function constitutionFrom(options={}){
 export function parametersFrom(values={}){if(Object.keys(values).some(k=>!Object.hasOwn(POLITICAL_PARAMETERS,k)))throw new Error('Неизвестный политический коэффициент');const k={...POLITICAL_PARAMETERS,...values};for(const [key,,min,max] of POLITICAL_PARAMETER_FIELDS)if(!Number.isFinite(k[key])||k[key]<min||k[key]>max)throw new Error('Некорректное политическое допущение: '+key);return k;}
 export const distance=(a,b)=>AXES.reduce((v,k)=>v+(a[k]-b[k])**2,0)/AXES.length;
 export const platformObject=values=>Object.fromEntries(AXES.map((k,i)=>[k,values[i]]));
+
+
+export const PARTY_LABELS={socialist:'Социалистическая партия',socialDemocrat:'Социал-демократическая партия',liberal:'Либеральная партия',conservative:'Консервативная партия',national:'Национал-консервативная партия',green:'Партия зелёных',agrarian:'Аграрная партия',regional:'Региональная партия'};
+export const PARTY_DESCRIPTIONS={socialist:'Общественная собственность, перераспределение доходов и защита работников.',socialDemocrat:'Социальные услуги и перераспределение при сохранении рыночной экономики.',liberal:'Рыночная экономика, гражданские свободы и внешняя открытость.',conservative:'Частная экономика, традиции и более централизованное управление.',national:'Национальные приоритеты, традиции и ограничения внешней открытости.',green:'Экология, гражданские свободы и децентрализация.',agrarian:'Интересы сельских территорий, общин и местного управления.',regional:'Региональная автономия и децентрализация.'};
+export function partyDisplayName(x){if(!x)return 'Неизвестная партия';const name=PARTY_LABELS[x.family]??'Политическая партия';return /^p[1-8]$/.test(x.id)?name:name+' · №'+String(x.id).replace(/^p/,'');}

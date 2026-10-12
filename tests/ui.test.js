@@ -20,7 +20,7 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   await import('../src/app.js');
   const app=node('app');
   const click=async data=>app.listeners.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
-  const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','elections','parties','constitution','journal','compare','validation','method'];
+  const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','elections','parties','constitution',];
   assert.ok(app.innerHTML.includes('Следующий месяц'));
   assert.ok(app.innerHTML.includes('Предложения партий'));assert.ok(app.innerHTML.includes('Было'));assert.ok(app.innerHTML.includes('Станет'));
   assert.ok(!app.innerHTML.includes('На следующий месяц:'));assert.ok(app.innerHTML.includes('data-category="decisions"'));assert.ok(app.innerHTML.includes('data-category="security"'));assert.ok(!app.innerHTML.includes('kpis'));assert.equal((app.innerHTML.match(/data-bill-card=/g)||[]).length,1);
@@ -43,13 +43,15 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   app.listeners.keydown({key:'Enter',target:{dataset:{policyNumber:'incomeTax'},value:'16'},preventDefault(){}});
   const keyed=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state;assert.equal(keyed.month,0);assert.ok(keyed.politics.bills.some(b=>b.patch.incomeTax===16&&b.decidedMonth===0));
   app.listeners.change({target:{dataset:{policyNumber:'incomeTax'},value:''}});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.politics.bills.length,keyed.politics.bills.length);
-  await click({view:'journal'});assert.ok(app.innerHTML.includes('Скачать журнал'));
+  for(const hidden of ['journal','compare','validation','method'])assert.ok(!app.innerHTML.includes('data-view="'+hidden+'"'));
+  const beforeBlocked=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state;assert.ok(app.innerHTML.includes('3 / 3'));
+  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'dollarized'}});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.politics.bills.length,beforeBlocked.politics.bills.length);
   await click({view:'households'});assert.ok(app.innerHTML.includes('Рождения'));assert.ok(app.innerHTML.includes('Продолжительность')||app.innerHTML.includes('продолжительность'));
-  await click({view:'validation'});assert.ok(app.innerHTML.includes('360 месяцев'));assert.ok(app.innerHTML.includes('Денежная стабилизация'));
+
   await click({view:'policy'});await click({policyTab:'Кредит'});
-  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'dollarized',hasAttribute:()=>false}});
-  assert.ok(!app.innerHTML.includes('id="policy-rate"'));assert.ok(app.innerHTML.includes('За:'));
-  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'discretion',hasAttribute:()=>false}});
+  assert.ok(app.innerHTML.includes('За:'));
+  await click({view:'parties'});assert.ok(app.innerHTML.includes('Либеральная партия'));assert.ok(app.innerHTML.includes('Голоса на последних выборах'));assert.ok(!app.innerHTML.includes('Свобода и развитие'));
+  await click({view:'elections'});assert.ok(app.innerHTML.includes('Одобрение президента'));assert.ok(app.innerHTML.includes('Ваш кандидат'));assert.ok(app.innerHTML.includes('Почему рейтинг и голоса различаются'));
   for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
   app.listeners.input({target:{dataset:{policy:'rate'},value:'15'}});
   await click({action:'step'});
@@ -65,8 +67,7 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   assert.ok(operation.politics.bills.some(b=>b.actions.some(a=>a.network==='roads')&&b.decidedMonth===1));
   await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v5'));
   app.listeners.input({target:{dataset:{policy:'rate'},value:'11'}});
-  await click({view:'compare'});await click({action:'compare'});
-  assert.ok(app.innerHTML.includes('Результаты на конец горизонта'));
+  const current=app.innerHTML;await click({view:'compare'});assert.equal(app.innerHTML,current);
   assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
   await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
   const second=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.politics.bills.find(b=>b.monthlyInitiative&&b.month===1&&b.status==='draft');await click({politicalAction:'reject',billId:String(second.id)});await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,2);
