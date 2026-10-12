@@ -100,3 +100,7 @@ button,input,select,textarea{max-width:100%}button{white-space:normal}
 
 .table td[data-label=""]::before{display:none}
 .policy-topic{border-bottom:1px solid #d4e0f3;padding-bottom:5px}.policy-topic>button{display:flex;justify-content:space-between}.policy-topic>button.active{border-left:3px solid #c52b39!important}
+
+/* Compact, vertical new-game setup; all four selectors fit the dialog. */
+#new-dialog{width:min(620px,calc(100vw - 24px))}#new-form .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-width:0}#new-form select{width:100%;min-width:0;max-width:100%;font-size:16px}#new-form p{line-height:1.5;margin-bottom:14px}#new-form h2{margin-bottom:12px}
+@media(max-width:420px){#new-dialog{padding:20px 14px}#new-form select{font-size:14px}#new-form .field{font-size:16px}#new-form p{font-size:14px}}

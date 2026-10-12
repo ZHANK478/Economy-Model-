@@ -1,3 +1,4 @@
+import {GOVERNMENT_PRESETS,COUNTRY_PRESETS,newGameOptions} from './start-presets.js';
 import {validation} from './validation-results.js';
 import {politicalValidation} from './political-validation-results.js';
 import {extendedValidation} from './extended-validation-results.js';
@@ -7,7 +8,7 @@ import {createBrowserStorage} from './storage.js';
 import {extendedViews} from './extended-views.js';
 import {politicalViews,handlePoliticalAction} from './political-views.js';
 import {METRIC_INFO,budgetBalance,metricSeries,currentMetric,GROUP_DIMENSIONS,electorateSeries} from './dashboard-data.js';
-import {partyDisplayName,FORMS,ELECTORAL_SYSTEMS,PRESIDENT_SYSTEMS,REGIMES} from './political-config.js';
+import {PARTY_FAMILIES,partyDisplayName,FORMS,ELECTORAL_SYSTEMS,PRESIDENT_SYSTEMS,REGIMES} from './political-config.js';
 import {createUIObservation} from './ui-observation.js';
 import {presidentialStanding} from './political-reporting.js';
 import {unresolvedInitiatives} from './political-agenda.js';
@@ -26,7 +27,7 @@ const pct=x=>n(x,1)+'%';
 const months=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const date=(month,short=false)=>short?`${String(month%12+1).padStart(2,'0')}.${(state.startYear??2026)+Math.floor(month/12)}`:`${months[month%12]} ${(state.startYear??2026)+Math.floor(month/12)}`;
 const iconCheck='<span class="tick">✓</span>';
-let state=createSimulation({politicalMode:true,politicalOptions:{agendaSlots:1,decisionLimit:3,dashboardMode:true,partyContinuity:true}}),draft=copy(state.policy),checkpoint=null,comparison=null;
+let state=createSimulation(newGameOptions()),draft=copy(state.policy),checkpoint=null,comparison=null;
 let view='politics',policyTab=null,chartMetric='gdpPerCapitaReal',compareMetric='gdpPerCapitaReal',compareMonths=24,compareSource='current',journalPage=0;
 let comparisonBase=null;
 let proposalOpen=false,proposalId=null,announcedProposal=null,trendMetric=null,electorateDimension='age',electorateMeasure='party',electorateParty=null;
@@ -546,12 +547,20 @@ app.addEventListener('pointermove',event=>{
   const rect=event.target.closest('[data-chart-tip]');if(!rect)return;
   const tip=rect.closest('.chart-wrap').querySelector('.chart-tip');if(tip)tip.textContent=rect.dataset.chartTip;
 });
+const governmentSelect=document.getElementById('new-government'),countrySelect=document.getElementById('new-country');
+governmentSelect.innerHTML=Object.entries(GOVERNMENT_PRESETS).map(([id,p])=>`<option value="${id}">${esc(p.label)}</option>`).join('');
+countrySelect.innerHTML=Object.entries(COUNTRY_PRESETS).map(([id,p])=>`<option value="${id}">${esc(p.label)} · $${n(p.gdp,0)} / человек</option>`).join('');
+document.getElementById('new-party').innerHTML=PARTY_FAMILIES.map(p=>`<option value="${p.id}" ${p.id==='liberal'?'selected':''}>${esc(partyDisplayName({id:'p1',family:p.id}))}</option>`).join('');
+governmentSelect.value='presidential';countrySelect.value='middle';
+function updateStartDescription(){
+ document.getElementById('new-government-description').textContent=GOVERNMENT_PRESETS[governmentSelect.value].description;
+ const c=COUNTRY_PRESETS[countrySelect.value];
+ document.getElementById('new-country-description').textContent=`Стартовый ВВП — $${n(c.gdp,0)} на человека в ценах 2000 года. Рождаемость — ${n(c.fertility,1)} ребёнка на женщину. Возрастной состав задан профилем страны; далее население меняется каждый месяц. Это условный сценарий, а не копия реальной страны.`;
+}
+governmentSelect.addEventListener('change',updateStartDescription);countrySelect.addEventListener('change',updateStartDescription);updateStartDescription();
 document.getElementById('new-form').addEventListener('submit',async event=>{
   event.preventDefault();const form=new FormData(event.target);
-  const profile=form.get('demography')??'young';
-  const profiles={young:{initialFertility:2.6,initialChildShare:.28,initialElderlyShare:.07},transition:{initialFertility:1.8,initialChildShare:.22,initialElderlyShare:.14},aging:{initialFertility:1.3,initialChildShare:.17,initialElderlyShare:.23}};
-  const constitution={form:form.get('governmentForm')??'presidential',playerRole:form.get('playerRole')??'president',regime:form.get('politicalRegime')??'democracy',electoralSystem:form.get('electoralSystem')??'pr',presidentSystem:form.get('presidentSystem')??'twoRound',seats:Number(form.get('seats')??120),threshold:Number(form.get('threshold')??4),parliamentTerm:Number(form.get('parliamentTerm')??48),presidentTerm:Number(form.get('presidentTerm')??48),parliamentOffset:Number(form.get('parliamentOffset')??24),confidence:form.get('confidence')??'constructive',independentCB:form.get('independentCB')==='true',termLimit:Number(form.get('termLimit')??2),naturalizationYears:Number(form.get('naturalizationYears')??5)};
-  try{state=createSimulation({resourceMode:form.get('resource')==='true',seed:Number(form.get('seed')),stochastic:form.has('stochastic'),modelProfile:form.get('modelProfile')??'balanced',parameters:profiles[profile]??profiles.young,politicalMode:form.get('playMode')!=='laboratory',politicalOptions:{constitution,agendaSlots:1,decisionLimit:3,dashboardMode:true,partyContinuity:true,playerFamily:form.get('playerFamily')??'liberal'}});}catch(e){toast(e.message);return;}
+  try{state=createSimulation(newGameOptions({government:form.get('government')??'presidential',country:form.get('country')??'middle',party:form.get('party')??'liberal',resource:form.get('resource')==='true'}));}catch(e){toast(e.message);return;}
   proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;
   draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparison=null;comparisonBase=null;view=state.politics.enabled?'politics':'country';checkpoint=null;mobileOpen=false;journalPage=0;
   try{await storage.set(CHECKPOINT,'');}catch(e){toast('Не удалось очистить прежнюю точку сравнения на устройстве.');}

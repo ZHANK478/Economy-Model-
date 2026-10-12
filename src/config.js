@@ -192,7 +192,7 @@ export const PARAMETER_FIELDS = [
   ['exchangeFlowSensitivity','Чувствительность курса к валютным потокам',.005,.12,.005],
   ['privateInvestmentDelay','Ввод частного капитала, месяцев',1,24,1],
   ['publicInvestmentDelay','Ввод инфраструктуры, месяцев',3,48,1],
-  ['initialFertility','Базовая рождаемость, детей на женщину',.5,5,.1],
+  ['initialFertility','Базовая рождаемость, детей на женщину',.5,8,.1],
   ['fertilityBenefitElasticity','Влияние реальной поддержки семей на рождаемость',0,.2,.01],
   ['healthMortalityElasticity','Влияние услуг здравоохранения на смертность',0,.5,.01]
   ,['neutralRealRate','Нейтральная реальная ставка · условная',0,.10,.005]

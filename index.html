@@ -16,32 +16,14 @@
     <form id="new-form">
       <button class="dialog-close" type="button" aria-label="Закрыть">×</button>
       <span class="eyebrow">ИСХОДНЫЕ УСЛОВИЯ</span>
-      <h2>Новый эксперимент</h2>
-      <p>Старт — январь 2000 года. Вымышленная развивающаяся страна. 10 млн жителей, $6 000 ВВП на человека, инфляция 8%, госдолг 50% ВВП.</p>
-      <label class="field">Режим игры<select name="playMode"><option value="political">Исполнительная власть: законы, партии и выборы</option><option value="laboratory">Экономическая лаборатория: прямое применение решений</option></select></label>
-      <details class="new-politics" open><summary>Политическое устройство</summary><div class="world-grid">
-        <label class="field">Форма правления<select name="governmentForm"><option value="presidential">Президентская республика</option><option value="parliamentary">Парламентская республика</option><option value="semiPresidential">Смешанная республика</option></select></label>
-        <label class="field">В смешанной республике играю за<select name="playerRole"><option value="president">Президента</option><option value="primeMinister">Премьер-министра</option></select></label>
-        <label class="field">Исходные институты<select name="politicalRegime"><option value="democracy">Конкурентная демократия</option><option value="hybrid">Ограниченная конкуренция</option><option value="party">Партийная автократия</option><option value="personalist">Персоналистская автократия</option><option value="military">Военное правление</option></select></label>
-        <label class="field">Моя партийная семья<select name="playerFamily"><option value="liberal">Либеральная</option><option value="socialDemocrat">Социал-демократическая</option><option value="socialist">Социалистическая</option><option value="conservative">Консервативная</option><option value="national">Национал-консервативная</option><option value="green">Зелёная</option><option value="agrarian">Аграрная</option><option value="regional">Региональная</option></select></label>
-        <label class="field">Выборы парламента<select name="electoralSystem"><option value="pr">Пропорциональная</option><option value="plurality">Округа: относительное большинство</option><option value="twoRound">Округа: два тура</option><option value="parallel">Смешанная параллельная</option><option value="mmp">Смешанная компенсирующая</option></select></label>
-        <label class="field">Выборы президента<select name="presidentSystem"><option value="twoRound">Два тура</option><option value="plurality">Относительное большинство</option><option value="ranked">Преференциальное голосование</option></select></label>
-        <label class="field">Мест в парламенте<input type="number" name="seats" min="30" max="360" step="1" value="120"></label>
-        <label class="field">Порог для списков, %<input type="number" name="threshold" min="0" max="15" step="1" value="4"></label>
-        <label class="field">Парламентский срок, месяцев<input type="number" name="parliamentTerm" min="12" max="84" value="48"></label>
-        <label class="field">Президентский срок, месяцев<input type="number" name="presidentTerm" min="12" max="84" value="48"></label>
-        <label class="field">Следующие выборы парламента через<input type="number" name="parliamentOffset" min="0" max="84" value="24"><span class="small muted">0 — полный срок; отдельный календарь от президента</span></label>
-        <label class="field">Предел президентских сроков<input type="number" name="termLimit" min="0" max="4" value="2"><span class="small muted">0 — без предела</span></label>
-        <label class="field">Вотум недоверия<select name="confidence"><option value="constructive">Конструктивный: с новым большинством</option><option value="ordinary">Обычный</option></select></label>
-        <label class="field">Центральный банк<select name="independentCB"><option value="true">Независимый: правительство задаёт мандат</option><option value="false">Подчинён исполнительной власти</option></select></label>
-        <label class="field">Проживание до гражданства, лет<input type="number" name="naturalizationYears" min="0" max="20" value="5"></label>
-      </div><p class="small muted">Вы начинаете с уже полученным исполнительным мандатом. После предела президентских сроков партия выдвигает преемника: если он побеждает, игра продолжается. Депутаты сформированы исходными выборами. Рейтинги и поведение — синтетические допущения, не прогноз конкретной страны.</p></details>
-      <label class="field">Демографическая структура<select name="demography"><option value="young">Молодая: рождаемость 2,6; 65+ — 7%</option><option value="transition">Переходная: рождаемость 1,8; 65+ — 14%</option><option value="aging">Стареющая: рождаемость 1,3; 65+ — 23%</option></select></label>
-      <p class="small muted">Возрастные профили условные, не копии реальных стран. Стареющая страна может терять население и рабочую силу.</p>
+      <h2>Новая игра</h2>
+      <p>Январь 2000 года. Вымышленная страна, 10 млн жителей.</p>
+      <label class="field">За кого играешь?<select name="government" id="new-government"></select></label>
+      <p class="small muted" id="new-government-description"></p>
+      <label class="field">Партия<select name="party" id="new-party"></select></label>
+      <label class="field">Уровень развития страны<select name="country" id="new-country"></select></label>
+      <p class="small muted" id="new-country-description"></p>
       <label class="field">Структура экономики<select name="resource"><option value="true">Сырьевая: добыча определяет экспорт</option><option value="false">Диверсифицированная: промышленность и услуги</option></select></label>
-      <label class="field">Профиль научных допущений<select name="modelProfile"><option value="balanced">Управление и конкуренция</option><option value="competition">Сильная роль конкуренции</option><option value="institutions">Сильная роль институтов</option></select><span class="small muted">Условные сценарии коэффициентов, не доказательство превосходства одной школы.</span></label>
-      <label class="field">Начальное число случайности<input type="number" name="seed" min="0" max="4294967295" value="42" required></label>
-      <label class="check"><input type="checkbox" name="stochastic"> Небольшие внешние случайные колебания</label>
       <p class="muted small">Текущий эксперимент будет заменён. Скачайте сохранение, если хотите к нему вернуться. Коэффициенты условные; модель не откалибрована под конкретную страну.</p>
       <button class="primary wide" type="submit">Начать с января 2000</button>
     </form>

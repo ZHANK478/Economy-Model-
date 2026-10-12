@@ -177,6 +177,9 @@ function validateParameters(parameters) {
 }
 
 export function createSimulation(options={}) {
+  const initialGDPPerCapita=options.initialGDPPerCapita??6000;
+  if(!Number.isFinite(initialGDPPerCapita)||initialGDPPerCapita<100||initialGDPPerCapita>100000)throw new Error('Некорректный начальный ВВП на человека');
+  const incomeScale=initialGDPPerCapita/6000,initialAnnualGDP=initialGDPPerCapita*10,initialMonthlyGDP=initialAnnualGDP/12;
   const resource=options.resourceMode!==false;
   const p=sanitizePolicy(options.policy);
   const parameters={...PARAMETERS,...options.parameters};
@@ -192,11 +195,11 @@ export function createSimulation(options={}) {
   const q=solveLeontief(f);
   const importCoefficients=[.06,.07,.18,.10,.035];
   const baseGDP=dot(q,q.map((_,i)=>1-colsum(i)-importCoefficients[i]))+C*BASE_POLICY.vat/100;
-  const scale=5000/baseGDP;
+  const scale=initialMonthlyGDP/baseGDP;
   const baseOutput=q.map(v=>v*scale);
   const initialWorkers=10*(1-parameters.initialChildShare-parameters.initialElderlyShare)*.70*.91;
   const workerShares=resource?[.20,.07,.20,.13,.40]:[.20,.035,.25,.13,.385];
-  const householdCash=GROUPS.map(g=>32700*(g.dividendShare*.8+g.wageShare*.2));
+  const householdCash=GROUPS.map(g=>32700*incomeScale*(g.dividendShare*.8+g.wageShare*.2));
   const hhShares=GROUPS.map(g=>g.wageShare*.8+g.dividendShare*.2);
   const s={
     version:VERSION,month:0,startYear:options.startYear??2000,resourceMode:resource,
@@ -205,20 +208,20 @@ export function createSimulation(options={}) {
     population:10,ageCohorts:[2.8,6.5,.7],participation:.70,workingAgeShare:.65,exchangeRate:1,
     expectedInflation:.08,inflationLogMonthly:Math.log1p(.08)/12,
     consumerPriceIndex:100,worldPriceIndex:100,skills:1,
-    infrastructure:60000*.60,initialInfrastructure:60000*.60,
+    infrastructure:initialAnnualGDP*.60,initialInfrastructure:initialAnnualGDP*.60,
     institutions:{confidence:.68,informality:.28,taxCompliance:.78,competition:.60,investmentEfficiency:.70,ownershipRisk:0},
     education:{access:1,meanYears:8,expectedYears:12},
-    base:{monthlyGDP:5000,output:baseOutput,consumption:C*scale,investment:I*scale,government:G*scale,exports:X*scale,
+    base:{monthlyGDP:initialMonthlyGDP,output:baseOutput,consumption:C*scale,investment:I*scale,government:G*scale,exports:X*scale,
       consumptionWeights,investmentWeights,governmentWeights,exportWeights,consumptionImport:cf,investmentImport:iv,governmentImport:gv,
       initialPopulation:10,referenceIncome:0,initialGroupIncomes:[],initialRate:.03},
-    households:GROUPS.map((g,i)=>({...g,cash:householdCash[i],loanLC:8000*hhShares[i],loanFX:2000*g.dividendShare,
-      averageRate:.15,foreignSavingsUSD:2500*g.dividendShare,income:((C*scale*hhShares[i]/g.mpc)-householdCash[i]*parameters.wealthAnnuity),
+    households:GROUPS.map((g,i)=>({...g,cash:householdCash[i],loanLC:8000*incomeScale*hhShares[i],loanFX:2000*incomeScale*g.dividendShare,
+      averageRate:.15,foreignSavingsUSD:2500*incomeScale*g.dividendShare,income:((C*scale*hhShares[i]/g.mpc)-householdCash[i]*parameters.wealthAnnuity),
       consumption:C*scale*hhShares[i],realIncomeIndex:100})),
     firms:SECTORS.map((sector,i)=>({id:sector.id,name:sector.name,price:1,inventory:baseOutput[i]*.15,
       production:baseOutput[i],salesExpected:baseOutput[i],workers:initialWorkers*workerShares[i],
       laborProductivity:baseOutput[i]/(initialWorkers*workerShares[i]),capacity:baseOutput[i]/.90,
       capital:baseOutput[i]/.90*12*1.35,initialCapital:baseOutput[i]/.90*12*1.35,
-      productivity:1,wage:2500*workerShares[i]/(initialWorkers*workerShares[i]),
+      productivity:1,wage:2500*incomeScale*workerShares[i]/(initialWorkers*workerShares[i]),
       cash:baseOutput[i]*2.2,loanLC:baseOutput[i]*2.6,loanFX:resource&&i===1?baseOutput[i]*.9:baseOutput[i]*.2,
       averageRate:.14,foreignEquityUSD:baseOutput[i]*.18,importCoefficient:importCoefficients[i],
       lastProfit:baseOutput[i]*.10,lastRevenue:baseOutput[i],lastInvestment:I*scale*workerShares[i],
@@ -226,19 +229,20 @@ export function createSimulation(options={}) {
       ownership:{state:[.05,.30,.10,.05,.15][i],foreign:.18,domestic:1-.18-[.05,.30,.10,.05,.15][i],municipal:0,cooperative:0},workerOwners:Array(10).fill(0),
       domesticOwners:GROUPS.map(g=>g.dividendShare*(1-.18-[.05,.30,.10,.05,.15][i])),
       governance:.65,managementEfficiency:1,reorganization:0,softBudget:0})),
-    government:{cash:3000,reservesUSD:8000,fundUSD:resource?2000:0,
-      domesticBonds:Array.from({length:60},(_,i)=>({principal:21000/60,rate:.09,maturity:i+1})),
-      externalBonds:Array.from({length:84},(_,i)=>({principal:9000/84,rate:.065,maturity:i+1})),
+    government:{cash:3000*incomeScale,reservesUSD:8000*incomeScale,fundUSD:resource?2000*incomeScale:0,
+      domesticBonds:Array.from({length:60},(_,i)=>({principal:21000*incomeScale/60,rate:.09,maturity:i+1})),
+      externalBonds:Array.from({length:84},(_,i)=>({principal:9000*incomeScale/84,rate:.065,maturity:i+1})),
       lastDeficit:0,arrears:0,defaults:0,defaultActive:false,defaultStart:null,defaultEpisodes:[],excludedUntil:0},
-    bank:{equity:0,reserves:3500,centralBorrowing:0,foreignAssetsUSD:0,lendingRate:.15,depositRate:.065,npl:.04,creditSupply:1,stateOwnership:0},
+    bank:{equity:0,reserves:3500*incomeScale,centralBorrowing:0,foreignAssetsUSD:0,lendingRate:.15,depositRate:.065,npl:.04,creditSupply:1,stateOwnership:0},
     centralBank:{equity:0,deferredLoss:0,lastProfit:0,lastRemittance:0},
     projects:[],history:[],incomeHistory:[],lastReport:{events:[],channels:[],fiscal:{},audit:{}},
-    metrics:{nominalGDPAnnual:60000,realGDPMonthly:5000,nominalGDPMonthly:5000}
+    metrics:{nominalGDPAnnual:initialAnnualGDP,realGDPMonthly:initialMonthlyGDP,nominalGDPMonthly:initialMonthlyGDP}
   };
   if(!(s.modelProfile in MODEL_PROFILES))throw new Error('Неизвестный профиль модели');
   initializeInstitutions(s);
   initializePolitics(s);initializeMonetary(s);initializeLabor(s);initializeServices(s);initializeInfrastructure(s);
   initializeJournal(s);
+  if(options.initialGDPPerCapita!==undefined)s.provenance.initialGDPPerCapita=initialGDPPerCapita;
   s.bank.equity=bankAssets(s)-deposits(s);
   s.base.referenceIncome=sum(s.households.map(h=>h.income));
   s.base.initialGroupIncomes=s.households.map(h=>h.income);
@@ -250,15 +254,15 @@ export function createSimulation(options={}) {
   for(let m=1;m<=parameters.publicInvestmentDelay;m++) s.projects.push({type:'public',amount:200*scale,due:m,efficiency:s.institutions.investmentEfficiency,legacy:true});
   s.demography=createDemography(s.population,parameters);
   s.ageCohorts=cohortTotals(s.demography);s.workingAgeShare=s.ageCohorts[1]/s.population;
-  s.metrics={...initialMetrics(s),...demographicMetrics(s),realGDPAnnualized:60000,realGDPRolling:60000,nominalGDPAnnualized:60000,gdpUSDAnnualized:60000,gdpUSDRolling:60000,realPolicyRate:realInterestRate(s.monetary.effectiveRate/100,.08)*100};
+  s.metrics={...initialMetrics(s),...demographicMetrics(s),realGDPAnnualized:initialAnnualGDP,realGDPRolling:initialAnnualGDP,nominalGDPAnnualized:initialAnnualGDP,gdpUSDAnnualized:initialAnnualGDP,gdpUSDRolling:initialAnnualGDP,realPolicyRate:realInterestRate(s.monetary.effectiveRate/100,.08)*100};
   // Explicit synthetic prehistory, solely for rolling indicators at the initial date.
   for(let m=-12;m<=0;m++) s.history.push({...s.metrics,month:m,consumerPriceIndex:100*Math.pow(1.08,m/12),
-    realGDPMonthly:5000*Math.pow(1.03,m/12),nominalGDPMonthly:5000*Math.pow(1.03*1.08,m/12),synthetic:m<0});
+    realGDPMonthly:initialMonthlyGDP*Math.pow(1.03,m/12),nominalGDPMonthly:initialMonthlyGDP*Math.pow(1.03*1.08,m/12),synthetic:m<0});
   const prehistory=s.history.filter(x=>x.month>=-11);
   s.metrics.realGDPRolling=sum(prehistory.map(x=>x.realGDPMonthly));
   s.metrics.nominalGDPAnnual=sum(prehistory.map(x=>x.nominalGDPMonthly));
   s.metrics.gdpUSDRolling=s.metrics.nominalGDPAnnual;
-  const debtScale=s.metrics.nominalGDPAnnual/60000;
+  const debtScale=s.metrics.nominalGDPAnnual/initialAnnualGDP;
   for(const bond of [...s.government.domesticBonds,...s.government.externalBonds]) bond.principal*=debtScale;
   s.bank.equity=riskAssets(s)*.12;
   s.bank.reserves=deposits(s)+s.bank.equity-privateLoans(s)-domesticDebt(s);
@@ -273,20 +277,21 @@ export function createSimulation(options={}) {
 }
 
 function initialMetrics(s) {
+  const annualGDP=s.base.monthlyGDP*12;
   const debt=domesticDebt(s)+externalDebtUSD(s)*s.exchangeRate;
-  return {month:0,realGDPMonthly:5000,nominalGDPMonthly:5000,nominalGDPAnnual:60000,
-    gdpPerCapitaReal:6000,gdpPerCapitaUSD:6000,gdpGrowthYoY:3,inflationYoY:8,inflationMonthly:annualToMonthly(.08)*100,
+  return {month:0,realGDPMonthly:s.base.monthlyGDP,nominalGDPMonthly:s.base.monthlyGDP,nominalGDPAnnual:annualGDP,
+    gdpPerCapitaReal:annualGDP/s.population,gdpPerCapitaUSD:annualGDP/s.population,gdpGrowthYoY:3,inflationYoY:8,inflationMonthly:annualToMonthly(.08)*100,
     coreInflation:8,foodInflation:8,energyInflation:8,unemployment:9,realIncomeIndex:100,
-    exchangeRate:1,outputGap:-8,debtRatio:debt/60000*100,deficitRatio:0,
+    exchangeRate:1,outputGap:-8,debtRatio:debt/annualGDP*100,deficitRatio:0,
     reservesUSD:s.government.reservesUSD,fundUSD:s.government.fundUSD,tradeBalance:0,currentAccountUSD:0,
     lendingRate:15,depositRate:6.5,capitalRatio:bankCapital(s)*100,npl:4,credit:privateLoans(s),
     deposits:deposits(s),consumption:s.base.consumption,investment:s.base.investment,governmentPurchases:s.base.government,
     exports:s.base.exports,imports:s.base.exports,inventoryChange:0,productivity:100,
     laborForce:s.population*s.workingAgeShare*s.participation,employment:sum(s.firms.map(f=>f.workers)),
     fulfillment:100,confidence:s.institutions.confidence*100,informality:s.institutions.informality*100,
-    taxRevenue:0,governmentSpending:0,interestExpense:0,privateDebtRatio:privateLoans(s)/60000*100,
+    taxRevenue:0,governmentSpending:0,interestExpense:0,privateDebtRatio:privateLoans(s)/annualGDP*100,
     infrastructure:100,skills:100,bankLiquidity:s.bank.reserves/deposits(s)*100,
-    foreignDebtRatio:externalDebtUSD(s)/60000*100,realExchangeRate:100,migration:0,publicInvestment:200,
+    foreignDebtRatio:externalDebtUSD(s)/annualGDP*100,realExchangeRate:100,migration:0,publicInvestment:200*(annualGDP/60000),
     moneyCreated:0,creditLosses:0,reserveMonths:6.4,sovereignSpread:3,investmentCompleted:0,
     auditError:bankResidual(s),policyRate:s.monetary.effectiveRate,expectedInflation:s.expectedInflation*100};
 }
@@ -903,7 +908,7 @@ export function scheduleRestructuring(s,{haircut=.30,extension=60}={}) {
 export function replayJournal(s) {
   const p=s.provenance;
   const politicalOptions=p.politicalOptions?{...p.politicalOptions,instantRules:p.politicalOptions.instantRules??false}:p.politicalOptions;
-  let result=createSimulation({startYear:s.startYear??2026,resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
+  let result=createSimulation({startYear:s.startYear??2026,...(p.initialGDPPerCapita!==undefined?{initialGDPPerCapita:p.initialGDPPerCapita}:{}),resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
   for(const entry of s.journal){
     result.parameters=copy(entry.parameters);result.world=copy(entry.world);result.shocks=copy(entry.shocks);result.stochastic=entry.stochastic;result.pendingNote=entry.note;
     if(result.politics.enabled){

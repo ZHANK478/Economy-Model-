@@ -67,7 +67,7 @@ export function advanceDemography(s,prev) {
     -.002*Math.max(0,prev.metrics.unemployment-9)-.10*(prev.skills-1)
     -k.fertilityHousingElasticity*Math.log(Math.max(.1,prev.services?.housingBurden??.25)/k.initialHousingBurden)
     +k.fertilityChildcareElasticity*Math.log((.5+(prev.services?.childcareAccess??.5)))
-    +k.fertilityWorkLifeElasticity*(Math.log(40/p.normalWorkweek)+Math.min(p.parentalLeaveMonths,12)/12-1/3)),.5,5);
+    +k.fertilityWorkLifeElasticity*(Math.log(40/p.normalWorkweek)+Math.min(p.parentalLeaveMonths,12)/12-1/3)),.5,Math.max(5,k.initialFertility));
   d.fertility+=k.fertilityAdjustment*(fertilityTarget-d.fertility);
   const conceived=expectedBirths(d);
   d.births=d.pregnancies.shift();d.pregnancies.push(conceived);

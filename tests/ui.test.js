@@ -42,5 +42,15 @@ test('vertical disclosure, result modals and separate interface exports preserve
  await click({action:'journal-export'});const journal=JSON.parse(await lastBlob.text());assert.equal(journal.format,'economy-decisions');assert.equal(journal.journal.length,1);
  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v5'));await click({action:'step'});await click({action:'restore'});assert.equal(game().month,1);assert.ok(!app.innerHTML.includes('id="result-dialog"'));
  for(const hidden of ['journal','compare','validation','method']){const before=app.innerHTML;await click({view:hidden});assert.equal(app.innerHTML,before);}
+ const NativeFormData=globalThis.FormData;
+ try{
+  globalThis.FormData=class {constructor(target){this.target=target;}get(key){return this.target[key]??null;}};
+  node('new-government').value='parliamentary';node('new-government').listeners.change();assert.ok(node('new-government-description').textContent.includes('кабинет'));
+  node('new-country').value='rich';node('new-country').listeners.change();assert.ok(node('new-country-description').textContent.includes('25'));
+  await node('new-form').listeners.submit({preventDefault(){},target:{government:'parliamentary',country:'rich',party:'socialist',resource:'false'}});
+  assert.equal(game().metrics.gdpPerCapitaReal,25000);assert.equal(game().politics.constitution.playerRole,'primeMinister');assert.equal(game().demography.fertility,1.6);assert.equal(game().resourceMode,false);assert.equal(game().month,0);
+  await node('new-form').listeners.submit({preventDefault(){},target:{government:'personalist',country:'poor',party:'conservative',resource:'true'}});
+  assert.equal(game().metrics.gdpPerCapitaReal,500);assert.equal(game().politics.constitution.regime,'personalist');assert.equal(game().demography.fertility,6);
+ }finally{globalThis.FormData=NativeFormData;}
  assert.equal(saved.get('economy-model-v3'),legacy);
 });
