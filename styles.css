@@ -107,3 +107,5 @@ button,input,select,textarea{max-width:100%}button{white-space:normal}
 
 /* File controls live only in the compact settings menu. */
 .topbar.settings-bar{display:flex;justify-content:flex-end;background:#fff;color:#174ca1;border:0;min-height:48px;height:auto;padding:6px 16px;gap:0}.settings-bar .settings-toggle{display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:0;background:#fff;color:#174ca1;font-size:25px;border-radius:6px}.settings-bar .settings-toggle:hover{background:#edf3ff}.settings-popup{width:min(440px,calc(100vw - 24px))}.settings-actions{display:flex;flex-direction:column;gap:8px}.settings-actions button{text-align:left;width:100%}.settings-popup #save-status{margin:16px 0 0}
+
+.population-pyramid{display:block;width:100%;max-width:540px;height:auto;margin:0 auto;font:12px Arial,Helvetica,sans-serif;fill:#142f59}.sidebar .policy-control input[type=range]{display:block;width:100%;min-height:32px;margin:10px 0;accent-color:#174ca1}

@@ -1,3 +1,4 @@
+import {worldEvent} from './world-events.js';
 import {createDemography,advanceDemography,demographicMetrics,cohortTotals} from './demography.js';
 import {VERSION,SECTORS,INPUTS,GROUPS,BASE_POLICY,POLICY_FIELDS,POLICY_CHECKS,POLICY_CHOICES,PARAMETERS,WORLD,MODEL_PROFILES} from './config.js';
 import {initializePolitics,reviewPolicy,advancePolitics,politicsMetrics} from './politics.js';
@@ -315,6 +316,7 @@ function constrainedProduction(s,finalDemand,capacity) {
 
 function effectiveWorld(s) {
   const w={...s.world};
+  const event=worldEvent(s);if(event)w[event.key]*=event.multiplier;
   if(s.stochastic) {
     const a=s.parameters.stochasticAmplitude;
     w.commodityPrice*=Math.exp(noise(s.seed,s.month,1)*.025*a);
@@ -752,6 +754,7 @@ export function advanceMonth(state,policy=state.policy) {
   const domesticInputsNominal=sum(INPUTS.map((row,i)=>dot(row,production)*s.firms[i].price));
   const intermediateImportsReal=dot(production,s.firms.map(f=>f.importCoefficient));
   const intermediateImportsNominal=intermediateImportsReal*importPrice;
+  const sectorValueAdded=s.firms.map((f,j)=>production[j]*(f.price-sum(INPUTS.map((row,i)=>row[j]*s.firms[i].price))-f.importCoefficient*importPrice*(1+p.tariff/100)));
   const nominalGDP=outputNominal-domesticInputsNominal-intermediateImportsNominal-intermediateDuties+flow.vat+flow.tariff;
   const realGDP=sum(production)-sum(INPUTS.map(row=>dot(row,production)))-intermediateImportsReal
     +ordinaryCVolume*alpha*BASE_POLICY.vat/100;
@@ -866,12 +869,13 @@ export function advanceMonth(state,policy=state.policy) {
   if(bankCapital(s)<0) events.push('Банковская система имеет отрицательный капитал.');
   const auditTolerance=Math.max(1e-4,Math.max(Math.abs(bankAssets(s)),Math.abs(nominalGDP),Math.abs(debt))*1e-10);
   if(auditError>auditTolerance) throw new Error(`Нарушен учёт: ${JSON.stringify(audits)}`);
-  s.lastReport={events,channels,demography:{births:s.demography.births,deaths:s.demography.deaths,migration:s.demography.netMigration,balance:s.demography.populationResidual},world:w,fiscal:flow,audit:audits,
+  const worldNews=worldEvent(s);if(worldNews?.start===s.month)events.push(worldNews.title+': '+worldNews.text);
+  s.lastReport={events,channels,...(worldNews?{worldNews}:{}),demography:{births:s.demography.births,deaths:s.demography.deaths,migration:s.demography.netMigration,balance:s.demography.populationResidual},world:w,fiscal:flow,audit:audits,
     market:{production,capacity,finalDemand,inventoryChange:goodsInventoryChange,exports:exportVolumes.map(v=>v*alpha),
       requestedInvestment:iVolume,requestedConsumption:cVolume,fulfillment:alpha},
     external:{exportsUSD:exportNominal/s.exchangeRate,importsUSD:importNominal/s.exchangeRate,remittancesUSD,foreignInvestmentIncomeUSD,inflowUSD,flightUSD,foreignDividendsUSD,currentAccountUSD,bopUSD},
     income:{wages:totalWages,privateInterest,householdIncome},
-    gdp:{production:nominalGDP,expenditure:expenditureNominal,consumption:consumptionNominal,investment:investmentNominal,
+    gdp:{sectorValueAdded,production:nominalGDP,expenditure:expenditureNominal,consumption:consumptionNominal,investment:investmentNominal,
       government:flow.purchases,exports:exportNominal,imports:importNominal,inventories:inventoryNominal},
     changes:{inflation:s.metrics.inflationYoY-prev.metrics.inflationYoY,growth:s.metrics.gdpGrowthYoY-prev.metrics.gdpGrowthYoY,
       exchange:(s.exchangeRate/prev.exchangeRate-1)*100,unemployment:unemployment-prev.metrics.unemployment,

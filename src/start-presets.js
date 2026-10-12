@@ -20,5 +20,5 @@ export function newGameOptions({government='presidential',country='middle',party
  const c=COUNTRY_PRESETS[country];
  return {startYear:2000,seed:42,stochastic:false,resourceMode:resource,modelProfile:'balanced',initialGDPPerCapita:c.gdp,
  parameters:{initialFertility:c.fertility,initialChildShare:c.childShare,initialElderlyShare:c.elderlyShare},politicalMode:true,
- politicalOptions:{constitution:{...DEFAULT_CONSTITUTION,...GOVERNMENT_PRESETS[government].constitution},agendaSlots:1,decisionLimit:3,dashboardMode:true,partyContinuity:true,playerFamily:party}};
+ politicalOptions:{livingWorld:true,constitution:{...DEFAULT_CONSTITUTION,...GOVERNMENT_PRESETS[government].constitution},agendaSlots:1,decisionLimit:3,dashboardMode:true,partyContinuity:true,playerFamily:party}};
 }

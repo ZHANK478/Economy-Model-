@@ -13,6 +13,7 @@ const labelRole=role=>role==='president'?'президент':'премьер-м
 export function initializePoliticalSystem(s,options={}){
   const p=s.politics;p.enabled=Boolean(options.politicalMode);if(!p.enabled)return;
   p.constitution=constitutionFrom(options.politicalOptions?.constitution??{});p.parameters=parametersFrom(options.politicalOptions?.parameters??{});
+  if(options.politicalOptions?.livingWorld===true)p.livingWorld=true;
   if(options.politicalOptions?.dashboardMode===true)p.dashboardMode=true;
   const c=p.constitution,regime=c.regime;
   const competitive=regime==='democracy'||regime==='hybrid',free=regime==='democracy';
@@ -39,6 +40,7 @@ export function initializePoliticalSystem(s,options={}){
   p.instantRules=options.politicalOptions?.instantRules!==false;
   p.initialOptions.instantRules=p.instantRules;
   if(p.dashboardMode)p.initialOptions.dashboardMode=true;
+  if(p.livingWorld)p.initialOptions.livingWorld=true;
   if(options.politicalOptions?.partyContinuity===true){initializePartyContinuity(s);p.initialOptions.partyContinuity=true;}
   if(options.politicalOptions?.agendaSlots!==undefined){if(![1,3].includes(options.politicalOptions.agendaSlots))throw new Error('Неверное число инициатив');p.agendaSlots=options.politicalOptions.agendaSlots;p.initialOptions.agendaSlots=p.agendaSlots;}
   if(options.politicalOptions?.decisionLimit!==undefined){if(options.politicalOptions.decisionLimit!==3)throw new Error('Неверный лимит решений');p.decisionLimit=3;p.initialOptions.decisionLimit=3;}
@@ -60,7 +62,7 @@ function allocateCabinet(s){const p=s.politics,members=p.parties.filter(x=>p.coa
   for(let i=0;i<left&&order.length;i++)posts[order[i%order.length].i]++;members.forEach((x,i)=>x.cabinetPosts=posts[i]);
 }
 export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)throw new Error('Включите политическую игру при создании страны');if(!p.executive.inOffice)throw new Error('Ваше правление завершено');
-  const kinds=['campaignResponse','proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
+  const kinds=['setLivingWorld','campaignResponse','proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
   if(!kinds.includes(command?.kind))throw new Error('Неизвестное политическое действие');
   const c=clone(command);delete c.id;delete c.month;
   if(['proposeBill','chooseLaw','policyDecision'].includes(c.kind)){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});if(c.actions)c.actions.forEach(validateLegislativeAction);}
@@ -68,7 +70,7 @@ export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)th
   if(c.kind==='partyProgram'&&(!c.platform||AXES.some(k=>!Number.isFinite(c.platform[k])||Math.abs(c.platform[k])>1)))throw new Error('Неверная программа партии');
   const request={...c,id:p.nextCommandId++,month:s.month};p.pendingCommands.push(request);return request;
 }
-const FREE_COMMANDS=new Set(['activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','parameters','campaignResponse']);
+const FREE_COMMANDS=new Set(['activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','parameters','campaignResponse','setLivingWorld']);
 export function decisionBudget(s){
  const p=s.politics;if(!p.enabled||!p.decisionLimit)return {limit:null,used:0,remaining:Infinity,optionalRemaining:Infinity};
  const commands=p.turnCommands??[],start=commands.findLastIndex(c=>c.kind==='setDecisionLimit');
@@ -177,6 +179,7 @@ function partyMerge(s,command){const p=s.politics,ids=[...new Set(command.partyI
 }
 function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   switch(command.kind){
+    case 'setLivingWorld':if(!p.livingWorld)p.livingWorldStart=s.month;p.livingWorld=true;s.stochastic=false;return;
     case 'campaignResponse':return respondToCampaign(s,command);
     case 'activateInstantRules':p.initialOptions.instantRules??=false;p.instantRules=true;initializeAgenda(s);generateMonthlyAgenda(s);return;
     case 'setPartyContinuity':initializePartyContinuity(s);return;
