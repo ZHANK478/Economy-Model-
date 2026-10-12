@@ -77,9 +77,10 @@ export function choiceProbabilities(s,g,parties,kind='parliament',district=0){
 export function turnout(s,g){const p=s.politics;
   return logistic(p.parameters.turnoutIntercept+.45*g.education+.06*Math.min(g.age,3)-.28*(g.origin==='naturalized'?1-p.citizenship.integration:0)+.35*Math.abs(g.ideal.liberty)+p.publicEvents.reduce((v,e)=>v+e.attention*Math.exp(-(s.month-e.month)/6),0)-.25*Math.abs(g.experience)-.6*(1-p.electoralIntegrity));
 }
-export function pollElectorate(s,{commitMemory=true}={}){
+export function pollElectorate(s,{commitMemory=true,trackGroups=s.politics.dashboardMode===true,assignPoll=true}={}){
   const p=s.politics,parties=p.parties.filter(x=>x.active),groups=makeElectorate(s),votes=parties.map(()=>0),candidateVotes=parties.map(()=>0),government=governedPlatform(s);
   let voters=0,approval=0,total=0,presidentApproval=0,cabinetApproval=0;const demographic=AGE_BANDS.map(()=>({eligible:0,voters:0,government:0}));
+  const groupTotals=new Map();
   for(const g of groups){const t=turnout(s,g),weights=choiceProbabilities(s,g,parties),president=choiceProbabilities(s,g,parties,'president');
     const mixed=p.constitution.form==='semiPresidential',presidentParty=p.parties.find(x=>x.id===p.executive.presidentParty),presidentPlatform=mixed?Object.fromEntries(AXES.map(k=>[k,.6*presidentParty.platform[k]+.4*government[k]])):government;
     const presA=logistic(.85-1.3*distance(g.ideal,presidentPlatform)+p.parameters.economicWeight*g.experience*(mixed?.6:1)-.7*p.corruption+(g.identity===p.executive.presidentParty?.2:0));
@@ -87,11 +88,21 @@ export function pollElectorate(s,{commitMemory=true}={}){
     const a=p.executive.role==='president'?presA:cabA;presidentApproval+=g.weight*presA;cabinetApproval+=g.weight*cabA;
     voters+=g.weight*t;approval+=g.weight*a;total+=g.weight;demographic[g.age].eligible+=g.weight;demographic[g.age].voters+=g.weight*t;demographic[g.age].government+=g.weight*a;
     for(let i=0;i<parties.length;i++){votes[i]+=g.weight*t*weights[i];candidateVotes[i]+=g.weight*t*president[i];}
+    if(trackGroups){
+      const dimensions=[['age',g.age,['18–24','25–34','35–44','45–54','55–64','65+'][g.age]],['income',g.income,['Низкие доходы','Доходы ниже среднего','Средние доходы','Доходы выше среднего','Высокие доходы'][g.income]],['region',g.region,REGIONS[g.region].name],['origin',g.origin,g.origin==='native'?'Граждане по рождению':'Натурализованные граждане'],['occupation',g.occupation,({retired:'Пенсионеры',agriculture:'Сельское хозяйство',industry:'Промышленность',business:'Предприниматели',services:'Услуги'})[g.occupation]]];
+      for(const [dimension,id,label] of dimensions){
+        const key=dimension+':'+id;let row=groupTotals.get(key);
+        if(!row){row={dimension,id:String(id),label,eligible:0,voters:0,approval:0,presidentApproval:0,cabinetApproval:0,parties:Object.fromEntries(parties.map(x=>[x.id,0])),candidates:Object.fromEntries(parties.map(x=>[x.id,0]))};groupTotals.set(key,row);}
+        row.eligible+=g.weight;row.voters+=g.weight*t;row.approval+=g.weight*a;row.presidentApproval+=g.weight*presA;row.cabinetApproval+=g.weight*cabA;
+        parties.forEach((x,i)=>{row.parties[x.id]+=g.weight*t*weights[i];row.candidates[x.id]+=g.weight*t*president[i];});
+      }
+    }
     if(commitMemory){let identity=g.identity;if(!identity){let best=0;weights.forEach((v,i)=>{if(v>weights[best])best=i;});identity=parties[best].id;}else if(hash(s.seed,s.month,'switch',g.id)<.006){const best=weights.indexOf(Math.max(...weights));identity=parties[best].id;}
       p.groupMemory[g.id]={income:g.experience,identity};}
   }
   const poll={month:s.month,eligible:total,expectedVoters:voters,turnout:voters/Math.max(total,.001)*100,approval:approval/Math.max(total,.001),presidentApproval:presidentApproval/Math.max(total,.001),cabinetApproval:cabinetApproval/Math.max(total,.001),parties:parties.map((x,i)=>({id:x.id,share:votes[i]/Math.max(voters,.001)*100,candidateShare:candidateVotes[i]/Math.max(voters,.001)*100})),demographic};
-  p.poll=poll;return {poll,groups,parties};
+  if(trackGroups)poll.groups=[...groupTotals.values()].map(row=>({...row,approval:row.eligible?row.approval/row.eligible*100:null,presidentApproval:row.eligible?row.presidentApproval/row.eligible*100:null,cabinetApproval:row.eligible?row.cabinetApproval/row.eligible*100:null,parties:Object.fromEntries(parties.map(x=>[x.id,row.voters?row.parties[x.id]/row.voters*100:null])),candidates:Object.fromEntries(parties.map(x=>[x.id,row.voters?row.candidates[x.id]/row.voters*100:null]))}));
+  if(assignPoll)p.poll=poll;return {poll,groups,parties};
 }
 function officialProbabilities(s,parties,probabilities){
   if(s.policy.competitiveElections)return probabilities;
@@ -127,4 +138,14 @@ export function conductElection(s,kind,{initial=false}={}){
     election.results.forEach((r,i)=>r.seats=allocation.seats[i]);election.districts=districts.map((d,i)=>({...d,winner:parties[allocation.districtWinners[i]].id}));
   }
   return election;
+}
+
+
+export function validateElectorateGroups(rows){
+  if(!Array.isArray(rows)||new Set(rows.map(g=>g.dimension+':'+g.id)).size!==rows.length)throw new Error('Повреждены групповые опросы');
+  for(const g of rows){
+    if(!['age','income','region','origin','occupation'].includes(g.dimension)||!Number.isFinite(g.eligible)||g.eligible<0||!Number.isFinite(g.voters)||g.voters<0||g.voters>g.eligible+1e-8)throw new Error('Повреждены числа избирателей в группе');
+    for(const key of ['approval','presidentApproval','cabinetApproval'])if(g.eligible>0?(!Number.isFinite(g[key])||g[key]<0||g[key]>100+1e-8):g[key]!==null)throw new Error('Повреждено групповое одобрение');
+    for(const key of ['parties','candidates']){if(!g[key]||typeof g[key]!=='object'||Array.isArray(g[key]))throw new Error('Повреждена групповая поддержка');const values=Object.values(g[key]);if(g.voters>0?(values.some(v=>!Number.isFinite(v)||v<0||v>100+1e-8)||Math.abs(values.reduce((a,b)=>a+b,0)-100)>1e-6):values.some(v=>v!==null))throw new Error('Не сходятся предпочтения избирателей');}
+  }
 }

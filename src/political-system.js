@@ -1,6 +1,6 @@
 import {BASE_POLICY} from './config.js';
 import {PARTY_FAMILIES,partyDisplayName,AXES,CONSTITUTIONAL_POLICY_KEYS,BUDGET_KEYS,CB_KEYS,clamp,clone,hash,logistic,distance,platformObject,constitutionFrom,parametersFrom} from './political-config.js';
-import {pollElectorate,conductElection,advanceCitizenship,electorateTotals,makeElectorate,governedPlatform} from './electorate.js';
+import {pollElectorate,validateElectorateGroups,conductElection,advanceCitizenship,electorateTotals,makeElectorate,governedPlatform} from './electorate.js';
 import {policyAuthority,createBill,amendBill,acceptAmendment,voteArticle,voteBill,presidentialDecision,referendum,enactBills,rollCall,validatePolicyPatch,validateLegislativeAction} from './legislation.js';
 import {initializeAgenda,generateMonthlyAgenda,expireMonthlyAgenda,decideBill,plannedPolicy} from './political-agenda.js';
 export {plannedPolicy};
@@ -12,6 +12,7 @@ const labelRole=role=>role==='president'?'президент':'премьер-м
 export function initializePoliticalSystem(s,options={}){
   const p=s.politics;p.enabled=Boolean(options.politicalMode);if(!p.enabled)return;
   p.constitution=constitutionFrom(options.politicalOptions?.constitution??{});p.parameters=parametersFrom(options.politicalOptions?.parameters??{});
+  if(options.politicalOptions?.dashboardMode===true)p.dashboardMode=true;
   const c=p.constitution,regime=c.regime;
   const competitive=regime==='democracy'||regime==='hybrid',free=regime==='democracy';
   // Starting constitutions are scenario assumptions, not a reform performed
@@ -32,10 +33,11 @@ export function initializePoliticalSystem(s,options={}){
   const election=conductElection(s,'parliament',{initial:true});installParliament(s,election);p.elections.push(election);initialCoalition(s);
   p.nextElection=p.nextPresidentElection===null?p.nextParliamentElection:Math.min(p.nextParliamentElection,p.nextPresidentElection);
   const {poll}=pollElectorate(s);p.publicSupport=poll.approval;p.hiddenApproval=poll.approval;p.officialApproval=poll.approval;p.presidentApproval=poll.presidentApproval;p.cabinetApproval=poll.cabinetApproval;p.parliamentSupport=coalitionSeats(s)/p.totalSeats;
-  p.partyHistory.push({month:0,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:poll.parties.map(x=>({...x,seats:party(s,x.id).seats}))});
+  p.partyHistory.push({month:0,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:poll.parties.map(x=>({...x,seats:party(s,x.id).seats})),...(p.dashboardMode?{groups:clone(poll.groups),presidentApproval:p.presidentApproval*100,cabinetApproval:p.cabinetApproval*100}:{})});
   p.initialOptions={constitution:clone(c),parameters:clone(p.parameters),playerFamily:player.family};
   p.instantRules=options.politicalOptions?.instantRules!==false;
   p.initialOptions.instantRules=p.instantRules;
+  if(p.dashboardMode)p.initialOptions.dashboardMode=true;
   if(options.politicalOptions?.agendaSlots!==undefined){if(![1,3].includes(options.politicalOptions.agendaSlots))throw new Error('Неверное число инициатив');p.agendaSlots=options.politicalOptions.agendaSlots;p.initialOptions.agendaSlots=p.agendaSlots;}
   if(options.politicalOptions?.decisionLimit!==undefined){if(options.politicalOptions.decisionLimit!==3)throw new Error('Неверный лимит решений');p.decisionLimit=3;p.initialOptions.decisionLimit=3;}
   if(p.instantRules){initializeAgenda(s);generateMonthlyAgenda(s);}
@@ -56,7 +58,7 @@ function allocateCabinet(s){const p=s.politics,members=p.parties.filter(x=>p.coa
   for(let i=0;i<left&&order.length;i++)posts[order[i%order.length].i]++;members.forEach((x,i)=>x.cabinetPosts=posts[i]);
 }
 export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)throw new Error('Включите политическую игру при создании страны');if(!p.executive.inOffice)throw new Error('Ваше правление завершено');
-  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
+  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
   if(!kinds.includes(command?.kind))throw new Error('Неизвестное политическое действие');
   const c=clone(command);delete c.id;delete c.month;
   if(['proposeBill','chooseLaw','policyDecision'].includes(c.kind)){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});if(c.actions)c.actions.forEach(validateLegislativeAction);}
@@ -64,7 +66,7 @@ export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)th
   if(c.kind==='partyProgram'&&(!c.platform||AXES.some(k=>!Number.isFinite(c.platform[k])||Math.abs(c.platform[k])>1)))throw new Error('Неверная программа партии');
   const request={...c,id:p.nextCommandId++,month:s.month};p.pendingCommands.push(request);return request;
 }
-const FREE_COMMANDS=new Set(['activateInstantRules','setAgendaSlots','setDecisionLimit','parameters']);
+const FREE_COMMANDS=new Set(['activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','parameters']);
 export function decisionBudget(s){
  const p=s.politics;if(!p.enabled||!p.decisionLimit)return {limit:null,used:0,remaining:Infinity,optionalRemaining:Infinity};
  const commands=p.turnCommands??[],start=commands.findLastIndex(c=>c.kind==='setDecisionLimit');
@@ -146,6 +148,13 @@ function partyMerge(s,command){const p=s.politics,ids=[...new Set(command.partyI
 function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   switch(command.kind){
     case 'activateInstantRules':p.initialOptions.instantRules??=false;p.instantRules=true;initializeAgenda(s);generateMonthlyAgenda(s);return;
+    case 'setDashboardMode':{
+      p.dashboardMode=true;
+      const grouped=pollElectorate(s,{commitMemory:false,trackGroups:true,assignPoll:false}).poll.groups;
+      p.poll.groups=grouped;
+      const i=p.partyHistory.findLastIndex(h=>h.month===s.month);if(i>=0)p.partyHistory[i]={...p.partyHistory[i],groups:clone(grouped),presidentApproval:p.presidentApproval*100,cabinetApproval:p.cabinetApproval*100};
+      p.nextAgendaMonth=s.month+2+Math.floor(hash(s.seed,'agenda-delay',s.month)*3);return;
+    }
     case 'setDecisionLimit':if(command.limit!==3)throw new Error('Неверный лимит решений');p.decisionLimit=3;return;
     case 'setAgendaSlots':{
       if(![1,3].includes(command.slots))throw new Error('Неверное число инициатив');
@@ -303,7 +312,7 @@ export function advancePoliticalSystem(s,prev,events,flow={},world=s.world){
   }
   // Constitutional conflict can lead to impeachment, with a distinct legal gate.
   if(p.executive.inOffice&&p.executive.role==='president'&&p.executive.legalExposure>0&&p.judicialIndependence>.5&&p.parliamentSupport<.4&&s.month%6===0){try{processCommand(s,{kind:'impeach'},events);}catch{/* No legal majority. */}}
-  p.partyHistory.push({month:s.month,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:p.poll.parties.map(x=>({...x,seats:party(s,x.id).seats}))});
+  p.partyHistory.push({month:s.month,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:p.poll.parties.map(x=>({...x,seats:party(s,x.id).seats})),...(p.dashboardMode?{groups:clone(p.poll.groups),presidentApproval:p.presidentApproval*100,cabinetApproval:p.cabinetApproval*100}:{})});
   p.nextElection=Math.min(p.nextParliamentElection,p.nextPresidentElection??Infinity,p.scheduledParliament??Infinity);if(p.nextElection<=s.month)p.nextElection=s.month+1;
   generateMonthlyAgenda(s);
 }
@@ -319,6 +328,9 @@ export function validatePoliticalSystem(s){const p=s.politics;if(Boolean(s.prove
   if(sum(p.parties.map(x=>x.seats))!==p.totalSeats||p.totalSeats<p.allocatedSeatBase||p.totalSeats>p.allocatedSeatBase*2)throw new Error('Не сходится число парламентских мест');
   if(!party(s,p.executive.playerParty)||typeof p.executive.inOffice!=='boolean'||p.coalition.some(id=>!party(s,id)))throw new Error('Повреждена исполнительная власть');
   if(!Array.isArray(p.bills)||!Array.isArray(p.pendingCommands)||!Array.isArray(p.rollCalls)||!p.lawPolicy||!p.citizenship||p.citizenship.residents<0||p.citizenship.naturalized<0)throw new Error('Повреждена политическая история');
+  if(p.dashboardMode!==undefined&&typeof p.dashboardMode!=='boolean')throw new Error('Повреждено наблюдение за электоратом');
+  if(p.nextAgendaMonth!==undefined&&(!Number.isInteger(p.nextAgendaMonth)||p.nextAgendaMonth<0))throw new Error('Повреждён календарь инициатив');
+  if(p.dashboardMode){if(p.poll.groups)validateElectorateGroups(p.poll.groups);for(const h of p.partyHistory)if(h.groups)validateElectorateGroups(h.groups);}
   if(p.decisionLimit!==undefined&&p.decisionLimit!==3)throw new Error('Повреждён лимит решений');
   if(p.instantRules&&(!Array.isArray(p.turnCommands)||!Array.isArray(p.turnActions)||!Array.isArray(p.turnEvents)||!p.initiativeCredits||Object.values(p.initiativeCredits).some(v=>!Number.isFinite(v))||p.parties.some(x=>!valid(x.executiveLoyalty,0,1))||p.turnCommands.some(c=>!Number.isInteger(c.id)||c.id<1||c.month!==s.month)))throw new Error('Повреждены решения текущего хода или лояльность партий');
   const citizenship=p.citizenship;if(!valid(citizenship.integration,0,1)||!Array.isArray(citizenship.arrivals)||!Array.isArray(citizenship.naturalizations)||[...citizenship.arrivals,...citizenship.naturalizations].some(b=>!Number.isInteger(b.month)||b.month>s.month||!valid(b.people))||Math.abs(sum(citizenship.arrivals.map(b=>b.people))-citizenship.residents)>1e-8||Math.abs(sum(citizenship.naturalizations.map(b=>b.people))-citizenship.naturalized)>1e-8)throw new Error('Повреждены когорты гражданства');

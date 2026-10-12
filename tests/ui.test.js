@@ -20,12 +20,12 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   await import('../src/app.js');
   const app=node('app');
   const click=async data=>app.listeners.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
-  const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','elections','parties','constitution',];
-  assert.ok(app.innerHTML.includes('Следующий месяц'));
+  const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','institutions','infrastructure','services','labor','politics','elections','parties','constitution','electorate',];
+  assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(app.innerHTML.includes('mission-control'));assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));
   assert.ok(app.innerHTML.includes('Предложения партий'));assert.ok(app.innerHTML.includes('Было'));assert.ok(app.innerHTML.includes('Станет'));
   assert.ok(!app.innerHTML.includes('На следующий месяц:'));assert.ok(app.innerHTML.includes('data-category="decisions"'));assert.ok(app.innerHTML.includes('data-category="security"'));assert.ok(!app.innerHTML.includes('kpis'));assert.equal((app.innerHTML.match(/data-bill-card=/g)||[]).length,1);
-  await click({action:'step'});assert.ok(app.innerHTML.includes('Ход 0'));
-  const first=app.innerHTML.match(/data-bill-card="(\d+)"/)[1];await click({politicalAction:'adopt',billId:first});
+  await click({action:'proposal-close'});await click({view:'households'});await click({action:'step'});assert.ok(app.innerHTML.includes('Ход 0'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));assert.ok(app.innerHTML.includes('Демография: возраст и пол'));
+  const first=app.innerHTML.match(/data-bill-card="(\d+)"/)[1];await click({politicalAction:'adopt',billId:first});await click({action:'proposal-close'});
   await click({category:'security'});assert.ok(app.innerHTML.includes('Чрезвычайные полномочия и конфликт'));assert.ok(!app.innerHTML.includes('Предложения партий'));assert.ok(!app.innerHTML.includes('data-policy="rate"'));
   await click({category:'political'});assert.ok(app.innerHTML.includes('Поддержка кабинета'));assert.ok(!app.innerHTML.includes('Предложения партий'));
   await click({category:'statistics'});assert.ok(app.innerHTML.includes('ПАСПОРТ СТРАНЫ'));assert.ok(!app.innerHTML.includes('Предложения партий'));
@@ -52,7 +52,7 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   assert.ok(app.innerHTML.includes('За:'));
   await click({view:'parties'});assert.ok(app.innerHTML.includes('Либеральная партия'));assert.ok(app.innerHTML.includes('Голоса на последних выборах'));assert.ok(!app.innerHTML.includes('Свобода и развитие'));
   await click({view:'elections'});assert.ok(app.innerHTML.includes('Одобрение президента'));assert.ok(app.innerHTML.includes('Ваш кандидат'));assert.ok(app.innerHTML.includes('Почему рейтинг и голоса различаются'));
-  for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
+  for(const view of views){await click({view});assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(app.innerHTML.includes('Экономическая лаборатория'));assert.ok(!app.innerHTML.includes('NaN'));}
   app.listeners.input({target:{dataset:{policy:'rate'},value:'15'}});
   await click({action:'step'});
   const persisted=JSON.parse(saved.get('economy-model-v5'));
@@ -69,8 +69,12 @@ test('all views render and month, policy, comparison and checkpoint handlers exe
   app.listeners.input({target:{dataset:{policy:'rate'},value:'11'}});
   const current=app.innerHTML;await click({view:'compare'});assert.equal(app.innerHTML,current);
   assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
-  await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
-  const second=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.politics.bills.find(b=>b.monthlyInitiative&&b.month===1&&b.status==='draft');await click({politicalAction:'reject',billId:String(second.id)});await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,2);
+  await click({view:'infrastructure'});await click({action:'run3'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,2);assert.ok(app.innerHTML.includes('data-view="infrastructure" class="active"'));
+  let latest=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state;
+  while(!latest.politics.bills.some(b=>b.monthlyInitiative&&b.month===latest.month&&b.status==='draft')){await click({action:'step'});latest=JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state;assert.ok(latest.month<=4);}
+  const second=latest.politics.bills.find(b=>b.monthlyInitiative&&b.month===latest.month&&b.status==='draft');assert.ok(app.innerHTML.includes('id="proposal-dialog"'));await click({politicalAction:'reject',billId:String(second.id)});await click({action:'proposal-close'});await click({action:'step'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,latest.month+1);
+  await click({graph:'budgetBalance'});assert.ok(app.innerHTML.includes('id="trend-dialog"'));assert.ok(app.innerHTML.includes('Плюс — профицит'));await click({action:'trend-close'});
+  await click({view:'electorate'});assert.ok(app.innerHTML.includes('Как меняется поддержка'));app.listeners.change({target:{dataset:{electorateDimension:'true'},value:'income'}});assert.ok(app.innerHTML.includes('Низкие доходы'));app.listeners.change({target:{dataset:{electorateMeasure:'true'},value:'candidate'}});assert.ok(app.innerHTML.includes('Поддержка кандидата'));
   await click({action:'restore'});assert.equal(JSON.parse(JSON.parse(saved.get('economy-model-v5')).simulation).state.month,1);
   assert.equal(saved.get('economy-model-v3'),legacy);
 });

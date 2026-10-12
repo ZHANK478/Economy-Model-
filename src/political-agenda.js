@@ -83,6 +83,7 @@ function candidateArticles(s,party){
 export function generateMonthlyAgenda(s){
   const p=s.politics;if(!p.enabled||!p.instantRules||!p.executive.inOffice||p.agendaMonth===s.month)return;
   initializeAgenda(s);p.agendaMonth=s.month;
+  if(p.dashboardMode){if(s.month<(p.nextAgendaMonth??s.month))return;p.nextAgendaMonth=s.month+2+Math.floor(hash(s.seed,'agenda-delay',s.month)*3);}
   const eligible=p.parties.filter(x=>x.active&&x.seats>0&&candidateArticles(s,x).length);
   const total=eligible.reduce((v,x)=>v+x.seats,0);if(!total)return;
   for(const x of eligible)p.initiativeCredits[x.id]=(p.initiativeCredits[x.id]??0)+(p.agendaSlots??MONTHLY_INITIATIVES)*x.seats/total;
