@@ -16,7 +16,7 @@ import {refinancingRisk,openDefaultEpisode,debtInDefault,restructureDebt} from '
 export {scheduleOwnership,scheduleNetwork};
 
 // Monetary amounts: million units of local currency (LC); foreign stocks: million USD.
-// Volumes: million LC at January 2026 basic prices. Population/workers: million people.
+// Volumes: million LC at the scenario start basic prices. Population/workers: million people.
 export const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export const sum=a=>a.reduce((s,v)=>s+v,0);
 export const copy=x=>JSON.parse(JSON.stringify(x));
@@ -199,7 +199,7 @@ export function createSimulation(options={}) {
   const householdCash=GROUPS.map(g=>32700*(g.dividendShare*.8+g.wageShare*.2));
   const hhShares=GROUPS.map(g=>g.wageShare*.8+g.dividendShare*.2);
   const s={
-    version:VERSION,month:0,startYear:2026,resourceMode:resource,
+    version:VERSION,month:0,startYear:options.startYear??2000,resourceMode:resource,
     seed:Number(options.seed??42)>>>0,stochastic:Boolean(options.stochastic),
     policy:p,parameters,world:{...WORLD,...options.world},shocks:[],modelProfile:options.modelProfile??'balanced',
     population:10,ageCohorts:[2.8,6.5,.7],participation:.70,workingAgeShare:.65,exchangeRate:1,
@@ -903,7 +903,7 @@ export function scheduleRestructuring(s,{haircut=.30,extension=60}={}) {
 export function replayJournal(s) {
   const p=s.provenance;
   const politicalOptions=p.politicalOptions?{...p.politicalOptions,instantRules:p.politicalOptions.instantRules??false}:p.politicalOptions;
-  let result=createSimulation({resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
+  let result=createSimulation({startYear:s.startYear??2026,resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
   for(const entry of s.journal){
     result.parameters=copy(entry.parameters);result.world=copy(entry.world);result.shocks=copy(entry.shocks);result.stochastic=entry.stochastic;result.pendingNote=entry.note;
     if(result.politics.enabled){
