@@ -24,6 +24,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: republic-android-debug-key-v1
       - run: npm test
       - run: npm run build
       - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
