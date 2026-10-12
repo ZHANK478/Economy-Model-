@@ -66,7 +66,7 @@ export function voterUtility(s,g,party,kind='parliament',district=0){
   const burden=responsibilities(s,party.id),candidate=kind==='president'?party.candidateCompetence:party.competence;
   const shock=p.publicEvents.reduce((v,e)=>v+(e.region===null||e.region===g.region?e.effect*Math.exp(-(s.month-e.month)/9):0),0);
   const local=kind==='district'?(hash(s.seed,'local-candidate',district,party.id)-.5)*.7:0;
-  const incumbency=kind==='president'&&p.executive.presidentParty===party.id?.22:0;
+  const incumbency=kind==='president'&&p.executive.presidentParty===party.id&&party.candidateIncumbent!==false?.22:0;
   const promise=party.brokenPromises*.14;
   const integration=g.origin==='naturalized'?.6+.4*p.citizenship.integration:1;
   return -k.ideologyWeight*distance(g.ideal,party.platform)+k.identityWeight*(loyal?integration:0)+k.economicWeight*economic*burden+k.competenceWeight*candidate+k.organizationWeight*Math.log(.2+party.organization)+local+incumbency+shock*burden-promise*burden;

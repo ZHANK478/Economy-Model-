@@ -38,6 +38,7 @@ export function initializePoliticalSystem(s,options={}){
   p.instantRules=options.politicalOptions?.instantRules!==false;
   p.initialOptions.instantRules=p.instantRules;
   if(p.dashboardMode)p.initialOptions.dashboardMode=true;
+  if(options.politicalOptions?.partyContinuity===true){initializePartyContinuity(s);p.initialOptions.partyContinuity=true;}
   if(options.politicalOptions?.agendaSlots!==undefined){if(![1,3].includes(options.politicalOptions.agendaSlots))throw new Error('Неверное число инициатив');p.agendaSlots=options.politicalOptions.agendaSlots;p.initialOptions.agendaSlots=p.agendaSlots;}
   if(options.politicalOptions?.decisionLimit!==undefined){if(options.politicalOptions.decisionLimit!==3)throw new Error('Неверный лимит решений');p.decisionLimit=3;p.initialOptions.decisionLimit=3;}
   if(p.instantRules){initializeAgenda(s);generateMonthlyAgenda(s);}
@@ -58,7 +59,7 @@ function allocateCabinet(s){const p=s.politics,members=p.parties.filter(x=>p.coa
   for(let i=0;i<left&&order.length;i++)posts[order[i%order.length].i]++;members.forEach((x,i)=>x.cabinetPosts=posts[i]);
 }
 export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)throw new Error('Включите политическую игру при создании страны');if(!p.executive.inOffice)throw new Error('Ваше правление завершено');
-  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
+  const kinds=['proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
   if(!kinds.includes(command?.kind))throw new Error('Неизвестное политическое действие');
   const c=clone(command);delete c.id;delete c.month;
   if(['proposeBill','chooseLaw','policyDecision'].includes(c.kind)){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});if(c.actions)c.actions.forEach(validateLegislativeAction);}
@@ -66,7 +67,7 @@ export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)th
   if(c.kind==='partyProgram'&&(!c.platform||AXES.some(k=>!Number.isFinite(c.platform[k])||Math.abs(c.platform[k])>1)))throw new Error('Неверная программа партии');
   const request={...c,id:p.nextCommandId++,month:s.month};p.pendingCommands.push(request);return request;
 }
-const FREE_COMMANDS=new Set(['activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','parameters']);
+const FREE_COMMANDS=new Set(['activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','parameters']);
 export function decisionBudget(s){
  const p=s.politics;if(!p.enabled||!p.decisionLimit)return {limit:null,used:0,remaining:Infinity,optionalRemaining:Infinity};
  const commands=p.turnCommands??[],start=commands.findLastIndex(c=>c.kind==='setDecisionLimit');
@@ -108,6 +109,34 @@ export function enableInstantPolitics(s){
   const queued=clone(s.politics.pendingCommands);s.politics.pendingCommands=[];
   for(const command of queued){try{executePolitical(s,command.kind==='proposeBill'?{...command,kind:'chooseLaw'}:command.kind==='renewBudget'?{kind:'chooseLaw',renewBudget:true,title:'Бюджет на следующий год'}:command);}catch{/* Invalid legacy selections stay in their old saved history. */}}
 }
+function initializePartyContinuity(s){
+  const p=s.politics;if(p.partyContinuity)return;
+  p.partyContinuity=true;
+  p.executive.presidentName=party(s,p.executive.presidentParty).candidateName;
+  p.executive.leaderStartedMonth=p.executive.startedMonth;
+  p.executive.leaderHistory=[];
+  const own=party(s,p.executive.playerParty);own.candidateGeneration=0;
+  own.candidateIncumbent=p.executive.presidentParty===own.id;
+}
+function prepareSuccessor(s,events){
+  const p=s.politics,e=p.executive,c=p.constitution;
+  if(!p.partyContinuity||e.role!=='president'||!e.inOffice||!c.termLimit||e.termsServed<c.termLimit||s.month<p.nextPresidentElection-12)return;
+  const own=party(s,e.playerParty);if(own.candidateName!==e.presidentName)return;
+  const previous=own.candidateName,generation=(own.candidateGeneration??0)+1;
+  let index=(p.parties.indexOf(own)+3+generation)%leaderNames.length;
+  if(leaderNames[index]===previous)index=(index+1)%leaderNames.length;
+  own.candidateGeneration=generation;own.candidateName=leaderNames[index];
+  own.candidateCompetence=.3+hash(s.seed,'successor-competence',own.id,generation)*.65;
+  own.candidateIncumbent=false;
+  events.push(`Предел сроков действующего президента: партия выдвинула преемника ${own.candidateName}. Для продолжения правления он должен победить на выборах.`);
+}
+function installSuccessor(s,events){
+  const p=s.politics,e=p.executive,own=party(s,e.playerParty);
+  e.leaderHistory.push({name:e.presidentName,startedMonth:e.leaderStartedMonth,endedMonth:s.month,termsServed:e.termsServed,reason:'Смена президента своей партии'});
+  e.presidentName=own.candidateName;e.leaderStartedMonth=s.month;e.termsServed=1;e.legalExposure=0;
+  own.candidateIncumbent=true;
+  events.push(`Президент ${own.candidateName} вступил в должность. Вы продолжаете за исполнительную власть своей партии; у нового президента первый срок.`);
+}
 function loseOffice(s,reason,events){const p=s.politics;if(!p.executive.inOffice)return;
   p.executive.inOffice=false;p.executive.reason=reason;p.executive.endedMonth=s.month;
   p.executive.report={month:s.month,monthsServed:s.month-p.executive.startedMonth,reason,approval:p.hiddenApproval*100,partyRating:p.poll?.parties.find(x=>x.id===p.executive.playerParty)?.share??0,seatShare:party(s,p.executive.playerParty).seats/p.totalSeats*100,realGDP:s.metrics.realGDPAnnualized,gdpPerCapita:s.metrics.gdpPerCapitaReal,inflation:s.metrics.inflationYoY,unemployment:s.metrics.unemployment,debt:s.metrics.debtRatio,population:s.population,gini:s.metrics.giniDisposable,laws:p.bills.filter(x=>x.status==='enacted').length};
@@ -148,6 +177,7 @@ function partyMerge(s,command){const p=s.politics,ids=[...new Set(command.partyI
 function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   switch(command.kind){
     case 'activateInstantRules':p.initialOptions.instantRules??=false;p.instantRules=true;initializeAgenda(s);generateMonthlyAgenda(s);return;
+    case 'setPartyContinuity':initializePartyContinuity(s);return;
     case 'setDashboardMode':{
       p.dashboardMode=true;
       const grouped=pollElectorate(s,{commitMemory:false,trackGroups:true,assignPoll:false}).poll.groups;
@@ -275,7 +305,7 @@ function publicEvents(s,flow,events,world){const p=s.politics,r=hash(s.seed,'pub
 }
 export function advancePoliticalSystem(s,prev,events,flow={},world=s.world){
   const p=s.politics;if(!p.enabled)return;
-  advanceCitizenship(s,prev);publicEvents(s,flow,events,world);
+  advanceCitizenship(s,prev);publicEvents(s,flow,events,world);prepareSuccessor(s,events);
   p.economicHistory.push({month:s.month,national:s.metrics.realIncomeIndex,groups:Array.from({length:5},(_,i)=>(s.households[i*2].realIncomeIndex+s.households[i*2+1].realIncomeIndex)/2)});p.economicHistory=p.economicHistory.slice(-13);
   const {poll}=pollElectorate(s);
   p.presidentApproval+=p.parameters.approvalAdjustment*(poll.presidentApproval-p.presidentApproval);p.cabinetApproval+=p.parameters.approvalAdjustment*(poll.cabinetApproval-p.cabinetApproval);
@@ -303,11 +333,23 @@ export function advancePoliticalSystem(s,prev,events,flow={},world=s.world){
   if(p.executive.inOffice&&p.nextPresidentElection!==null&&s.month>=p.nextPresidentElection){
     const e=conductElection(s,'president');p.elections.push(e);p.nextPresidentElection=s.month+p.constitution.presidentTerm;p.executive.presidentParty=e.winner;
     events.push(`Президентские выборы: победила ${party(s,e.winner).name}. Парламентский состав рассчитывается отдельно.`);
-    if(p.executive.role==='president'){if(p.constitution.termLimit>0&&p.executive.termsServed>=p.constitution.termLimit)loseOffice(s,'Истёк конституционный предел президентских сроков',events);else if(e.winner!==p.executive.playerParty)loseOffice(s,'Поражение на президентских выборах',events);else p.executive.termsServed++;}
+    if(p.executive.role==='president'){
+      if(p.partyContinuity){
+        if(e.winner!==p.executive.playerParty)loseOffice(s,'Поражение на президентских выборах',events);
+        else if(party(s,e.winner).candidateName!==p.executive.presidentName)installSuccessor(s,events);
+        else p.executive.termsServed++;
+      }else{if(p.constitution.termLimit>0&&p.executive.termsServed>=p.constitution.termLimit)loseOffice(s,'Истёк конституционный предел президентских сроков',events);else if(e.winner!==p.executive.playerParty)loseOffice(s,'Поражение на президентских выборах',events);else p.executive.termsServed++;}
+    }
   }
   p.parliamentSupport=clamp(coalitionSeats(s)/Math.max(1,p.totalSeats));
   if(p.executive.inOffice&&p.constitution.form!=='presidential'){
-    if(p.executive.formationDeadline!==null&&s.month>=p.executive.formationDeadline&&p.parliamentSupport<=.5){if(p.executive.role==='primeMinister')loseOffice(s,'Не сформировано парламентское большинство после выборов',events);else{const leader=p.parties.filter(x=>x.seats>0).sort((a,b)=>b.seats-a.seats)[0];p.coalition=[leader.id];p.executive.primeMinisterParty=leader.id;p.executive.formationDeadline=null;events.push('Президент назначил кабинет крупнейшей парламентской партии.');}}
+    if(p.executive.formationDeadline!==null&&s.month>=p.executive.formationDeadline&&p.parliamentSupport<=.5){
+      if(p.partyContinuity){
+        p.executive.formationDeadline=null;
+        try{confidenceVote(s,{automatic:true},events);}catch{events.push('Новое большинство не предложило допустимую замену кабинета.');}
+        if(p.executive.inOffice&&p.lastActions.at(-1)?.passed!==true)events.push('Большинство для коалиции не собрано, но кабинет не отстранён: правительство продолжает работу в меньшинстве.');
+      }else{if(p.executive.role==='primeMinister')loseOffice(s,'Не сформировано парламентское большинство после выборов',events);else{const leader=p.parties.filter(x=>x.seats>0).sort((a,b)=>b.seats-a.seats)[0];p.coalition=[leader.id];p.executive.primeMinisterParty=leader.id;p.executive.formationDeadline=null;events.push('Президент назначил кабинет крупнейшей парламентской партии.');}}
+    }
     else if(p.parliamentSupport<.45&&s.month%6===0&&p.executive.formationDeadline===null)confidenceVote(s,{automatic:true},events);
   }
   // Constitutional conflict can lead to impeachment, with a distinct legal gate.
@@ -328,6 +370,8 @@ export function validatePoliticalSystem(s){const p=s.politics;if(Boolean(s.prove
   if(sum(p.parties.map(x=>x.seats))!==p.totalSeats||p.totalSeats<p.allocatedSeatBase||p.totalSeats>p.allocatedSeatBase*2)throw new Error('Не сходится число парламентских мест');
   if(!party(s,p.executive.playerParty)||typeof p.executive.inOffice!=='boolean'||p.coalition.some(id=>!party(s,id)))throw new Error('Повреждена исполнительная власть');
   if(!Array.isArray(p.bills)||!Array.isArray(p.pendingCommands)||!Array.isArray(p.rollCalls)||!p.lawPolicy||!p.citizenship||p.citizenship.residents<0||p.citizenship.naturalized<0)throw new Error('Повреждена политическая история');
+  if(p.partyContinuity!==undefined&&typeof p.partyContinuity!=='boolean')throw new Error('Повреждён режим преемственности');
+  if(p.partyContinuity&&(!Array.isArray(p.executive.leaderHistory)||typeof p.executive.presidentName!=='string'||!Number.isInteger(p.executive.termsServed)||p.executive.termsServed<1||!Number.isInteger(p.executive.leaderStartedMonth)))throw new Error('Повреждена история руководителей');
   if(p.dashboardMode!==undefined&&typeof p.dashboardMode!=='boolean')throw new Error('Повреждено наблюдение за электоратом');
   if(p.nextAgendaMonth!==undefined&&(!Number.isInteger(p.nextAgendaMonth)||p.nextAgendaMonth<0))throw new Error('Повреждён календарь инициатив');
   if(p.dashboardMode){if(p.poll.groups)validateElectorateGroups(p.poll.groups);for(const h of p.partyHistory)if(h.groups)validateElectorateGroups(h.groups);}
