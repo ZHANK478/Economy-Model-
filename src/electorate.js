@@ -1,3 +1,4 @@
+import {campaignUtility} from './campaign-events.js';
 import {AXES,clamp,hash,logistic,distance} from './political-config.js';
 import {integerVotes,rankedCount,legislatureSeats} from './elections.js';
 export const AGE_BANDS=[[18,25],[25,35],[35,45],[45,55],[55,65],[65,101]];
@@ -64,12 +65,12 @@ const responsibilities=(s,id)=>{
 export function voterUtility(s,g,party,kind='parliament',district=0){
   const p=s.politics,k=p.parameters,loyal=g.identity===party.id,economic=g.experience*(loyal?1-k.polarization:1);
   const burden=responsibilities(s,party.id),candidate=kind==='president'?party.candidateCompetence:party.competence;
-  const shock=p.publicEvents.reduce((v,e)=>v+(e.region===null||e.region===g.region?e.effect*Math.exp(-(s.month-e.month)/9):0),0);
+  const shock=p.publicEvents.reduce((v,e)=>v+(e.type!=='campaign'&&(e.region===null||e.region===g.region)?e.effect*Math.exp(-(s.month-e.month)/9):0),0);
   const local=kind==='district'?(hash(s.seed,'local-candidate',district,party.id)-.5)*.7:0;
   const incumbency=kind==='president'&&p.executive.presidentParty===party.id&&party.candidateIncumbent!==false?.22:0;
   const promise=party.brokenPromises*.14;
   const integration=g.origin==='naturalized'?.6+.4*p.citizenship.integration:1;
-  return -k.ideologyWeight*distance(g.ideal,party.platform)+k.identityWeight*(loyal?integration:0)+k.economicWeight*economic*burden+k.competenceWeight*candidate+k.organizationWeight*Math.log(.2+party.organization)+local+incumbency+shock*burden-promise*burden;
+  return -k.ideologyWeight*distance(g.ideal,party.platform)+k.identityWeight*(loyal?integration:0)+k.economicWeight*economic*burden+k.competenceWeight*candidate+k.organizationWeight*Math.log(.2+party.organization)+local+incumbency+shock*burden-promise*burden+campaignUtility(s,g,party,kind);
 }
 export function choiceProbabilities(s,g,parties,kind='parliament',district=0){
   const u=parties.map(p=>voterUtility(s,g,p,kind,district)),hi=Math.max(...u),values=u.map(v=>Math.exp(v-hi)),total=sum(values);return values.map(v=>v/total);

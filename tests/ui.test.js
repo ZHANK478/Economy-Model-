@@ -64,5 +64,14 @@ test('vertical disclosure, result modals and separate interface exports preserve
   await node('new-form').listeners.submit({preventDefault(){},target:{government:'personalist',country:'poor',party:'conservative',resource:'true'}});
   assert.equal(game().metrics.gdpPerCapitaReal,500);assert.equal(game().politics.constitution.regime,'personalist');assert.equal(game().demography.fertility,6);
  }finally{globalThis.FormData=NativeFormData;}
+ const {createSimulation,exportSimulation}=await import('../src/engine.js');
+ const campaignSave=createSimulation({politicalMode:true,politicalOptions:{constitution:{parliamentOffset:12},decisionLimit:3,dashboardMode:true,partyContinuity:true}});
+ node('import-file').files=[{size:1000,text:async()=>exportSimulation(campaignSave)}];
+ await node('import-file').listeners.change({target:node('import-file')});await click({action:'proposal-close'});
+ assert.ok(app.innerHTML.includes('id="campaign-dialog"'));assert.ok(!app.innerHTML.includes('Одобрение власти'));assert.ok(app.innerHTML.includes('Парламентский рейтинг'));
+ const eventId=app.innerHTML.match(/data-event-id="([^"]+)"/)[1];
+ await click({campaignChoice:'0',eventId});assert.equal(game().politics.campaignResponses.length,1);assert.ok(app.innerHTML.includes('Ответ опубликован'));
+ await click({action:'campaign-close'});assert.ok(!app.innerHTML.includes('id="campaign-dialog"'));
+ await click({view:'economy'});assert.ok(!app.innerHTML.includes('Матрица межотраслевых затрат'));assert.ok(!app.innerHTML.includes('Открыть формулы модели'));
  assert.equal(saved.get('economy-model-v3'),legacy);
 });
