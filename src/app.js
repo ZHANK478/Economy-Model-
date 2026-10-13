@@ -1,3 +1,4 @@
+import {productionPie} from './game-charts.js';
 import {savedWorldEvents} from './world-events.js';
 import {campaignEvent} from './campaign-events.js';
 import {GOVERNMENT_PRESETS,COUNTRY_PRESETS,newGameOptions} from './start-presets.js';
@@ -184,8 +185,7 @@ function country(){
 }
 function productionComposition(){
  const va=state.lastReport.gdp?.sectorValueAdded??state.firms.map((f,j)=>f.production*(f.price-INPUTS.reduce((v,row,i)=>v+row[j]*state.firms[i].price,0)-f.importCoefficient*state.exchangeRate*state.worldPriceIndex/100));
- const total=va.reduce((a,b)=>a+b,0);
- return state.firms.map((f,i)=>bar(esc(f.name),total?va[i]/total*100:0,pct(total?va[i]/total*100:0),i%2?'#c52b39':'#174ca1')).join('')+`<details class="country-subdetail"><summary>Занятость по отраслям</summary>${state.firms.map(f=>row(esc(f.name),n(f.workers*1000,0)+' тыс.')).join('')}</details>`;
+ return productionPie(state.firms.map((f,i)=>({label:f.name,value:va[i]})),{percent:share=>pct(share*100)})+`<details class="country-subdetail"><summary>Занятость по отраслям</summary>${state.firms.map(f=>row(esc(f.name),n(f.workers*1000,0)+' тыс.')).join('')}</details>`;
 }
 function countryDetails() {
   const m=state.metrics,annualPopulation=state.history.filter(r=>r.month>=state.month-11).reduce((v,r)=>v+r.population,0)/12;

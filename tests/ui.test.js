@@ -41,7 +41,7 @@ test('vertical disclosure, result modals and separate interface exports preserve
  app.listeners.change({target:{dataset:{policyCheck:'protectedJudges'},checked:false,hasAttribute:()=>false}});assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(app.innerHTML.includes('Не все статьи'));assert.ok(app.innerHTML.includes('<b>80</b>'));await click({action:'result-close'});
  await click({view:'infrastructure'});node('network-id').value='roads';node('network-kind').value='networkSale';node('network-points').value='10';await click({action:'network-queue'});assert.ok(app.innerHTML.includes('id="result-dialog"'));await click({action:'result-close'});
  await click({graph:'budgetBalance'});assert.ok(app.innerHTML.includes('id="trend-dialog"'));await click({action:'trend-close'});
- await click({view:'parties'});assert.ok(!app.innerHTML.includes('Ваша партия: программа'));assert.ok(!app.innerHTML.includes('Партийные семьи и история'));assert.ok(app.innerHTML.includes('Парламент и коалиции'));
+ await click({view:'parties'});assert.ok(!app.innerHTML.includes('Ваша партия: программа'));assert.ok(!app.innerHTML.includes('Партийные семьи и история'));assert.ok(app.innerHTML.includes('Парламент и коалиции'));assert.ok(app.innerHTML.includes('parliament-chart'));assert.ok(!app.innerHTML.includes('seat-strip'));
  await click({view:'country'});assert.ok(app.innerHTML.includes('Экономика и финансы'));assert.ok(!app.innerHTML.includes('Долговая нагрузка'));assert.ok(!app.innerHTML.includes('Передача ставки'));
  await click({action:'usage-export'});const report=JSON.parse(await lastBlob.text());assert.equal(report.format,'economy-ui-observation');assert.ok(report.summary.targets.some(x=>x.id==='view:country'&&x.opens>0));assert.ok(report.events.some(x=>x.target==='window:result'));assert.ok(report.summary.neverOpened.some(x=>x.id==='graph:giniDisposable'));
  await click({action:'export'});const payload=JSON.parse(await lastBlob.text());assert.ok(payload.uiObservation);assert.ok(!payload.state.uiObservation);assert.equal(payload.state.month,1);
@@ -75,7 +75,7 @@ test('vertical disclosure, result modals and separate interface exports preserve
  await click({view:'country'});assert.ok(!app.innerHTML.includes('Матрица межотраслевых затрат'));assert.ok(!app.innerHTML.includes('Открыть формулы модели'));
  await click({view:'country'});assert.ok(!app.innerHTML.includes('data-world='));assert.ok(!app.innerHTML.includes('data-shock='));assert.ok(!app.innerHTML.includes('data-stochastic'));assert.ok(!app.innerHTML.includes('УСЛОВИЯ ЭКСПЕРИМЕНТА'));
  await click({view:'country'});assert.ok(app.innerHTML.includes('population-pyramid'));assert.ok(!app.innerHTML.includes('Десять групп домохозяйств'));
- await click({view:'country'});assert.ok(app.innerHTML.includes('Структура производства'));assert.ok(!app.innerHTML.includes('Будущий выпуск'));
+ await click({view:'country'});assert.ok(app.innerHTML.includes('Структура производства'));assert.ok(app.innerHTML.includes('production-pie'));assert.ok(!app.innerHTML.includes('Будущий выпуск'));
  const {worldEvent}=await import('../src/world-events.js');let beforeNews=createSimulation({seed:42,politicalMode:true,politicalOptions:{livingWorld:true,constitution:{parliamentOffset:84,presidentTerm:84}}});
  const onset=Array.from({length:30},(_,i)=>worldEvent({...beforeNews,month:i+1})).find(Boolean).start;
  const {advanceMonth}=await import('../src/engine.js');for(let i=0;i<onset-1;i++)beforeNews=advanceMonth(beforeNews,beforeNews.policy);

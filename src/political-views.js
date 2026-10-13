@@ -1,3 +1,4 @@
+import {parliamentChart,partyColor} from './game-charts.js';
 import {FORMS,ELECTORAL_SYSTEMS,PRESIDENT_SYSTEMS,REGIMES,PARTY_FAMILIES,AXES,AXIS_NAMES,POLITICAL_PARAMETER_FIELDS} from './political-config.js';
 import {coalitionSeats,executePolitical,executiveDescription,decisionBudget} from './political-system.js';
 import {POLICY_FIELDS,POLICY_CHOICES} from './config.js';
@@ -14,7 +15,7 @@ export function politicalViews({state:s,n,pct,row,esc,date}){
   const btn=(action,label,data={})=>`<button data-political-action="${action}" ${Object.entries(data).map(([k,v])=>`data-${k}="${esc(v)}"`).join(' ')} ${enabled&&(!p.executive.inOffice||!available(action,data))?'disabled':''}>${label}</button>`;
   const options=(entries,value)=>Object.entries(entries).map(([k,v])=>`<option value="${k}" ${k===value?'selected':''}>${esc(v)}</option>`).join('');
   const off=()=>`<section class="panel"><h2>Экономическая лаборатория</h2><p>В этой партии решения принимаются напрямую. Для выборов, коалиций и голосований начните новую страну и выберите политическую игру. Прежнее сохранение останется доступно для скачивания.</p><button data-action="new">Настроить новую страну</button></section>`;
-  const seatChart=()=>`<div class="seat-strip" role="img" aria-label="Парламентские места по партиям">${p.parties.filter(x=>x.seats>0).map(x=>`<span style="flex:${x.seats};background:${x.id.charCodeAt(x.id.length-1)%2?'#17386b':'#c52b39'}" title="${esc(partyDisplayName(x))}: ${x.seats}">${x.seats}</span>`).join('')}</div>`;
+  const seatChart=()=>parliamentChart(p.parties,{name:partyDisplayName,playerParty:p.executive.playerParty,coalition:p.coalition});
   const government=()=>{
     const c=p.constitution,e=p.executive;
     const end=e.inOffice?'':`<div class="callout warning"><strong>Правление завершено</strong>${esc(e.reason)} <button data-action="new">Новая страна</button></div><details class="method-details"><summary>Итоги правления</summary>${table(['Показатель','Результат'],Object.entries(e.report??{}).map(([k,v])=>[esc(({month:'Ход',monthsServed:'Месяцев у власти',reason:'Причина завершения',approval:'Одобрение власти, %',partyRating:'Опрос вашей партии, %',seatShare:'Места вашей партии, %',realGDP:'Реальный ВВП',gdpPerCapita:'ВВП на человека',inflation:'Инфляция, %',unemployment:'Безработица, %',debt:'Долг / ВВП, %',population:'Население, млн',gini:'Джини',laws:'Принятые законы'})[k]??k),typeof v==='number'?n(v,2):esc(v)]))}</details>`;
@@ -26,7 +27,7 @@ export function politicalViews({state:s,n,pct,row,esc,date}){
     let svg='<svg viewBox="0 0 780 260" role="img" aria-label="История парламентских рейтингов партий за последние 120 месяцев">';
     for(const value of [0,25,50,75,100])svg+=`<line x1="42" x2="758" y1="${y(value)}" y2="${y(value)}" stroke="#e8effb"/><text x="32" y="${y(value)+4}" text-anchor="end" font-size="10" fill="#456794">${value}</text>`;
     for(const e of p.elections.filter(e=>!e.initial&&e.month>=from&&e.month<=to))svg+=`<line x1="${x(e.month)}" x2="${x(e.month)}" y1="30" y2="224" stroke="#a8bce0" stroke-dasharray="3 4"><title>${e.kind==='president'?'Президентские':'Парламентские'} выборы · ${date(e.month,true)}</title></line>`;
-    for(const a of p.parties.filter(a=>a.active||points.some(z=>z.parties.some(r=>r.id===a.id)))){const line=points.filter(z=>z.parties.some(r=>r.id===a.id)).map(z=>`${x(z.month)},${y(z.parties.find(r=>r.id===a.id).share)}`).join(' ');svg+=`<polyline points="${line}" fill="none" stroke="${a.id.charCodeAt(a.id.length-1)%2?'#17386b':'#c52b39'}" stroke-width="1.8"><title>${esc(partyDisplayName(a))}</title></polyline>`;}
+    for(const a of p.parties.filter(a=>a.active||points.some(z=>z.parties.some(r=>r.id===a.id)))){const line=points.filter(z=>z.parties.some(r=>r.id===a.id)).map(z=>`${x(z.month)},${y(z.parties.find(r=>r.id===a.id).share)}`).join(' ');svg+=`<polyline points="${line}" fill="none" stroke="${partyColor(a)}" stroke-width="1.8"><title>${esc(partyDisplayName(a))}</title></polyline>`;}
 
     svg+='</svg>';
     return `<div class="chart-wrap">${svg}</div><p class="small muted">Вертикальные линии — выборы. Цвета партий соответствуют таблице.</p>`;
