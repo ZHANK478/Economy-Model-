@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createSimulation,advanceMonth,executePolitical,replayJournal,importSimulation,exportSimulation,copy} from '../src/engine.js';
 import {decisionBudget} from '../src/political-system.js';
 import {unresolvedInitiatives,generateMonthlyAgenda} from '../src/political-agenda.js';
-import {budgetBalance,currentMetric,metricSeries,electorateSeries} from '../src/dashboard-data.js';
+import {comparableGDP,budgetBalance,currentMetric,metricSeries,electorateSeries} from '../src/dashboard-data.js';
 const create=(form='presidential',dashboardMode=true)=>createSimulation({politicalMode:true,seed:11,politicalOptions:{constitution:{form},agendaSlots:1,decisionLimit:3,...(dashboardMode?{dashboardMode:true}:{})}});
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function checkGroups(s){
@@ -43,4 +43,12 @@ test('budget graph uses the complete fiscal balance and excludes uncalculated op
  const f=s.lastReport.fiscal,spending=f.purchases+f.transfers+f.familyBenefits+f.businessSupport+f.concessionGuarantees+f.bankRescue+f.interest+f.networkPurchases-f.networkSales;
  near(currentMetric(s,'budgetBalance'),f.tax+f.centralIncome+f.stateDividends-spending);
  const broken=JSON.parse(exportSimulation(s));broken.state.politics.poll.groups[0].parties.p1=101;assert.throws(()=>importSimulation(JSON.stringify(broken)));
+});
+
+test('the two visible GDP figures share prices, period and average population',()=>{
+ const s={population:12,metrics:{month:12,realGDPRolling:12000,nominalGDPAnnual:80000},history:Array.from({length:13},(_,month)=>({month,population:month===0?100:10,realGDPRolling:12000}))};
+ assert.deepEqual(comparableGDP(s),{total:12000,perCapita:1200});assert.equal(currentMetric(s,'gdpPerCapitaRolling'),1200);
+ s.metrics.nominalGDPAnnual*=3;assert.deepEqual(comparableGDP(s),{total:12000,perCapita:1200});
+ const series=metricSeries(s,'gdpPerCapitaRolling');assert.equal(series.at(-1).gdpPerCapitaRolling,1200);
+ assert.ok(series.every(x=>Number.isFinite(x.gdpPerCapitaRolling)));assert.equal(JSON.stringify(s).includes('gdpPerCapitaRolling'),false);
 });

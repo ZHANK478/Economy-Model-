@@ -1,10 +1,12 @@
 // Fiscal balance is revenue minus expenditure, including interest; borrowing is financing.
 export const budgetBalance=m=>Number.isFinite(m?.deficitRatio)&&Number.isFinite(m?.nominalGDPAnnual)?-m.deficitRatio*Math.max(m.nominalGDPAnnual,100)/1200:null;
 export const METRIC_INFO={
+ gdpGrowthYoY:{label:'Рост экономики',unit:'% за 12 месяцев',digits:1},
+ gdpPerCapitaRolling:{label:'ВВП на человека',unit:'$ в ценах начала игры / год',digits:0},
  budgetBalance:{label:'Чистый баланс бюджета',unit:'млн нац. валюты / месяц',digits:0},
  gdpPerCapitaReal:{label:'Реальный ВВП на человека',unit:'$ базы / годовой темп',digits:0},
  realGDPAnnualized:{label:'Общий реальный ВВП',unit:'млн $ базы / годовой темп',digits:0},
- realGDPRolling:{label:'Реальный ВВП за 12 месяцев',unit:'млн $ базы',digits:0},
+ realGDPRolling:{label:'Общий ВВП',unit:'млн $ в ценах начала игры / последние 12 месяцев',digits:0},
  gdpUSDRolling:{label:'Номинальный ВВП за 12 месяцев',unit:'млн $',digits:0},
  inflationYoY:{label:'Инфляция за 12 месяцев',unit:'%',digits:1},unemployment:{label:'Безработица',unit:'%',digits:1},
  population:{label:'Население',unit:'млн человек',digits:3},realIncomeIndex:{label:'Реальные доходы',unit:'индекс, начало = 100',digits:1},
@@ -17,8 +19,14 @@ export const METRIC_INFO={
  totalFertilityRate:{label:'Рождаемость',unit:'детей / женщину',digits:2},reservesUSD:{label:'Валютные резервы',unit:'млн $',digits:0},
  exchangeRate:{label:'Курс валюты',unit:'нац. валюта / $',digits:3}
 };
-export function metricSeries(s,key){return s.history.filter(m=>m.month>=0&&(key!=='budgetBalance'||m.month>0)).map(m=>({...m,budgetBalance:budgetBalance(m)})).filter(m=>Number.isFinite(m[key]));}
-export function currentMetric(s,key){if(key==='budgetBalance')return s.month>0?-s.government.lastDeficit:null;return s.metrics[key];}
+// Both visible GDP figures use the same rolling year and constant-price basis.
+export function comparableGDP(s,metric=s.metrics){
+ const year=s.history.filter(h=>h.month>metric.month-12&&h.month<=metric.month&&Number.isFinite(h.population));
+ const population=year.length?year.reduce((a,h)=>a+h.population,0)/year.length:s.population;
+ return {total:metric.realGDPRolling,perCapita:metric.realGDPRolling/Math.max(population,1e-9)};
+}
+export function metricSeries(s,key){return s.history.filter(m=>m.month>=0&&(key!=='budgetBalance'||m.month>0)).map(m=>({...m,budgetBalance:budgetBalance(m),...(key==='gdpPerCapitaRolling'?{gdpPerCapitaRolling:comparableGDP(s,m).perCapita}:{})})).filter(m=>Number.isFinite(m[key]));}
+export function currentMetric(s,key){if(key==='budgetBalance')return s.month>0?-s.government.lastDeficit:null;if(key==='gdpPerCapitaRolling')return comparableGDP(s).perCapita;return s.metrics[key];}
 export const GROUP_DIMENSIONS={age:'Возраст',income:'Доход',region:'Регион',origin:'Происхождение',occupation:'Занятие'};
 export function electorateSeries(s,dimension,measure,partyId){
  const rows=s.politics.poll?.groups?.filter(g=>g.dimension===dimension)??[];

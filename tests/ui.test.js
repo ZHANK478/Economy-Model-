@@ -22,9 +22,9 @@ test('vertical disclosure, result modals and separate interface exports preserve
  assert.ok(app.innerHTML.includes('Рейтинг президента'));assert.ok(app.innerHTML.includes('январь 2000'));
  assert.ok(app.innerHTML.includes('id="proposal-dialog"'));const id=app.innerHTML.match(/data-bill-card="(\d+)"/)[1];
  await click({action:'proposal-close'});await click({category:'statistics'});
- assert.ok(!app.innerHTML.includes('ПАСПОРТ СТРАНЫ'));assert.ok(app.innerHTML.includes('Паспорт страны'));
- await click({view:'country'});assert.ok(app.innerHTML.includes('ПАСПОРТ СТРАНЫ'));await click({view:'country'});assert.ok(!app.innerHTML.includes('ПАСПОРТ СТРАНЫ'));
- await click({view:'households'});await click({action:'step'});assert.ok(app.innerHTML.includes('Ход 0'));assert.ok(app.innerHTML.includes('Возрастная пирамида'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));
+ assert.ok(app.innerHTML.includes('country-grid'));assert.equal((app.innerHTML.match(/data-category=/g)??[]).length,3);assert.ok(!app.innerHTML.includes('ВВП · номинальный'));assert.ok(!app.innerHTML.includes('ВВП по условному ППС'));assert.equal((app.innerHTML.match(/class="kpi country-stat"/g)??[]).length,8);
+ await click({category:'statistics'});assert.ok(!app.innerHTML.includes('country-grid'));await click({category:'statistics'});
+ await click({view:'country'});await click({action:'step'});assert.ok(app.innerHTML.includes('январь 2000'));assert.ok(app.innerHTML.includes('Возрастная пирамида'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));
  await click({politicalAction:'adopt',billId:id});assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(!app.innerHTML.includes('id="proposal-dialog"'));
  await click({action:'result-close'});assert.ok(!app.innerHTML.includes('id="result-dialog"'));assert.ok(!app.innerHTML.includes('data-bill-card='));
  await click({view:'policy'});await click({policyTab:'Структура'});assert.ok(app.innerHTML.includes('type="range"'));assert.ok(app.innerHTML.includes('data-policy-number='));
@@ -36,18 +36,18 @@ test('vertical disclosure, result modals and separate interface exports preserve
  const count=game().politics.bills.length;assert.ok(app.innerHTML.includes('3 / 3'));
  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'dollarized'}});assert.equal(game().politics.bills.length,count);
  await click({action:'step'});assert.equal(game().month,1);assert.equal(game().journal.length,1);
- const views=['security','government','policy','country','overview','economy','fiscal','credit','external','households','ownership','infrastructure','services','elections','parties','constitution','electorate'];
+ const views=['government','policy','country','ownership','infrastructure','elections','parties','constitution','electorate'];
  for(const view of views){if(app.innerHTML.includes(`data-view="${view}" class="active"`))await click({view});await click({view});assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(!app.innerHTML.includes('NaN'));assert.ok(!app.innerHTML.includes('undefined'));}
  app.listeners.change({target:{dataset:{policyCheck:'protectedJudges'},checked:false,hasAttribute:()=>false}});assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(app.innerHTML.includes('Не все статьи'));assert.ok(app.innerHTML.includes('<b>80</b>'));await click({action:'result-close'});
  await click({view:'infrastructure'});node('network-id').value='roads';node('network-kind').value='networkSale';node('network-points').value='10';await click({action:'network-queue'});assert.ok(app.innerHTML.includes('id="result-dialog"'));await click({action:'result-close'});
  await click({graph:'budgetBalance'});assert.ok(app.innerHTML.includes('id="trend-dialog"'));await click({action:'trend-close'});
  await click({view:'parties'});assert.ok(!app.innerHTML.includes('Ваша партия: программа'));assert.ok(!app.innerHTML.includes('Партийные семьи и история'));assert.ok(app.innerHTML.includes('Парламент и коалиции'));
- await click({view:'credit'});assert.ok(app.innerHTML.includes('Банковская система'));assert.ok(!app.innerHTML.includes('Долговая нагрузка'));assert.ok(!app.innerHTML.includes('Передача ставки'));
+ await click({view:'country'});assert.ok(app.innerHTML.includes('Экономика и финансы'));assert.ok(!app.innerHTML.includes('Долговая нагрузка'));assert.ok(!app.innerHTML.includes('Передача ставки'));
  await click({action:'usage-export'});const report=JSON.parse(await lastBlob.text());assert.equal(report.format,'economy-ui-observation');assert.ok(report.summary.targets.some(x=>x.id==='view:country'&&x.opens>0));assert.ok(report.events.some(x=>x.target==='window:result'));assert.ok(report.summary.neverOpened.some(x=>x.id==='graph:giniDisposable'));
  await click({action:'export'});const payload=JSON.parse(await lastBlob.text());assert.ok(payload.uiObservation);assert.ok(!payload.state.uiObservation);assert.equal(payload.state.month,1);
  await click({action:'journal-export'});const journal=JSON.parse(await lastBlob.text());assert.equal(journal.format,'economy-decisions');assert.equal(journal.journal.length,1);
  await click({action:'checkpoint'});assert.ok(saved.has('economy-checkpoint-v5'));await click({action:'step'});await click({action:'restore'});assert.equal(game().month,1);assert.ok(!app.innerHTML.includes('id="result-dialog"'));
- for(const hidden of ['journal','compare','validation','method','labor','politics','institutions']){const before=app.innerHTML;await click({view:hidden});assert.equal(app.innerHTML,before);}
+ for(const hidden of ['journal','compare','validation','method','labor','politics','institutions','overview','economy','fiscal','credit','external','households','services','security']){const before=app.innerHTML;await click({view:hidden});assert.equal(app.innerHTML,before);}
  const NativeFormData=globalThis.FormData;
  try{
   globalThis.FormData=class {constructor(target){this.target=target;}get(key){return this.target[key]??null;}};
@@ -72,10 +72,10 @@ test('vertical disclosure, result modals and separate interface exports preserve
  const eventId=app.innerHTML.match(/data-event-id="([^"]+)"/)[1];
  await click({campaignChoice:'0',eventId});assert.equal(game().politics.campaignResponses.length,1);assert.ok(app.innerHTML.includes('Ответ опубликован'));
  await click({action:'campaign-close'});assert.ok(!app.innerHTML.includes('id="campaign-dialog"'));
- await click({view:'economy'});assert.ok(!app.innerHTML.includes('Матрица межотраслевых затрат'));assert.ok(!app.innerHTML.includes('Открыть формулы модели'));
- await click({view:'external'});assert.ok(!app.innerHTML.includes('data-world='));assert.ok(!app.innerHTML.includes('data-shock='));assert.ok(!app.innerHTML.includes('data-stochastic'));assert.ok(!app.innerHTML.includes('УСЛОВИЯ ЭКСПЕРИМЕНТА'));
- await click({view:'households'});assert.ok(app.innerHTML.includes('population-pyramid'));assert.ok(!app.innerHTML.includes('Десять групп домохозяйств'));
- await click({view:'economy'});assert.ok(app.innerHTML.includes('Доля экономики'));assert.ok(!app.innerHTML.includes('Будущий выпуск'));
+ await click({view:'country'});assert.ok(!app.innerHTML.includes('Матрица межотраслевых затрат'));assert.ok(!app.innerHTML.includes('Открыть формулы модели'));
+ await click({view:'country'});assert.ok(!app.innerHTML.includes('data-world='));assert.ok(!app.innerHTML.includes('data-shock='));assert.ok(!app.innerHTML.includes('data-stochastic'));assert.ok(!app.innerHTML.includes('УСЛОВИЯ ЭКСПЕРИМЕНТА'));
+ await click({view:'country'});assert.ok(app.innerHTML.includes('population-pyramid'));assert.ok(!app.innerHTML.includes('Десять групп домохозяйств'));
+ await click({view:'country'});assert.ok(app.innerHTML.includes('Структура производства'));assert.ok(!app.innerHTML.includes('Будущий выпуск'));
  const {worldEvent}=await import('../src/world-events.js');let beforeNews=createSimulation({seed:42,politicalMode:true,politicalOptions:{livingWorld:true,constitution:{parliamentOffset:84,presidentTerm:84}}});
  const onset=Array.from({length:30},(_,i)=>worldEvent({...beforeNews,month:i+1})).find(Boolean).start;
  const {advanceMonth}=await import('../src/engine.js');for(let i=0;i<onset-1;i++)beforeNews=advanceMonth(beforeNews,beforeNews.policy);
