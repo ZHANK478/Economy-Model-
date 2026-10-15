@@ -142,3 +142,12 @@ dialog{overscroll-behavior:contain;scrollbar-gutter:stable;max-height:calc(100sv
 }
 @media(max-height:500px) and (orientation:landscape){.game-hud{position:static}dialog{max-height:calc(100svh - 16px)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Monthly feedback stays next to its number on every screen. */
+.hud-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hud-metric .change,.country-stat .change,.row-value .change{display:block;font-size:12px;line-height:1.35;overflow-wrap:anywhere;margin-top:3px}
+.change.positive{color:#174ca1}.change.negative{color:#c52b39}.change.neutral{color:#456794}
+.row-value{flex-wrap:wrap}.row-value .change{flex-basis:100%;text-align:right}
+@media(min-width:1200px){.hud-metrics{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(max-width:600px){.hud-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.hud-metric .change{font-size:11px}}
+@media(max-width:360px){.hud-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}

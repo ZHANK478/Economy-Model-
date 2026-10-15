@@ -32,3 +32,13 @@ export function electorateSeries(s,dimension,measure,partyId){
  const rows=s.politics.poll?.groups?.filter(g=>g.dimension===dimension)??[];
  return rows.map(g=>({id:g.id,name:g.label,points:s.politics.partyHistory.flatMap(h=>{const row=h.groups?.find(x=>x.dimension===dimension&&x.id===g.id);const value=measure==='party'?row?.parties[partyId]:measure==='candidate'?row?.candidates[partyId]:measure==='presidentApproval'?row?.presidentApproval:row?.approval;return Number.isFinite(value)?[{month:h.month,value}]:[];})}));
 }
+
+// Exact previous completed month; absent observations are never replaced by zero.
+export function monthlyMetricChange(s,key){
+ if(s.month===0)return null;
+ const previous=s.history.find(m=>m.month===s.month-1);
+ if(!previous||(key==='budgetBalance'&&previous.month===0))return null;
+ const before=key==='budgetBalance'?budgetBalance(previous):key==='gdpPerCapitaRolling'?comparableGDP(s,previous).perCapita:previous[key];
+ const now=currentMetric(s,key);
+ return Number.isFinite(before)&&Number.isFinite(now)?now-before:null;
+}

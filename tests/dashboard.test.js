@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createSimulation,advanceMonth,executePolitical,replayJournal,importSimulation,exportSimulation,copy} from '../src/engine.js';
 import {decisionBudget} from '../src/political-system.js';
 import {unresolvedInitiatives,generateMonthlyAgenda} from '../src/political-agenda.js';
-import {comparableGDP,budgetBalance,currentMetric,metricSeries,electorateSeries} from '../src/dashboard-data.js';
+import {comparableGDP,budgetBalance,currentMetric,monthlyMetricChange,metricSeries,electorateSeries} from '../src/dashboard-data.js';
 const create=(form='presidential',dashboardMode=true)=>createSimulation({politicalMode:true,seed:11,politicalOptions:{constitution:{form},agendaSlots:1,decisionLimit:3,...(dashboardMode?{dashboardMode:true}:{})}});
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function checkGroups(s){
@@ -51,4 +51,16 @@ test('the two visible GDP figures share prices, period and average population',(
  s.metrics.nominalGDPAnnual*=3;assert.deepEqual(comparableGDP(s),{total:12000,perCapita:1200});
  const series=metricSeries(s,'gdpPerCapitaRolling');assert.equal(series.at(-1).gdpPerCapitaRolling,1200);
  assert.ok(series.every(x=>Number.isFinite(x.gdpPerCapitaRolling)));assert.equal(JSON.stringify(s).includes('gdpPerCapitaRolling'),false);
+});
+
+test('monthly changes use matching rolling GDP and omit missing fiscal observations',()=>{
+ const s={month:1,population:12,metrics:{month:1,realGDPRolling:2400,unemployment:8,inflationYoY:7},government:{lastDeficit:3},history:[{month:0,population:10,realGDPRolling:2000,unemployment:10,inflationYoY:8},{month:1,population:12,realGDPRolling:2400,unemployment:8,inflationYoY:7}]};
+ near(monthlyMetricChange(s,'gdpPerCapitaRolling'),2400/11-200);
+ near(monthlyMetricChange(s,'unemployment'),-2);near(monthlyMetricChange(s,'inflationYoY'),-1);
+ assert.equal(monthlyMetricChange(s,'budgetBalance'),null);
+ s.month=2;s.metrics={...s.metrics,month:2,unemployment:7};s.history.push(s.metrics);
+ s.history[1].deficitRatio=12;s.history[1].nominalGDPAnnual=1000;
+ near(monthlyMetricChange(s,'budgetBalance'),7);
+ delete s.history[1].unemployment;assert.equal(monthlyMetricChange(s,'unemployment'),null);
+ s.month=0;assert.equal(monthlyMetricChange(s,'inflationYoY'),null);
 });
