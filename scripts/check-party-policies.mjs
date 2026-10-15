@@ -62,7 +62,7 @@ export function checkPartyPolicies(){
    assert.ok(s.metrics.realGDPMonthly>=0&&Object.values(s.metrics).every(v=>typeof v!=='number'||Number.isFinite(v)));
    minRatio=Math.min(minRatio,s.metrics.realGDPMonthly/initial);maxUnemployment=Math.max(maxUnemployment,s.metrics.unemployment);
    assert.ok(s.metrics.realGDPMonthly/initial>1e-6,'Near-zero output requires investigation; a balanced ledger is not sufficient');
-   assert.ok(s.lastReport.diagnostics?.revision===2);
+   assert.ok(s.lastReport.diagnostics?.revision>=2);
   }
   if(s.month<20)early++;
   const saved=importSimulation(exportSimulation(s));assert.deepEqual(saved.metrics,s.metrics);

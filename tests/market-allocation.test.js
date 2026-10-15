@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {allocateMarket} from '../src/market-allocation.js';
-import {createSimulation,advanceMonth,replayJournal,exportSimulation,importSimulation} from '../src/engine.js';
+import {createSimulation,advanceMonth,replayJournal,exportSimulation,importSimulation,treasuryForeignLiquidity,accountBalances} from '../src/engine.js';
 import {newGameOptions} from '../src/start-presets.js';
+import {foreignCreditLimitUSD} from '../src/open-economy.js';
 import {governanceTarget} from '../src/institutions.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 test('export receipts finance imported inputs even with no unused foreign credit',()=>{
@@ -23,20 +24,32 @@ test('allocation respects goods, capacities and currency across scales without f
 test('revision keeps historical equations replayable while new investment plans match opening GDP',()=>{
  for(const country of ['poor','middle','rich']){
   const options={...newGameOptions({country,resource:false}),politicalMode:false};
-  const s=createSimulation(options);assert.equal(s.economy.revision,2);
+  const s=createSimulation(options);assert.equal(s.economy.revision,3);
   near(s.firms.reduce((v,f)=>v+f.lastInvestment,0),s.base.investment);
   let old=createSimulation({...options,economicRevision:1});for(let i=0;i<8;i++)old=advanceMonth(old,old.policy,{preserveEconomicRevision:true});
   assert.deepEqual(replayJournal(importSimulation(exportSimulation(old))).metrics,old.metrics);
-  const past=JSON.stringify(old.journal);const upgraded=advanceMonth(old);assert.equal(upgraded.economy.revision,2);
+  const past=JSON.stringify(old.journal);const upgraded=advanceMonth(old);assert.equal(upgraded.economy.revision,3);
   assert.equal(JSON.stringify(upgraded.journal.slice(0,old.month)),past);
-  assert.equal(upgraded.journal.at(-1).economicRevision,2);
+  assert.equal(upgraded.journal.at(-1).economicRevision,3);
   assert.deepEqual(replayJournal(importSimulation(exportSimulation(upgraded))).metrics,upgraded.metrics);
  }
- const invalid=createSimulation({...newGameOptions(),politicalMode:false});invalid.economy.revision=3;assert.throws(()=>importSimulation(exportSimulation(invalid)));
- const brokenHistory=advanceMonth(createSimulation({...newGameOptions(),politicalMode:false}));brokenHistory.journal[0].economicRevision=3;assert.throws(()=>importSimulation(exportSimulation(brokenHistory)));
+ const invalid=createSimulation({...newGameOptions(),politicalMode:false});invalid.economy.revision=4;assert.throws(()=>importSimulation(exportSimulation(invalid)));
+ const brokenHistory=advanceMonth(createSimulation({...newGameOptions(),politicalMode:false}));brokenHistory.journal[0].economicRevision=4;assert.throws(()=>importSimulation(exportSimulation(brokenHistory)));
 });
 test('employee participation has the same governance effect under private and cooperative ownership',()=>{
  const s=createSimulation({...newGameOptions(),politicalMode:false}),f=s.firms[4];
  const effect=cooperative=>{f.ownership={state:0,municipal:0,foreign:0,domestic:1-cooperative,cooperative};s.policy.workerRepresentation=false;const a=governanceTarget(s,f);s.policy.workerRepresentation=true;return governanceTarget(s,f)-a;};
  near(effect(0),effect(1));
+});
+
+test('Treasury can settle FX debt from official reserves without creating income or equity',()=>{
+ const s=createSimulation({...newGameOptions({country:'poor'}),politicalMode:false});
+ const delta=-foreignCreditLimitUSD(s)-s.bank.foreignAssetsUSD;s.bank.foreignAssetsUSD+=delta;s.bank.equity+=delta*s.exchangeRate;
+ const old={reserves:s.government.reservesUSD,bankReserves:s.bank.reserves,fx:s.bank.foreignAssetsUSD,cash:s.government.cash,equity:s.bank.equity,cbEquity:s.centralBank.equity};
+ const flow={},usd=1;assert.ok(treasuryForeignLiquidity(s,usd,flow)>=usd-1e-7);
+ s.government.cash-=usd*s.exchangeRate;s.bank.foreignAssetsUSD-=usd;
+ near(s.government.reservesUSD,old.reserves-usd);near(s.bank.reserves,old.bankReserves-usd*s.exchangeRate);
+ near(s.government.cash,old.cash-usd*s.exchangeRate);near(s.bank.foreignAssetsUSD,old.fx);
+ near(s.bank.equity,old.equity);near(s.centralBank.equity,old.cbEquity);near(flow.reserveRedemption,usd*s.exchangeRate);
+ near(accountBalances(s).bankResidual,0);
 });

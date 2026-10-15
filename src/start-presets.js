@@ -1,3 +1,4 @@
+import {MACRO_OBSERVATIONS} from './macro-observations.js';
 // Scenario presets, not empirical causal estimates. See docs/START-PRESETS.md.
 import {DEFAULT_CONSTITUTION,PARTY_LABELS} from './political-config.js';
 import {ECONOMIC_STRUCTURES} from './economic-structure.js';
@@ -25,7 +26,7 @@ export const COUNTRY_PRESETS={
 export function newGameOptions({government='presidential',country='middle',party='liberal',resource=true}={}){
  if(!Object.hasOwn(GOVERNMENT_PRESETS,government)||!Object.hasOwn(COUNTRY_PRESETS,country)||!Object.hasOwn(PARTY_LABELS,party))throw new Error('Неизвестный стартовый сценарий');
  const c=COUNTRY_PRESETS[country];
- return {startYear:2000,seed:42,stochastic:false,resourceMode:resource,modelProfile:'balanced',initialGDPPerCapita:c.gdp,economicStructure:structuredClone(ECONOMIC_STRUCTURES[country]),
+ return {startYear:2000,seed:42,stochastic:false,resourceMode:resource,modelProfile:'balanced',initialGDPPerCapita:c.gdp,initialMacro:structuredClone(MACRO_OBSERVATIONS[({poor:'BGD',middle:'MEX',rich:'FRA'})[country]]),economicStructure:structuredClone(ECONOMIC_STRUCTURES[country]),
  parameters:{initialFertility:c.fertility,initialChildShare:c.childShare,initialElderlyShare:c.elderlyShare},politicalMode:true,
  politicalOptions:{livingWorld:true,constitution:{...DEFAULT_CONSTITUTION,...GOVERNMENT_PRESETS[government].constitution},agendaSlots:1,decisionLimit:3,dashboardMode:true,partyContinuity:true,playerFamily:party}};
 }

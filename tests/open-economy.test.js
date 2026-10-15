@@ -31,7 +31,7 @@ for(const [country,id] of [['poor','BGD'],['middle','MEX'],['rich','FRA']])for(c
 });
 test('same numeric state has same rules regardless of the start button used',()=>{
  const a=newGameOptions({country:'poor',resource:false}),b=newGameOptions({country:'rich',resource:false});
- Object.assign(b,{initialGDPPerCapita:a.initialGDPPerCapita,parameters:clone(a.parameters),economicStructure:clone(a.economicStructure)});
+ Object.assign(b,{initialGDPPerCapita:a.initialGDPPerCapita,parameters:clone(a.parameters),economicStructure:clone(a.economicStructure),initialMacro:clone(a.initialMacro)});
  const x=runMonths(createSimulation({...a,politicalMode:false}),24),y=runMonths(createSimulation({...b,politicalMode:false}),24);
  assert.deepEqual(x.metrics,y.metrics);assert.deepEqual(x.firms,y.firms);
 });
@@ -104,4 +104,14 @@ test('old saves retain the original model, while invalid new world stocks are re
  const s=initial();for(const breakIt of [x=>{x.economy.regions[0].saving='high';},x=>{x.firms[0].technology=0;},x=>{x.economy.worldGDPHistory.pop();},x=>{delete x.demography.initialMortalityFactor;},x=>{delete x.economy;}]){
   const data=JSON.parse(exportSimulation(s));breakIt(data.state);assert.throws(()=>importSimulation(JSON.stringify(data)));
  }
+});
+
+test('observed opening inflation, unemployment and deposit rates are not shared fictional constants',()=>{
+ for(const [country,pi,u,deposit] of [['poor',2.20825620937535,3.27,8.68666666666666],['middle',9.49156149435402,2.646,8.25666666666666],['rich',1.67061991153283,10.218,2.625]]){
+  const s=initial(country);near(s.metrics.inflationYoY,pi);near(s.metrics.unemployment,u);near(s.metrics.depositRate,deposit);
+  near(s.metrics.employment/s.metrics.laborForce,1-u/100);
+  for(let i=0;i<12;i++)assert.ok(s.history[i].synthetic);
+  assert.deepEqual(importSimulation(exportSimulation(s)).initialMacro,s.initialMacro);
+ }
+ const broken=initial();broken.initialMacro.unemployment=.5;assert.throws(()=>importSimulation(exportSimulation(broken)));
 });
