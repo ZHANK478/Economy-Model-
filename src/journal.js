@@ -12,7 +12,7 @@ export function appendJournal(s,prev,actions,effectiveWorld) {
     policy:clone(s.policy),policyChanges:changesBetween(before?.policy??s.provenance.initialPolicy,s.policy),
     parameters:clone(s.parameters),parameterChanges:changesBetween(before?.parameters??s.provenance.initialParameters,s.parameters),
     world:clone(s.world),worldChanges:changesBetween(before?.world??s.provenance.initialWorld,s.world),
-    ...(s.economy?{economicParameters:clone(s.economy.parameters)}:{}),
+    ...(s.economy?{economicParameters:clone(s.economy.parameters),economicRevision:s.economy.revision??1}:{}),
     stochastic:s.stochastic,shocks:clone(s.shocks),effectiveWorld:clone(effectiveWorld),
     actions:clone(actions),submittedActions:clone(s.politics.enabled?s.politics.lastSubmittedActions:prev.pendingActions),nextActionId:prev.nextActionId,
     politicalCommands:clone(s.politics.enabled?s.politics.lastCommands:[]),nextCommandId:s.politics.nextCommandId??null,

@@ -66,9 +66,10 @@ export function validateOpenParameters(p){
  for(const k of ['depreciationStructures','depreciationEquipment','knowledgeDepreciation','sovereignLossGivenDefault'])if(!number(p[k],0,.99))throw new Error('Некорректный износ или потеря');
  return p;
 }
-export function initializeOpenEconomy(s,structure,overrides={}){
+export function initializeOpenEconomy(s,structure,overrides={},revision=2){
  const c=validateStructure(structure);
- s.economy={version:1,parameters:validateOpenParameters({...OPEN_PARAMETERS,...overrides}),initial:structuredClone(c),
+ if(![1,2].includes(revision))throw new Error('Неизвестная ревизия механизмов');
+ s.economy={version:1,revision,parameters:validateOpenParameters({...OPEN_PARAMETERS,...overrides}),initial:structuredClone(c),
   regions:WORLD_REGIONS.map(r=>({...r,imports:[...r.imports],capital:r.gdp*r.capitalOutput,initialCapital:r.gdp*r.capitalOutput,initialGDP:r.gdp,initialPopulation:r.population,technology:1})),
   frontier:[...FRONTIER],tradeWeights:[],initialTradeCost:c.tradeCost,
   foreignCreditRatio:c.foreignCreditRatio,previousWorldGDP:sum(WORLD_REGIONS.map(r=>r.gdp)),worldGDPHistory:[],
@@ -101,7 +102,10 @@ export function initializeOpenEconomy(s,structure,overrides={}){
   f.lastProfit=grossVA[i]*.32;f.expectedOperatingSurplus=grossVA[i]*.42;f.expectedValueAdded=grossVA[i];
   f.expectedSales=f.production;f.referenceWage=f.wage;
   f.foreignEquityUSD=enterpriseValue(s,f)*f.ownership.foreign;
-  f.lastInvestment=f.capital*structuralDepreciation(s)/12;
+  // Opening plans must sum to the investment used to calibrate opening GDP.
+  // Replacing that flow by depreciation silently started every country with an
+  // investment shock before any decision was made.
+  f.lastInvestment=revision>=2?s.base.investment*grossVA[i]/totalVA:f.capital*structuralDepreciation(s)/12;
  });
  s.households.forEach(h=>{const share=h.wageShare*.8+h.dividendShare*.2;h.loanLC=totalCredit*c.householdCreditShare*share*.8;h.loanFX=totalCredit*c.householdCreditShare*h.dividendShare*.2;});
  const estimateImports=s.base.imports;
@@ -188,7 +192,10 @@ export function investmentOpportunities(s,prev,investmentPrice){
   const demandLimit=clamp(Math.pow(Math.max(.05,salesRatio),1/(1-p.capitalShare)),.50,1.75);
   const q=operatingYield/Math.max(required,.01);
   const targetRatio=Math.min(Math.pow(clamp(q,.10,4),1/(1-p.capitalShare)),demandLimit);
-  const desired=Math.max(0,f.capital*(delta/12+p.capitalAdjustment*(targetRatio-1)));
+  const target=Math.max(0,f.capital*(delta/12+p.capitalAdjustment*(targetRatio-1)));
+  // Installation/planning inertia uses the existing disclosed adjustment
+  // assumption. It delays responses; it does not force profitable investment.
+  const desired=e.revision>=2?Math.max(0,f.lastInvestment+s.parameters.investmentAdjustment*(target-f.lastInvestment)):target;
   const value=enterpriseValue(s,f),yieldEquity=Math.max(0,f.lastProfit)*12/Math.max(value,1);
   return {sector:i,desired,operatingYield,required,npvPerUnit:operatingYield/required-1,
    foreignScore:(1+yieldEquity)*1.02-1-(s.world.globalRate/100+.025+risk),expectedSalesRatio:salesRatio};
@@ -277,8 +284,12 @@ export function validateOpenEconomy(s){
  if(!s.economy){if(s.provenance?.economicStructure)throw new Error('Отсутствует структурная экономика');return;}
  const e=s.economy,finite=(x,min=0,max=Infinity)=>Number.isFinite(x)&&x>=min&&x<=max;
  validateStructure(e.initial);validateStructure(s.provenance.economicStructure);
- if(e.version!==1)throw new Error('Неизвестная структурная модель');
+ if(![1,2].includes(s.provenance.initialEconomicRevision??1)||(e.revision??1)<(s.provenance.initialEconomicRevision??1))throw new Error('Повреждена ревизия механизмов');
+ if(e.version!==1||![1,2].includes(e.revision??1))throw new Error('Неизвестная структурная модель');
  validateOpenParameters(e.parameters);validateOpenParameters(s.provenance.initialEconomicParameters);
+ let historicalRevision=s.provenance.initialEconomicRevision??1;
+ for(const entry of s.journal??[]){const revision=entry.economicRevision??historicalRevision;if(![1,2].includes(revision)||revision<historicalRevision)throw new Error('Повреждена история ревизий');historicalRevision=revision;}
+ if((e.revision??1)<historicalRevision)throw new Error('Состояние не соответствует истории ревизий');
  if(!Array.isArray(e.regions)||e.regions.length!==3||e.regions.some((r,i)=>r.id!==WORLD_REGIONS[i].id||!['gdp','population','capital','initialCapital','initialGDP','initialPopulation','technology'].every(k=>finite(r[k],1e-12))||!finite(r.saving,0,1)||!finite(r.laborGrowth,-.05,.1)||!finite(r.technologyGrowth,-.05,.1)||!Array.isArray(r.imports)||r.imports.length!==5||r.imports.some(v=>!finite(v,0,1))))throw new Error('Повреждён мировой рынок');
  if(!Array.isArray(e.frontier)||e.frontier.length!==5||e.frontier.some(v=>!finite(v,1e-12))||!Array.isArray(e.tradeWeights)||e.tradeWeights.length!==5||e.tradeWeights.some(v=>!finite(v,0,1)))throw new Error('Повреждены торговые связи');
  if(!finite(e.previousWorldGDP,1e-9)||!finite(e.foreignCreditRatio,0,4)||!finite(e.initialTradeCost,0,3)||!Array.isArray(e.worldGDPHistory)||e.worldGDPHistory.length!==13||e.worldGDPHistory.some((r,i)=>r.month!==s.month-12+i||!finite(r.gdp,1e-9))||!finite(s.demography.initialMortalityFactor,.01,10))throw new Error('Повреждена история мировой экономики');

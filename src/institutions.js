@@ -43,8 +43,12 @@ export function governanceTarget(s,f) {
   const publicGovernance=.65+s.parameters.publicAccountabilityEffect*(ruleExecution-1);
   const common=.10*(i.competition-.60)+.10*(i.contractReliability-.65);
   const publicShare=f.ownership.state+(f.ownership.municipal??0),cooperative=f.ownership.cooperative??0;
-  const cooperativeGovernance=.65+.08*Number(p.workerRepresentation)*i.contractReliability;
-  return clamp(publicShare*publicGovernance+cooperative*cooperativeGovernance+(1-publicShare-cooperative)*.65+common,.05,.98);
+  // Employee participation is a governance arrangement, not an intrinsic
+  // cooperative-owner productivity bonus. Magnitude remains a sensitivity assumption.
+  const participation=.08*Number(p.workerRepresentation)*i.contractReliability;
+  const cooperativeGovernance=.65+(s.economy?.revision>=2?0:participation);
+  const sharedParticipation=s.economy?.revision>=2?participation:0;
+  return clamp(publicShare*publicGovernance+cooperative*cooperativeGovernance+(1-publicShare-cooperative)*.65+common+sharedParticipation,.05,.98);
 }
 
 // GDP includes purchases once. This function makes NO cash transfers: the

@@ -69,7 +69,7 @@ export function executeOwnership(s,flow,events,{fundGovernment,transfer,foreignP
       if(compensation<1){s.institutions.ownershipRisk=clamp(s.institutions.ownershipRisk+fraction*(1-compensation),0,1);events.push(`${f.name}: изъятие с неполной компенсацией повысило риск прав собственности.`);}
     }
     for(const key of ['state','domestic','foreign','municipal','cooperative'])o[key]=Math.max(0,o[key]);
-    f.reorganization=clamp(f.reorganization+Math.abs(o.state-before.state)*s.parameters.ownershipDisruption,0,.15);
+    f.reorganization=clamp(f.reorganization+(s.economy?.revision>=2?.5*['state','domestic','foreign','municipal','cooperative'].reduce((v,key)=>v+Math.abs(o[key]-before[key]),0):Math.abs(o.state-before.state))*s.parameters.ownershipDisruption,0,.15);
     const actual={...action,before,after:{...o},actualPoints:fraction*100,cost,valuation:value};results.push(actual);
     events.push(`${f.name}: ${action.kind}, передано ${actual.actualPoints.toFixed(1)} п.п.; стоимость ${cost.toFixed(0)} млн.`);
   }
