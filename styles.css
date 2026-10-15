@@ -118,3 +118,27 @@ button,input,select,textarea{max-width:100%}button{white-space:normal}
 
 /* Hemicycle seating and sector composition. */
 .parliament-figure,.production-figure{margin:16px 0}.parliament-visual{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:center;gap:24px}.parliament-chart{display:block;width:100%;height:auto;max-width:620px;margin:auto;overflow:visible}.parliament-total{font:700 30px Arial,Helvetica,sans-serif;fill:#142f59}.parliament-total-label{font:14px Arial,Helvetica,sans-serif;fill:#456794}.parliament-majority{font:14px Arial,Helvetica,sans-serif;fill:#456794}.parliament-seat{transition:opacity .15s}.parliament-seat:hover{opacity:.65}.chart-legend-list{list-style:none;padding:0;margin:0;min-width:0}.chart-legend-list li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid #d4e0f3;font-size:15px}.chart-legend-list li:last-child{border:0}.chart-color{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #fff;box-shadow:0 0 0 1px #d4e0f3}.chart-legend-list small{display:block;color:#456794;font-size:12px}.chart-legend-list strong{font-variant-numeric:tabular-nums;font-size:17px}.parliament-figure figcaption{text-align:center;font-size:15px;margin-top:8px;color:#456794}.production-figure{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:center}.production-pie{display:block;width:100%;max-width:350px;height:auto;margin:auto}.production-pie path:hover,.production-pie circle:hover{opacity:.8}@media(max-width:650px){.parliament-visual,.production-figure{grid-template-columns:1fr;gap:8px}.parliament-chart{max-width:480px}.production-pie{max-width:280px}.chart-legend-list li{font-size:15px;padding:8px 0}}
+
+/* One browser UI: wider summaries on PC, vertical controls and dialogs on phones. */
+.main{padding-bottom:max(28px,env(safe-area-inset-bottom))!important}
+.screen-content,.subsection-content,.country-stat,.chart-legend-list li>span{min-width:0}
+.country-stat .value,.chart-legend-list li>span,.data-row>span{overflow-wrap:anywhere}
+button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #c52b39;outline-offset:3px}
+dialog{overscroll-behavior:contain;scrollbar-gutter:stable;max-height:calc(100svh - 24px)}
+.settings-actions button{min-height:44px}.country-detail>summary,.country-subdetail>summary{min-height:44px;align-content:center}
+@media(min-width:1100px){.main{max-width:1120px}.country-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.country-stat{padding:16px}.country-stat .value{font-size:24px}.country-stat .name{font-size:15px}.hud-metric>strong{font-size:24px}}
+@media(min-width:651px) and (max-width:1099px){.country-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+ .main{padding-left:10px!important;padding-right:10px!important}
+ .country-grid{grid-template-columns:1fr}.country-stat{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px}
+ .country-stat .name{grid-column:1/-1}.country-stat .value{margin:0;font-size:23px}.country-stat .spark{margin:0;width:80px;height:28px;max-width:100%}
+ .country-stat .change{grid-column:1/-1}.policy-panel.sidebar{max-width:100%;padding:12px}
+ .policy-control .control-meta{flex-wrap:wrap;gap:6px}.sidebar .policy-control input[type=range]{min-height:40px;touch-action:pan-y}
+ .sidebar .number-entry{min-width:0;max-width:110px}.initiative-actions button{min-height:46px}
+ .hud-heading button{min-height:42px}.hud-heading>div{column-gap:6px}.hud-metric>div{flex-wrap:wrap;line-height:1.25}.hud-metric>strong{line-height:1.35}
+ .popup-head{position:sticky;top:-14px;background:#fff;z-index:1;padding-top:5px;padding-bottom:5px}.popup-head>button{flex:0 0 42px;min-height:42px;padding:0}
+ .chart-legend-list li{grid-template-columns:11px minmax(0,1fr) auto;gap:7px}
+ .settings-popup,.proposal-popup,.result-popup,.trend-popup{width:calc(100vw - 20px);margin:auto;max-width:calc(100vw - 20px)}
+}
+@media(max-height:500px) and (orientation:landscape){.game-hud{position:static}dialog{max-height:calc(100svh - 16px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}

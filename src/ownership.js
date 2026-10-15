@@ -3,7 +3,7 @@ const sum=a=>a.reduce((v,x)=>v+x,0);
 export function enterpriseValue(s,f) {
   const price=s.metrics.investmentPrice??s.consumerPriceIndex/100;
   // Transparent net-asset valuation, not a claimed observed stock-market price.
-  return Math.max(1,(f.capital+(f.infrastructureCapital??0))*price+f.inventory*f.price+f.cash-f.loanLC-f.loanFX*s.exchangeRate);
+  return Math.max(1,(f.capital+(f.knowledgeCapital??0)+(f.infrastructureCapital??0))*price+f.inventory*f.price+f.cash-f.loanLC-f.loanFX*s.exchangeRate);
 }
 export function scheduleOwnership(s,{sector,kind,points,compensation=1}) {
   if(!Number.isInteger(sector)||sector<0||sector>=s.firms.length||!['purchase','privatize','foreignSale','cooperatize','municipalize','nationalize','recapitalize'].includes(kind)||!Number.isFinite(points)||points<=0||points>100||!Number.isFinite(compensation)||compensation<0||compensation>1)throw new Error('Некорректная операция собственности');

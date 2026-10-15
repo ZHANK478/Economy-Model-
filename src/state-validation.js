@@ -28,7 +28,7 @@ export function validateExtendedState(s){
   if(!p||!['judicialIndependence','mediaFreedom','electoralIntegrity','legislativeConstraint','civilFreedom','civilService','corruption','publicSupport','parliamentSupport'].every(k=>number(p[k],0,1))
     ||!Array.isArray(p.elections)||!Array.isArray(p.lastReview)||!Number.isInteger(p.nextElection)||p.nextElection<=s.month)fail('Повреждены политические институты');
   if(!s.monetary||!number(s.monetary.effectiveRate,0,100)||!number(s.monetary.peg,1e-12)||s.monetary.previousRegime!==s.policy.monetaryRegime)fail('Повреждён денежный режим');
-  if(!Array.isArray(s.projects)||s.projects.some(p=>!['public','private','network'].includes(p.type)||!number(p.amount)||!number(p.efficiency,0,1)
+  if(!Array.isArray(s.projects)||s.projects.some(p=>!['public','private','network'].includes(p.type)||!number(p.amount)||!number(p.efficiency,0,1)||(p.importShare!==undefined&&!number(p.importShare,0,1))
     ||!Number.isInteger(p.due)||p.due<=s.month||(p.type!=='public'&&(!Number.isInteger(p.sector)||p.sector<0||p.sector>4))
     ||(p.type==='network'&&(!NETWORKS.some(n=>n.id===p.network)||!['private','concession'].includes(p.owner)||!number(p.guarantee,0,1)))))fail('Повреждён реестр строящихся объектов');
 }

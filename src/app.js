@@ -5,7 +5,7 @@ import {GOVERNMENT_PRESETS,COUNTRY_PRESETS,newGameOptions} from './start-presets
 import {validation} from './validation-results.js';
 import {politicalValidation} from './political-validation-results.js';
 import {extendedValidation} from './extended-validation-results.js';
-import {createSimulation,advanceMonth,runMonths,comparePolicies,exportSimulation,importSimulation,accountBalances,scheduleShock,scheduleOwnership,scheduleNetwork,scheduleRestructuring,replayJournal,copy,sanitizePolicy,realInterestRate} from './engine.js';
+import {createSimulation,advanceMonth,runMonths,comparePolicies,exportSimulation,importSimulation,accountBalances,scheduleShock,scheduleOwnership,scheduleNetwork,scheduleRestructuring,replayJournal,copy,sanitizePolicy,realInterestRate,inputMatrix} from './engine.js';
 import {VERSION,POLICY_FIELDS,POLICY_CHECKS,POLICY_CHOICES,PARAMETER_FIELDS,MODULES,SECTORS,BASE_POLICY,MODEL_PROFILES,INPUTS} from './config.js';
 import {createBrowserStorage} from './storage.js';
 import {extendedViews} from './extended-views.js';
@@ -184,7 +184,7 @@ function country(){
  <details class="panel country-detail"><summary>Инфраструктура</summary>${row('Состояние инфраструктуры',n(m.infrastructure,1),'Начало = 100')}${row('Покрытие потребности в ремонте',pct(m.infrastructureMaintenanceCoverage))}${row('Частная доля',pct(m.privateInfrastructureShare))}<button data-view="infrastructure">Управлять инфраструктурой</button></details>`;
 }
 function productionComposition(){
- const va=state.lastReport.gdp?.sectorValueAdded??state.firms.map((f,j)=>f.production*(f.price-INPUTS.reduce((v,row,i)=>v+row[j]*state.firms[i].price,0)-f.importCoefficient*state.exchangeRate*state.worldPriceIndex/100));
+ const va=state.lastReport.gdp?.sectorValueAdded??state.firms.map((f,j)=>f.production*(f.price-inputMatrix(state).reduce((v,row,i)=>v+row[j]*state.firms[i].price,0)-f.importCoefficient*state.exchangeRate*state.worldPriceIndex/100));
  return productionPie(state.firms.map((f,i)=>({label:f.name,value:va[i]})),{percent:share=>pct(share*100)})+`<details class="country-subdetail"><summary>Занятость по отраслям</summary>${state.firms.map(f=>row(esc(f.name),n(f.workers*1000,0)+' тыс.')).join('')}</details>`;
 }
 function countryDetails() {
@@ -248,13 +248,14 @@ function overview() {
 }
 function economy(){
  const m=state.metrics,r=state.lastReport;
- const va=r.gdp?.sectorValueAdded??state.firms.map((f,j)=>f.production*(f.price-INPUTS.reduce((v,row,i)=>v+row[j]*state.firms[i].price,0)-f.importCoefficient*state.exchangeRate*state.worldPriceIndex/100));
+ const va=r.gdp?.sectorValueAdded??state.firms.map((f,j)=>f.production*(f.price-inputMatrix(state).reduce((v,row,i)=>v+row[j]*state.firms[i].price,0)-f.importCoefficient*state.exchangeRate*state.worldPriceIndex/100));
  const total=va.reduce((a,b)=>a+b,0);
  return `<section class="panel"><h2>Структура производства</h2><div class="table-wrap"><table class="table"><thead><tr><th>Отрасль</th><th>Доля экономики</th><th>Занятость</th></tr></thead><tbody>${state.firms.map((f,i)=>`<tr><td>${esc(f.name)}</td><td>${pct(total?va[i]/total*100:0)}</td><td>${n(f.workers*1000,0)} тыс.</td></tr>`).join('')}</tbody></table></div></section><section class="panel"><h2>ВВП по расходам</h2>${row('Потребление',money(r.gdp?.consumption??m.consumption)+' млрд')}${row('Инвестиции',money(r.gdp?.investment??m.investment)+' млрд')}${row('Государственные закупки',money(r.gdp?.government??m.governmentPurchases)+' млрд')}${row('Экспорт',money(r.gdp?.exports??m.exports)+' млрд')}${row('− Импорт',money(r.gdp?.imports??m.imports)+' млрд')}${row('Изменение запасов',money(r.gdp?.inventories??0)+' млрд')}${row('ВВП за месяц',money(m.nominalGDPMonthly)+' млрд')}</section>`;
 }
 function worldConditions(){
  const events=[state.lastReport.worldNews,...savedWorldEvents(state)].filter(Boolean);
- return events.length?events.map(e=>`<div class="callout"><strong>${esc(e.title)}</strong>${esc(e.text)}<p>${signed((e.multiplier-1)*100,0)}% к обычному уровню · ${e.start>state.month?'начало через '+(e.start-state.month)+' мес.; длительность '+e.duration+' мес.':'осталось '+(e.start+e.duration-state.month)+' мес.'}</p></div>`).join(''):'<p class="small muted">Сейчас нет мировых событий, меняющих условия торговли.</p>';
+ const growth=state.economy?row('Базовый рост мировой экономики',signed(state.metrics.worldGrowth,1)+'% за год'):'';
+ return growth+(events.length?events.map(e=>`<div class="callout"><strong>${esc(e.title)}</strong>${esc(e.text)}<p>${signed((e.multiplier-1)*100,0)}% к обычному уровню · ${e.start>state.month?'начало через '+(e.start-state.month)+' мес.; длительность '+e.duration+' мес.':'осталось '+(e.start+e.duration-state.month)+' мес.'}</p></div>`).join(''):'<p class="small muted">Сейчас нет мировых событий, меняющих условия торговли.</p>');
 }
 function external(){
  const m=state.metrics,e=state.lastReport.external??{};

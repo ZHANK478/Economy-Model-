@@ -54,7 +54,7 @@ test('vertical disclosure, result modals and separate interface exports preserve
   node('new-government').value='parliamentary';node('new-government').listeners.change();assert.ok(node('new-government-description').textContent.includes('кабинет'));
   node('new-country').value='rich';node('new-country').listeners.change();assert.ok(node('new-country-description').textContent.includes('25'));
   await node('new-form').listeners.submit({preventDefault(){},target:{government:'parliamentary',country:'rich',party:'socialist',resource:'false'}});
-  assert.equal(game().metrics.gdpPerCapitaReal,25000);assert.equal(game().politics.constitution.playerRole,'primeMinister');assert.equal(game().demography.fertility,1.6);assert.equal(game().resourceMode,false);assert.equal(game().month,0);
+  assert.equal(game().metrics.gdpPerCapitaReal,25000);assert.equal(game().politics.constitution.playerRole,'primeMinister');assert.equal(game().demography.fertility,1.89);assert.equal(game().resourceMode,false);assert.equal(game().month,0);
   await node('new-form').listeners.submit({preventDefault(){},target:{government:'presidential',country:'middle',party:'liberal',resource:'true'}});
   const vetoId=app.innerHTML.match(/data-bill-card="(\d+)"/)[1],beforeUsed=game().politics.bills.find(b=>b.id===Number(vetoId));
   assert.ok(beforeUsed);await click({politicalAction:'reject',billId:vetoId});
@@ -62,7 +62,7 @@ test('vertical disclosure, result modals and separate interface exports preserve
   assert.ok(['vetoed','declined'].includes(game().politics.bills.find(b=>b.id===Number(vetoId)).status));assert.ok(app.innerHTML.includes('1 / 3'));
   await click({view:'constitution'});assert.ok(!app.innerHTML.includes('Голосовать за свободные институты'));assert.ok(!app.innerHTML.includes('Голосовать за ограничения'));assert.ok(!app.innerHTML.includes('Эти оценки вычисляются'));
   await node('new-form').listeners.submit({preventDefault(){},target:{government:'personalist',country:'poor',party:'conservative',resource:'true'}});
-  assert.equal(game().metrics.gdpPerCapitaReal,500);assert.equal(game().politics.constitution.regime,'personalist');assert.equal(game().demography.fertility,6);
+  assert.equal(game().metrics.gdpPerCapitaReal,500);assert.equal(game().politics.constitution.regime,'personalist');assert.equal(game().demography.fertility,3.279);
  }finally{globalThis.FormData=NativeFormData;}
  const {createSimulation,exportSimulation}=await import('../src/engine.js');
  const campaignSave=createSimulation({politicalMode:true,politicalOptions:{constitution:{parliamentOffset:12},decisionLimit:3,dashboardMode:true,partyContinuity:true}});

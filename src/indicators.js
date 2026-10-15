@@ -1,3 +1,4 @@
+import {humanCapital,OPEN_INPUTS} from './open-economy.js';
 // Statistical definitions are established; synthetic strata/PPP/education
 // behaviour are conditional calibration and must not be reported as observations.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -31,9 +32,9 @@ export function advanceEducation(s,previousEducationSpending=0) {
   e.expectedYears+=1/60*(target-e.expectedYears);
   // Stock of adult attainment adjusts only as new educated generations enter.
   e.meanYears+=1/360*(clamp(e.expectedYears*.75,0,15)-e.meanYears);
-  s.skills=Math.exp(.06*(e.meanYears-8));
+  s.skills=s.economy?humanCapital(e.meanYears)/humanCapital(8):Math.exp(.06*(e.meanYears-8));
 }
-export function socialIndicators(s,{wages=2500,netPrimaryIncome=0}={}) {
+export function socialIndicators(s,{wages=2500,netPrimaryIncome=0,sectorValueAdded=null}={}) {
   const m=s.metrics,cpi=s.consumerPriceIndex/100;
   const weights=s.households.map(h=>h.population);
   const perPerson=s.households.map((h,i)=>sum(s.incomeHistory.map(r=>Math.max(0,r.net[i])/(r.population*h.population)/(r.cpi/100)))/s.incomeHistory.length*cpi);
@@ -41,7 +42,7 @@ export function socialIndicators(s,{wages=2500,netPrimaryIncome=0}={}) {
   const equivalent=perPerson.map((v,i)=>v*Math.sqrt(s.households[i].householdSize));
   const marketEquivalent=market.map((v,i)=>v*Math.sqrt(s.households[i].householdSize));
   const median=weightedQuantile(equivalent,weights),threshold=median*.5;
-  const equity=s.firms.map(f=>Math.max(0,(f.capital+(f.infrastructureCapital??0))*(m.investmentPrice??cpi)+f.cash+f.inventory*f.price-f.loanLC-f.loanFX*s.exchangeRate));
+  const equity=s.firms.map(f=>Math.max(0,(f.capital+(f.knowledgeCapital??0)+(f.infrastructureCapital??0))*(m.investmentPrice??cpi)+f.cash+f.inventory*f.price-f.loanLC-f.loanFX*s.exchangeRate));
   const privateBank=Math.max(0,s.bank.equity)*(1-s.bank.stateOwnership);
   const wealth=s.households.map((h,i)=>h.cash+h.foreignSavingsUSD*s.exchangeRate-h.loanLC-h.loanFX*s.exchangeRate+sum(equity.map((v,j)=>v*(s.firms[j].domesticOwners[i]+s.firms[j].workerOwners[i])))+privateBank*h.dividendShare);
   const wealthPerPerson=wealth.map((v,i)=>v/(s.population*weights[i]));
@@ -52,7 +53,7 @@ export function socialIndicators(s,{wages=2500,netPrimaryIncome=0}={}) {
   const historicalPrimary=sum(s.history.filter(r=>r.month>=s.month-11&&r.month<s.month).map(r=>r.primaryIncomeReal??0));
   const gniRealPerCapita=Math.max(0,(m.realGDPRolling+historicalPrimary+netPrimaryIncome/cpi)/s.population);
   const gniPPP=gniRealPerCapita*s.parameters.pppConversionFactor;
-  const sectorVA=s.firms.map((f,i)=>Math.max(0,f.production*(1-[.20,.20,.33,.32,.165][i]-f.importCoefficient)));
+  const sectorVA=s.economy?(sectorValueAdded??s.firms.map((f,i)=>f.production*(f.price-sum(OPEN_INPUTS.map((row,j)=>row[i]*s.firms[j].price))-f.importCoefficient*s.exchangeRate*s.worldPriceIndex/100))).map(v=>Math.max(0,v)):s.firms.map((f,i)=>Math.max(0,f.production*(1-[.20,.20,.33,.32,.165][i]-f.importCoefficient)));
   const totalVA=sum(sectorVA);
   const stateOutput=sum(sectorVA.map((v,i)=>v*(s.firms[i].ownership.state+s.firms[i].ownership.municipal)))/Math.max(totalVA,1);
   const incomeTotal=sum(perPerson.map((v,i)=>v*weights[i]));
