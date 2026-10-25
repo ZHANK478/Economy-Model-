@@ -4,7 +4,7 @@
 // Scientific limits retained explicitly in code: political platforms and voting
 // utilities are synthetic; minimum-wage pass-through is not calibrated to legal
 // coverage; informal self-employment is not a separate household production
-// sector; the consolidated bank excludes household bond portfolios; fixed IO
+// sector; non-bank bond portfolios are aggregate and stylised; fixed IO
 // recipes and within-stratum incomes omit substitution and heterogeneity.
 // Twenty months cannot validate long-run demographics or identify causal effects.
 // No documents or report files are generated. Decisions face actual voting rules.

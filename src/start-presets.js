@@ -1,3 +1,6 @@
+import {NATIONAL_ACCOUNTS} from './national-accounts.js';
+import {publicPolicyFromAccounts} from './macro-core.js';
+import {BASE_POLICY} from './config.js';
 import {MACRO_OBSERVATIONS} from './macro-observations.js';
 // Scenario presets, not empirical causal estimates. See docs/START-PRESETS.md.
 import {DEFAULT_CONSTITUTION,PARTY_LABELS} from './political-config.js';
@@ -25,8 +28,11 @@ export const COUNTRY_PRESETS={
 };
 export function newGameOptions({government='presidential',country='middle',party='liberal',resource=true}={}){
  if(!Object.hasOwn(GOVERNMENT_PRESETS,government)||!Object.hasOwn(COUNTRY_PRESETS,country)||!Object.hasOwn(PARTY_LABELS,party))throw new Error('Неизвестный стартовый сценарий');
- const c=COUNTRY_PRESETS[country];
- return {startYear:2000,seed:42,stochastic:false,resourceMode:resource,modelProfile:'balanced',initialGDPPerCapita:c.gdp,initialMacro:structuredClone(MACRO_OBSERVATIONS[({poor:'BGD',middle:'MEX',rich:'FRA'})[country]]),economicStructure:structuredClone(ECONOMIC_STRUCTURES[country]),
- parameters:{initialFertility:c.fertility,initialChildShare:c.childShare,initialElderlyShare:c.elderlyShare},politicalMode:true,
+ const c=COUNTRY_PRESETS[country],accounts=structuredClone(NATIONAL_ACCOUNTS[({poor:'BGD',middle:'MEX',rich:'FRA'})[country]]);
+ const regime=GOVERNMENT_PRESETS[government].constitution.regime,competitive=['democracy','hybrid'].includes(regime),free=regime==='democracy';
+ const macro=MACRO_OBSERVATIONS[accounts.referenceCountry];
+ const policy=publicPolicyFromAccounts({...BASE_POLICY,rate:100*((1+.03)*(1+macro.inflationAnnual)-1),inflationTarget:100*macro.inflationAnnual,electionAdministration:.12,securityBudget:regime==='military'?1.2:.35,patronageBudget:competitive?0:.4,competitiveElections:competitive,freeMedia:free,protectedJudges:free,judicialReview:free,parliamentOversight:competitive,associationFreedom:competitive},accounts);
+ return {initialAccounts:accounts,policy,startYear:2000,seed:42,stochastic:false,resourceMode:resource,modelProfile:'balanced',initialGDPPerCapita:c.gdp,initialMacro:structuredClone(MACRO_OBSERVATIONS[({poor:'BGD',middle:'MEX',rich:'FRA'})[country]]),economicStructure:structuredClone(ECONOMIC_STRUCTURES[country]),
+ parameters:{governanceEfficiencyElasticity:0,competitionEfficiencyElasticity:0,softBudgetEfficiencyPenalty:0,initialFertility:c.fertility,initialChildShare:c.childShare,initialElderlyShare:c.elderlyShare},politicalMode:true,
  politicalOptions:{livingWorld:true,constitution:{...DEFAULT_CONSTITUTION,...GOVERNMENT_PRESETS[government].constitution},agendaSlots:1,decisionLimit:3,dashboardMode:true,partyContinuity:true,playerFamily:party}};
 }

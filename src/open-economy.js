@@ -1,3 +1,5 @@
+import {validateInitialAccounts} from './national-accounts.js';
+import {macroInvestment,balancedInvestment} from './macro-core.js';
 // Shared structural equations. This module never reads poor/middle/rich.
 // SFC cash/asset postings are made by the engine, not by the real-side functions.
 import {validateInitialMacro} from './macro-observations.js';
@@ -67,9 +69,9 @@ export function validateOpenParameters(p){
  for(const k of ['depreciationStructures','depreciationEquipment','knowledgeDepreciation','sovereignLossGivenDefault'])if(!number(p[k],0,.99))throw new Error('Некорректный износ или потеря');
  return p;
 }
-export function initializeOpenEconomy(s,structure,overrides={},revision=3){
+export function initializeOpenEconomy(s,structure,overrides={},revision=4){
  const c=validateStructure(structure);
- if(![1,2,3].includes(revision))throw new Error('Неизвестная ревизия механизмов');
+ if(![1,2,3,4].includes(revision))throw new Error('Неизвестная ревизия механизмов');
  s.economy={version:1,revision,parameters:validateOpenParameters({...OPEN_PARAMETERS,...overrides}),initial:structuredClone(c),
   regions:WORLD_REGIONS.map(r=>({...r,imports:[...r.imports],capital:r.gdp*r.capitalOutput,initialCapital:r.gdp*r.capitalOutput,initialGDP:r.gdp,initialPopulation:r.population,technology:1})),
   frontier:[...FRONTIER],tradeWeights:[],initialTradeCost:c.tradeCost,
@@ -92,6 +94,11 @@ export function initializeOpenEconomy(s,structure,overrides={},revision=3){
   f.workers=employment*c.workerShares[i];
   // Private network stocks were already separated by initializeInfrastructure.
   f.capital=Math.max(grossVA[i]*12*c.capitalOutput[i]-(f.infrastructureCapital??0),grossVA[i]*12);
+  if(revision>=4){
+   const flow=s.base.investment*grossVA[i]/totalVA;
+   const growth=s.initialAccounts?.trendGrowth??s.initialMacro?.realGrowthAnnual??.03;
+   f.capital=flow/(balancedInvestment(1,structuralDepreciation(s),growth));
+  }
   f.initialCapital=f.capital;
   f.wage=grossVA[i]*.58/Math.max(f.workers,1e-9);f.referenceWage=f.wage;
   f.laborProductivity=f.production/Math.max(f.workers,1e-9);
@@ -173,11 +180,17 @@ export function consumptionWeights(s){
  // change of preferences on the first month. Elasticity is an assumption.
  const initial=s.base.consumption/s.base.initialPopulation;
  const current=Math.max(s.metrics.consumption/s.population,.01);
- const old=s.base.consumptionWeights,food=clamp(old[0]*Math.pow(current/initial,-.35),.03,.85);
+ const old=s.base.consumptionWeights,food=clamp(old[0]*Math.pow(current/initial,-.35),s.economy.revision>=4?Math.min(.03,old[0]):.03,.85);
  return old.map((v,i)=>i===0?food:v*(1-food)/(1-old[0]));
 }
 export function investmentOpportunities(s,prev,investmentPrice){
  const e=s.economy,p=e.parameters,delta=structuralDepreciation(s);
+ if(e.revision>=4&&e.macro)return macroInvestment(s,prev,investmentPrice,delta,s.firms.map((f,i)=>{
+  const m=e.macro,initial=m.firms[i],labor=s.population*s.workingAgeShare*s.participation;
+  const referenceLabor=s.base.initialLaborForce??labor;
+  const workers=initial.initialWorkers*labor/referenceLabor;
+  return sectorCapacity(s,f,workers)/(s.base.output[i]/p.normalUtilization);
+ }));
  const risk=p.riskPrice*(1-s.institutions.contractReliability)+s.institutions.ownershipRisk*.08;
  const realBorrow=(1+s.bank.lendingRate)/(1+s.expectedInflation)-1;
  return s.firms.map((f,i)=>{
@@ -259,6 +272,10 @@ export function foreignFinancing(s,prev,flow,{foreignPayment},investmentPrice){
 export function completeTechnology(s,project){
  const f=s.firms[project.sector],e=s.economy,p=e.parameters;
  const installed=project.amount*project.efficiency,ratio=installed/Math.max(f.capital,1e-9);
+ // The old absolute frontier has incompatible sector/country units and was
+ // never estimated. Keep that experiment for old revisions; do not turn an
+ // arbitrary distance into automatic TFP growth or compulsory research costs.
+ if(e.revision>=4)return installed;
  const frontier=e.frontier[project.sector],current=f.technology*f.productivity;
  const gap=Math.max(0,Math.log(frontier/Math.max(current,1e-9)));
  const skills=humanCapital(s.education.meanYears)/humanCapital(12);
@@ -286,13 +303,19 @@ export function validateOpenEconomy(s){
  if(s.initialMacro)validateInitialMacro(s.initialMacro);
  if(s.initialMacro&&!s.provenance.initialMacro)throw new Error('Отсутствует исходный макроэкономический ориентир');
  if(s.provenance.initialMacro&&JSON.stringify(s.provenance.initialMacro)!==JSON.stringify(s.initialMacro))throw new Error('Изменён исходный макроэкономический ориентир');
+ if(s.initialAccounts){validateInitialAccounts(s.initialAccounts);if(JSON.stringify(s.initialAccounts)!==JSON.stringify(s.provenance.initialAccounts))throw new Error('Изменены исходные национальные счета');}
  const e=s.economy,finite=(x,min=0,max=Infinity)=>Number.isFinite(x)&&x>=min&&x<=max;
+ if(e.revision>=4){
+  const m=e.macro;if(!m||m.version!==1||m.calibrationMonth!==0||m.firms?.length!==5||m.households?.length!==10||JSON.stringify(m)!==JSON.stringify(s.provenance.initialMacroCore))throw new Error('Повреждена калибровка макроэкономики');
+  if(!s.base.serviceReference||!finite(s.base.serviceReference.health,1e-12)||!finite(s.base.serviceReference.school,1e-12)||!finite(s.base.educationPerPupil,1e-12))throw new Error('Повреждены единицы услуг');
+  for(const b of s.government.domesticBonds)if(b.householdHoldings&&(!Array.isArray(b.householdHoldings)||b.householdHoldings.length!==10||b.householdHoldings.some(v=>!finite(v))||sum(b.householdHoldings)>b.principal+1e-6))throw new Error('Нарушен учёт держателей облигаций');
+ }
  validateStructure(e.initial);validateStructure(s.provenance.economicStructure);
- if(![1,2,3].includes(s.provenance.initialEconomicRevision??1)||(e.revision??1)<(s.provenance.initialEconomicRevision??1))throw new Error('Повреждена ревизия механизмов');
- if(e.version!==1||![1,2,3].includes(e.revision??1))throw new Error('Неизвестная структурная модель');
+ if(![1,2,3,4].includes(s.provenance.initialEconomicRevision??1)||(e.revision??1)<(s.provenance.initialEconomicRevision??1))throw new Error('Повреждена ревизия механизмов');
+ if(e.version!==1||![1,2,3,4].includes(e.revision??1))throw new Error('Неизвестная структурная модель');
  validateOpenParameters(e.parameters);validateOpenParameters(s.provenance.initialEconomicParameters);
  let historicalRevision=s.provenance.initialEconomicRevision??1;
- for(const entry of s.journal??[]){const revision=entry.economicRevision??historicalRevision;if(![1,2,3].includes(revision)||revision<historicalRevision)throw new Error('Повреждена история ревизий');historicalRevision=revision;}
+ for(const entry of s.journal??[]){const revision=entry.economicRevision??historicalRevision;if(![1,2,3,4].includes(revision)||revision<historicalRevision)throw new Error('Повреждена история ревизий');historicalRevision=revision;}
  if((e.revision??1)<historicalRevision)throw new Error('Состояние не соответствует истории ревизий');
  if(!Array.isArray(e.regions)||e.regions.length!==3||e.regions.some((r,i)=>r.id!==WORLD_REGIONS[i].id||!['gdp','population','capital','initialCapital','initialGDP','initialPopulation','technology'].every(k=>finite(r[k],1e-12))||!finite(r.saving,0,1)||!finite(r.laborGrowth,-.05,.1)||!finite(r.technologyGrowth,-.05,.1)||!Array.isArray(r.imports)||r.imports.length!==5||r.imports.some(v=>!finite(v,0,1))))throw new Error('Повреждён мировой рынок');
  if(!Array.isArray(e.frontier)||e.frontier.length!==5||e.frontier.some(v=>!finite(v,1e-12))||!Array.isArray(e.tradeWeights)||e.tradeWeights.length!==5||e.tradeWeights.some(v=>!finite(v,0,1)))throw new Error('Повреждены торговые связи');

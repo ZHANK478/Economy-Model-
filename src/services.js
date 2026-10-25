@@ -18,9 +18,11 @@ export function privateServicePlans(s,ordinaryBudget,servicePrice){
 }
 export function settleServices(s,prev,flow,plans,alpha,price,publicPrice=price){
   const a=s.services,k=s.parameters;
-  const publicHealth=flow.healthcare/publicPrice/Math.max(s.population*10,1);
+  const healthCost=s.economy?.revision>=4?s.base.serviceReference.health:10;
+  const schoolCost=s.economy?.revision>=4?s.base.serviceReference.school:7.5;
+  const publicHealth=flow.healthcare/publicPrice/Math.max(s.population*healthCost,1e-9);
   const pupilRatio=(s.ageCohorts[0]/s.population)/.28;
-  const publicSchool=flow.education/publicPrice/Math.max(s.population*7.5*pupilRatio,1);
+  const publicSchool=flow.education/publicPrice/Math.max(s.population*schoolCost*pupilRatio,1);
   a.publicHealthCapacity+=k.serviceCapacityAdjustment*(clamp(publicHealth,0,2)-a.publicHealthCapacity);
   a.publicEducationCapacity+=k.serviceCapacityAdjustment*(clamp(publicSchool,0,2)-a.publicEducationCapacity);
   a.publicHealthDelivered=Math.min(a.publicHealthCapacity,publicHealth);
@@ -29,8 +31,8 @@ export function settleServices(s,prev,flow,plans,alpha,price,publicPrice=price){
   const privateCapacity=clamp(firm.capital/Math.max(firm.initialCapital,1)*firm.managementEfficiency,.1,5);
   const health=sum(plans.map(p=>p.health))*alpha,school=sum(plans.map(p=>p.education))*alpha,care=sum(plans.map(p=>p.care))*alpha;
   a.privateHealth=health*price;a.privateEducation=school*price;a.privateChildcare=care*price;
-  a.healthByGroup=plans.map((p,i)=>clamp(a.publicHealthDelivered+Math.min(privateCapacity,p.health*alpha/Math.max(s.population*s.households[i].population*10,1e-6)),0,1));
-  a.educationByGroup=plans.map((p,i)=>clamp(a.publicEducationDelivered+Math.min(privateCapacity,p.education*alpha/Math.max(s.population*s.households[i].population*7.5*pupilRatio,1e-6)),0,1));
+  a.healthByGroup=plans.map((p,i)=>clamp(a.publicHealthDelivered+Math.min(privateCapacity,p.health*alpha/Math.max(s.population*s.households[i].population*healthCost,1e-6)),0,1));
+  a.educationByGroup=plans.map((p,i)=>clamp(a.publicEducationDelivered+Math.min(privateCapacity,p.education*alpha/Math.max(s.population*s.households[i].population*schoolCost*pupilRatio,1e-6)),0,1));
   a.healthCoverage=sum(a.healthByGroup.map((v,i)=>v*s.households[i].population));
   a.educationCoverage=sum(a.educationByGroup.map((v,i)=>v*s.households[i].population));
   const careTarget=clamp((flow.childcare/publicPrice+care)/Math.max(s.ageCohorts[0]*2.5,1),0,1);

@@ -1,6 +1,9 @@
+import {settleBankForeignInterest,initializeNonbankHolders,nonbankDebt,bankBondPrincipal,subscribeHouseholds,domesticCouponShares,distributeCoupon,redeemDomestic} from './bond-market.js';
+import {calibrateMacroCore,macroConsumption,purchaseShare,monthlyDepreciation} from './macro-core.js';
+import {validateInitialAccounts} from './national-accounts.js';
 import {CALCULATION_BUILD,accountSnapshot,initialDiagnostic,diagnosticWarnings,diagnosticEnvelope} from './calculation-diagnostics.js';
 import {validateInitialMacro} from './macro-observations.js';
-import {allocateMarket} from './market-allocation.js';
+import {allocateMarket,allocateMarketWithStocks} from './market-allocation.js';
 import {worldEvent} from './world-events.js';
 import {validateStructure} from './economic-structure.js';
 import {OPEN_INPUTS,initializeOpenEconomy,advanceWorldEconomy,sectorCapacity,structuralLaborDemand,structuralDepreciation,exportDemand,importUnitPrice,domesticImportShare,investmentOpportunities,consumptionWeights as structuralConsumptionWeights,foreignFinancing,foreignCreditLimitUSD,completeTechnology,observeOperatingSurplus,openEconomyMetrics,validateOpenEconomy,actuarialSpread} from './open-economy.js';
@@ -70,17 +73,17 @@ function privateLoans(s) {return sum(borrowers(s).map(x=>x.loanLC+x.loanFX*s.exc
 function domesticDebt(s) {return sum(s.government.domesticBonds.map(x=>x.principal));}
 function externalDebtUSD(s) {return sum(s.government.externalBonds.map(x=>x.principal));}
 function bankAssets(s) {
-  return privateLoans(s)+domesticDebt(s)+s.bank.reserves+s.bank.foreignAssetsUSD*s.exchangeRate;
+  return privateLoans(s)+domesticDebt(s)-nonbankDebt(s)+s.bank.reserves+s.bank.foreignAssetsUSD*s.exchangeRate;
 }
-function bankResidual(s) {return bankAssets(s)-deposits(s)-s.bank.centralBorrowing-s.bank.equity;}
+function bankResidual(s) {return bankAssets(s)-deposits(s)-s.bank.centralBorrowing-(s.bank.foreignArrearsUSD??0)*s.exchangeRate-s.bank.equity;}
 function netForeignAssetsUSD(s) {
-  return s.bank.foreignAssetsUSD+s.government.reservesUSD+s.government.fundUSD
+  return s.bank.foreignAssetsUSD-(s.bank.foreignArrearsUSD??0)+s.government.reservesUSD+s.government.fundUSD
     +sum(s.households.map(h=>h.foreignSavingsUSD))-externalDebtUSD(s)-sum(s.firms.map(f=>f.foreignEquityUSD));
 }
 function riskAssets(s) {
   const fx=Math.max(0,s.bank.foreignAssetsUSD)*s.exchangeRate;
-  const openPosition=s.policy.monetaryRegime==='dollarized'?0:Math.abs(s.bank.foreignAssetsUSD+sum(borrowers(s).map(a=>a.loanFX)))*s.exchangeRate;
-  return privateLoans(s)+(.2+(s.government.defaultActive?.8:0))*domesticDebt(s)+s.parameters.foreignAssetRiskWeight*fx+s.parameters.fxRiskWeight*openPosition;
+  const openPosition=s.policy.monetaryRegime==='dollarized'?0:Math.abs(s.bank.foreignAssetsUSD-(s.bank.foreignArrearsUSD??0)+sum(borrowers(s).map(a=>a.loanFX)))*s.exchangeRate;
+  return privateLoans(s)+(.2+(s.government.defaultActive?.8:0))*(domesticDebt(s)-nonbankDebt(s))+s.parameters.foreignAssetRiskWeight*fx+s.parameters.fxRiskWeight*openPosition;
 }
 function bankCapital(s) {return s.bank.equity/Math.max(1,riskAssets(s));}
 function bankLeverage(s) {return s.bank.equity/Math.max(1,bankAssets(s)+Math.max(0,-s.bank.foreignAssetsUSD)*s.exchangeRate);}
@@ -121,7 +124,10 @@ export function treasuryForeignLiquidity(s,requestedUSD,flow){
   const convert=Math.min(Math.max(0,requestedUSD-privateLiquidity),Math.max(0,s.government.reservesUSD),Math.max(0,s.bank.reserves)/s.exchangeRate,Math.max(0,s.government.cash)/s.exchangeRate);
   s.government.reservesUSD-=convert;s.bank.reserves-=convert*s.exchangeRate;s.bank.foreignAssetsUSD+=convert;
   flow.reserveRedemption=(flow.reserveRedemption??0)+convert*s.exchangeRate;
-  return availableForeignLiquidity(s);
+  // Treasury's own reserve conversion is usable for its payment even when the
+  // commercial bank has already breached its private credit line. Re-applying
+  // that line here incorrectly confiscated official FX and created a default.
+  return s.economy.revision>=4?privateLiquidity+convert:availableForeignLiquidity(s);
 }
 function grantLoan(s,actor,amount,fxShare=0) {
   if(amount<=0) return;
@@ -174,8 +180,9 @@ function fundGovernment(s,needed,flow) {
   const bankHeadroom=Math.max(0,(s.bank.equity/(s.policy.bankCapitalRequirement/100)-riskAssets(s))/bondWeight);
   const domestic=Math.min(amount-foreign,bankHeadroom,Math.max(0,gdpAnnual*.12));
   issueExternal(s,foreign,flow); issueDomestic(s,domestic,flow);
-  flow.unfunded+=shortage-foreign-domestic;
-  (flow.financingRequests??=[]).push({needed,cashBefore,shortage,debt,gdpAnnual,debtCeilingHeadroom:capacity,marketAccess:access,bankHeadroom,bondWeight,domesticIssued:domestic,foreignIssuedLC:foreign,unfunded:shortage-foreign-domestic});
+  const nonbank=subscribeHouseholds(s,Math.max(0,amount-foreign-domestic),flow);
+  flow.unfunded+=shortage-foreign-domestic-nonbank;
+  (flow.financingRequests??=[]).push({needed,cashBefore,shortage,debt,gdpAnnual,debtCeilingHeadroom:capacity,marketAccess:access,bankHeadroom,bondWeight,domesticIssued:domestic,nonbankIssued:nonbank,foreignIssuedLC:foreign,unfunded:shortage-foreign-domestic-nonbank});
 }
 
 export function sanitizePolicy(policy) {
@@ -207,6 +214,7 @@ function validateParameters(parameters) {
 }
 
 export function createSimulation(options={}) {
+  const initialAccounts=options.initialAccounts?validateInitialAccounts(options.initialAccounts):null;
   const initialMacro=options.initialMacro?validateInitialMacro(options.initialMacro):null;
   const structure=options.economicStructure?validateStructure(options.economicStructure):null;
   const initialGDPPerCapita=options.initialGDPPerCapita??6000;
@@ -221,17 +229,19 @@ export function createSimulation(options={}) {
   const investmentWeights=[.01,.08,.31,.55,.05];
   const governmentWeights=[.03,.06,.14,.28,.49];
   const exportWeights=resource?(structure?[.04,.64,.22,.00,.10]:[.10,.64,.16,.00,.10]):structure?[...structure.exportWeights]:[.18,.08,.46,.00,.28];
-  const [C,I,G]=[2500,1000,700];let X=1700;
+  const serviceBudgetShare=initialAccounts?Math.min(.5,(p.privateHealthEntry?parameters.privateHealthDemand+.11*(1-structure.healthAccess):0)+(p.privateEducationEntry?parameters.privateEducationDemand+.08*(1-Math.min(1,structure.expectedSchooling/12))+.003:0)+.024):0;
+  const serviceVolumeShare=serviceBudgetShare/(serviceBudgetShare+(1-serviceBudgetShare)/(1+p.vat/100));
+  const [C,I,G]=initialAccounts?[initialAccounts.consumptionGDP/(1+(1-serviceVolumeShare)*p.vat/100),initialAccounts.investmentGDP-p.publicInvestment,initialAccounts.governmentConsumptionGDP+p.publicInvestment]:[2500,1000,700];let X=1700;
   if([C,I,G,X].some(x=>!Number.isFinite(x)||x<=0)) throw new Error('Некорректный начальный спрос');
   let cf=.16,iv=.40,gv=.13;const matrix=structure?OPEN_INPUTS:INPUTS;
   let importCoefficients=[.06,.07,.18,.10,.035];
   const initialMarket=(basket,importShare)=>{
     const va=importCoefficients.map((v,i)=>1-colsum(i,matrix)-v);
-    const domestic=zeros().map((_,i)=>C*(1-importShare)*basket[i]+I*(1-iv)*investmentWeights[i]+G*(1-gv)*governmentWeights[i]);
+    const domestic=zeros().map((_,i)=>C*(1-serviceVolumeShare)*(1-importShare)*basket[i]+(i===4?C*serviceVolumeShare:0)+I*(1-iv)*investmentWeights[i]+G*(1-gv)*governmentWeights[i]);
     const noExports=solveLeontief(domestic,matrix),exportUnit=solveLeontief(exportWeights,matrix);
-    const x=structure?structure.exportGDPShare*(dot(noExports,va)+C*BASE_POLICY.vat/100)/(1-structure.exportGDPShare*dot(exportUnit,va)):X;
-    const output=noExports.map((v,i)=>v+exportUnit[i]*x),gdp=dot(output,va)+C*BASE_POLICY.vat/100;
-    const imports=C*importShare+I*iv+G*gv+dot(output,importCoefficients);
+    const x=structure?structure.exportGDPShare*(dot(noExports,va)+C*(1-serviceVolumeShare)*(initialAccounts?p.vat:BASE_POLICY.vat)/100)/(1-structure.exportGDPShare*dot(exportUnit,va)):X;
+    const output=noExports.map((v,i)=>v+exportUnit[i]*x),gdp=dot(output,va)+C*(1-serviceVolumeShare)*(initialAccounts?p.vat:BASE_POLICY.vat)/100;
+    const imports=C*(1-serviceVolumeShare)*importShare+I*iv+G*gv+dot(output,importCoefficients);
     return {output,gdp,x,imports,agricultureShare:output[0]*va[0]/gdp};
   };
   if(structure){
@@ -263,6 +273,7 @@ export function createSimulation(options={}) {
   const hhShares=GROUPS.map(g=>g.wageShare*.8+g.dividendShare*.2);
   const s={
     version:VERSION,...(initialMacro?{initialMacro}:{}),month:0,startYear:options.startYear??2000,resourceMode:resource,
+    ...(initialAccounts?{initialAccounts}:{}),
     seed:Number(options.seed??42)>>>0,stochastic:Boolean(options.stochastic),
     policy:p,parameters,world:{...WORLD,...options.world},shocks:[],modelProfile:options.modelProfile??'balanced',
     population:10,ageCohorts:[2.8,6.5,.7],participation:.70,workingAgeShare:.65,exchangeRate:1,
@@ -301,7 +312,7 @@ export function createSimulation(options={}) {
   if(!(s.modelProfile in MODEL_PROFILES))throw new Error('Неизвестный профиль модели');
   initializeInstitutions(s);
   initializePolitics(s);initializeMonetary(s);initializeLabor(s);initializeServices(s);initializeInfrastructure(s);
-  if(structure){s.base.imports=calibrated.imports*scale;initializeOpenEconomy(s,structure,options.economicParameters,options.economicRevision??3);s.parameters.annualDepreciation=structuralDepreciation(s);}
+  if(structure){s.base.imports=calibrated.imports*scale;initializeOpenEconomy(s,structure,options.economicParameters,options.economicRevision??4);s.parameters.annualDepreciation=structuralDepreciation(s);}
   if(initialMacro){
     // Missing French lending data uses an explicit model spread over observed
     // deposits; it must not be mistaken for a measured French lending rate.
@@ -311,6 +322,7 @@ export function createSimulation(options={}) {
   }
   initializeJournal(s);
   if(initialMacro)s.provenance.initialMacro=copy(initialMacro);
+  if(initialAccounts)s.provenance.initialAccounts=copy(initialAccounts);
   if(structure){s.provenance.economicStructure=copy(structure);s.provenance.initialEconomicParameters=copy(s.economy.parameters);s.provenance.initialEconomicRevision=s.economy.revision;}
   if(options.initialGDPPerCapita!==undefined)s.provenance.initialGDPPerCapita=initialGDPPerCapita;
   s.bank.equity=bankAssets(s)-deposits(s);
@@ -337,6 +349,7 @@ export function createSimulation(options={}) {
   for(const bond of [...s.government.domesticBonds,...s.government.externalBonds]) bond.principal*=debtScale;
   s.bank.equity=riskAssets(s)*.12;
   s.bank.reserves=deposits(s)+s.bank.equity-privateLoans(s)-domesticDebt(s);
+  if(s.economy?.revision>=4)initializeFinancialStocks(s,initialAnnualGDP);
   s.centralBank.equity=s.government.reservesUSD*s.exchangeRate+s.bank.centralBorrowing-s.bank.reserves;
   s.metrics.capitalRatio=bankCapital(s)*100;s.metrics.bankLiquidity=s.bank.reserves/deposits(s)*100;
   s.metrics.foreignDebtRatio=externalDebtUSD(s)/s.metrics.nominalGDPAnnual*100;
@@ -345,8 +358,59 @@ export function createSimulation(options={}) {
   initializePoliticalSystem(s,options);
   s.metrics={...s.metrics,...politicsMetrics(s)};
   s.history[s.history.length-1]={...s.metrics,consumerPriceIndex:100,synthetic:false};
+  if(s.economy?.revision>=4){
+    s.base.initialLaborForce=s.population*s.workingAgeShare*s.participation;
+    initializeHouseholdFlowReference(s);
+    calibrateMacroCore(s,structuralDepreciation(s));
+    s.provenance.initialMacroCore=copy(s.economy.macro);
+    s.metrics={...s.metrics,...socialIndicators(s,{wages:sum(s.firms.map(f=>f.workers*f.wage))})};
+    s.history[s.history.length-1]={...s.metrics,consumerPriceIndex:100,synthetic:false};
+    s.base.serviceReference={health:Math.max(1e-9,s.base.monthlyGDP*p.healthcare/100/(s.population*Math.max(.01,s.services.publicHealthCapacity))),school:Math.max(1e-9,s.base.monthlyGDP*p.education/100/(s.population*((s.ageCohorts[0]/s.population)/.28)*Math.max(.01,s.services.publicEducationCapacity)))};
+    s.base.educationPerPupil=s.base.monthlyGDP*p.education/100/(s.population*((s.ageCohorts[0]/s.population)/.28));
+  }
   s.diagnosticBaseline=initialDiagnostic(s,s.economy?investmentOpportunities(s,s,1):[]);
   return s;
+}
+
+function initializeFinancialStocks(s,annualGDP){
+ initializeNonbankHolders(s);
+ const ratio=s.policy.reserveRequirement/100;
+ const inferredTotal=(privateLoans(s)+domesticDebt(s)-nonbankDebt(s)-s.bank.equity)/Math.max(.1,1-ratio);
+ const privateDeposits=s.initialAccounts?.broadMoneyGDP===null?Math.max(annualGDP*.1,inferredTotal-s.government.cash):(s.initialAccounts?.broadMoneyGDP??40)/100*annualGDP;
+ const householdPool=privateDeposits*.7,firmPool=privateDeposits*.3;
+ const referenceC=s.base.consumption*(1+s.policy.vat/100),transactionCash=Math.min(householdPool,referenceC*1.5);
+ s.households.forEach(h=>{h.cash=transactionCash*h.consumption/s.base.consumption+(householdPool-transactionCash)*h.dividendShare;});
+ const gross=sum(s.firms.map(f=>f.production));s.firms.forEach(f=>{f.cash=firmPool*f.production/gross;});
+ s.bank.reserves=deposits(s)*ratio;
+ // Solve equity and net foreign assets jointly because FX positions enter RWA.
+ for(let i=0;i<100;i++){
+  s.bank.foreignAssetsUSD=(deposits(s)+s.bank.equity-privateLoans(s)-(domesticDebt(s)-nonbankDebt(s))-s.bank.reserves)/s.exchangeRate;
+  s.bank.equity=riskAssets(s)*.12;
+ }
+ s.bank.foreignAssetsUSD=(deposits(s)+s.bank.equity-privateLoans(s)-(domesticDebt(s)-nonbankDebt(s))-s.bank.reserves)/s.exchangeRate;
+ s.base.financialCalibration={privateDeposits,broadMoneyReference:s.initialAccounts?.broadMoneyGDP??null,missingMoneyData:s.initialAccounts?.broadMoneyGDP==null,householdDepositShare:.7,nonbankSovereignShare:.7,transactionMonths:1.5,bankForeignAssetsUSD:s.bank.foreignAssetsUSD,bankReserves:s.bank.reserves};
+}
+
+function initializeHouseholdFlowReference(s){
+ const p=s.policy,k=s.parameters,y=s.base.monthlyGDP;
+ const transferTotal=y*p.transfers/100*(.6+.4*(s.ageCohorts[2]/s.population)/.07),family=y*p.familyBenefits/100*(s.ageCohorts[0]/s.population)/.28;
+ const remittances=y*(s.initialAccounts?.remittancesGDP??1)/100;
+ const bondCoupons=domesticCouponShares(s).households;
+ const income=s.households.map((h,j)=>bondCoupons[j]+h.cash*annualToMonthly(s.bank.depositRate)+h.foreignSavingsUSD*annualToMonthly(s.world.globalRate/100)+(transferTotal+remittances)*GROUPS[j].transferShare+family*GROUPS[j].familyShare);
+ for(const f of s.firms){
+  const i=s.firms.indexOf(f),payroll=f.workers*f.wage,wages=laborWageShares(s,f,GROUPS);
+  GROUPS.forEach((g,j)=>{const tax=clamp(p.incomeTax/100+p.incomeTaxProgressivity*.15*Math.log(Math.max(.01,wages[j]/g.population)),0,.60)*s.institutions.taxCompliance;income[j]+=payroll*wages[j]*(1-tax);});
+  const revenue=f.production*f.price,input=dot(inputMatrix(s).map(row=>row[i]),s.firms.map(x=>x.price))*f.production+f.production*f.importCoefficient;
+  const royalty=i===1&&s.resourceMode?revenue*p.royalty/100:0;
+  const interest=(f.loanLC+f.loanFX)*annualToMonthly(f.averageRate),depreciation=f.capital*monthlyDepreciation(k.annualDepreciation);
+  const profit=revenue-input-payroll-interest-royalty-depreciation,tax=Math.max(0,profit)*p.corporateTax/100*s.institutions.taxCompliance;
+  const dividend=Math.max(0,profit-tax)*k.dividendPayout;
+  GROUPS.forEach((g,j)=>{income[j]+=dividend*(f.domesticOwners[j]+f.workerOwners[j]);});
+ }
+ s.households.forEach((h,j)=>{h.income=income[j];h.interestPaid=(h.loanLC+h.loanFX)*annualToMonthly(h.averageRate);});
+ s.base.referenceIncome=sum(s.households.map(h=>h.income-h.interestPaid));
+ s.base.initialGroupIncomes=s.households.map(h=>h.income-h.interestPaid);
+ s.incomeHistory=Array.from({length:12},(_,j)=>({month:j-11,population:s.population,cpi:100,net:[...s.base.initialGroupIncomes],market:[...s.base.initialGroupIncomes],synthetic:true}));
 }
 
 function initialMetrics(s) {
@@ -407,7 +471,28 @@ export function scheduleShock(s,{key,multiplier,start=s.month+1,duration=12}) {
   s.shocks.push({key,multiplier,start,duration});
 }
 
-export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision=false}={}) {
+export function advanceMonth(state,policy=state.policy,options={}) {
+  const first=advanceMonthCandidate(state,policy,options);
+  if(!(state.economy?.revision>=4)||fixedExchange(state)||!first.lastReport.diagnostics?.foreignFundingGapUSD)return first;
+  // Find the smallest depreciation that clears desired goods payments at the
+  // available private FX line. Recompute all LC postings at that rate; no FX or
+  // deposits are invented. The 20% monthly log limit is a numerical scenario
+  // boundary, exported as such, not an empirical exchange-rate prediction.
+  const base=Math.log(first.exchangeRate/state.exchangeRate),ceiling=.20;
+  if(base>=ceiling)return first;
+  const at=logChange=>advanceMonthCandidate(state,policy,{...options,exchangeLogOverride:logChange});
+  let upper=at(ceiling),chosen=upper,iterations=1;
+  if((upper.lastReport.diagnostics.foreignFundingGapUSD??0)<=1e-7){
+    let lo=base,hi=ceiling;
+    for(let j=0;j<14;j++){const mid=(lo+hi)/2,candidate=at(mid);iterations++;if((candidate.lastReport.diagnostics.foreignFundingGapUSD??0)>1e-7)lo=mid;else {hi=mid;chosen=candidate;}}
+  }
+  const solve={method:'minimum-depreciation-goods-FX-clearing',iterations,initialLogChange:base,settledLogChange:Math.log(chosen.exchangeRate/state.exchangeRate),ceilingReached:(chosen.lastReport.diagnostics.foreignFundingGapUSD??0)>1e-7};
+  if(solve.ceilingReached){const warning={code:'FX-clearing-scenario-boundary',observed:.20,threshold:.20};chosen.lastReport.calculationTrace.warnings.push(warning);chosen.journal.at(-1).calculationTrace.warnings.push({...warning});}
+  chosen.lastReport.diagnostics.fxMarketSolve=solve;chosen.lastReport.calculationTrace.report.diagnostics.fxMarketSolve=solve;
+  chosen.journal.at(-1).calculationTrace.report.diagnostics.fxMarketSolve=solve;
+  return chosen;
+}
+function advanceMonthCandidate(state,policy=state.policy,{preserveEconomicRevision=false,exchangeLogOverride=null}={}) {
   if(state.politics.enabled&&!state.politics.executive.inOffice)return copy(state);
   // Historical entries are immutable. Copy live accounts, not an ever-growing
   // journal on every month; callers' histories are never modified.
@@ -442,6 +527,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const initialDebt=domesticDebt(prev)+externalDebtUSD(prev)*prev.exchangeRate;
   const debtRatio=initialDebt/Math.max(prev.metrics.nominalGDPAnnual,1);
   const fundingRisk=refinancingRisk(s);
+  flow.defaultProbability=fundingRisk.annualProbability;
   flow.marketClosed=s.stochastic&&uniform(s.seed,s.month,9)<fundingRisk.monthlyProbability;
   flow.sovereignSpread=.025+(s.economy?actuarialSpread(fundingRisk.annualProbability,s.economy.parameters.sovereignLossGivenDefault,w.globalRate/100):k.sovereignRiskSensitivity*Math.max(0,debtRatio-.60))+.025*(1-s.institutions.confidence)+.03*Math.max(0,prev.metrics.reserveMonths<3?1-prev.metrics.reserveMonths/3:0)
     +(gov.defaultActive||s.month<gov.excludedUntil?.05:0);
@@ -449,15 +535,15 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const realPolicy=realInterestRate(effectiveRate/100,s.expectedInflation);
   const flowPressure=-(prev.lastReport.external?.bopUSD??prev.metrics.currentAccountUSD)/Math.max(prev.metrics.nominalGDPMonthly/prev.exchangeRate,1);
   const interventionUSD=fixedExchange(s)?0:clamp(p.fxIntervention,-Math.max(0,gov.cash/prev.exchangeRate),gov.reservesUSD);
-  const exchangeChange=fixedExchange(s)?0:clamp((Math.log1p(s.expectedInflation)-Math.log1p(.02))/12+k.exchangeFlowSensitivity*flowPressure
+  const exchangeChange=exchangeLogOverride??(fixedExchange(s)?0:clamp((Math.log1p(s.expectedInflation)-Math.log1p(.02))/12+k.exchangeFlowSensitivity*flowPressure
     -k.exchangeInterestSensitivity*(realPolicy-realInterestRate(w.globalRate/100,.02))
     -k.exchangeParityAdjustment*Math.log(Math.max(.1,prev.exchangeRate*prev.worldPriceIndex/prev.consumerPriceIndex))
     +.005*Math.max(0,debtRatio-.8)+.006*(.68-s.institutions.confidence)
     -.14*interventionUSD/Math.max(prev.metrics.nominalGDPMonthly/prev.exchangeRate,1)
-    +(s.stochastic?noise(s.seed,s.month,5)*.004:0),-.15,.20);
+    +(s.stochastic?noise(s.seed,s.month,5)*.004:0),-.15,.20));
   s.exchangeRate*=Math.exp(exchangeChange);
   s.centralBank.equity+=prev.government.reservesUSD*(s.exchangeRate-prev.exchangeRate);
-  const bankFXRevaluation=(b.foreignAssetsUSD+sum(borrowers(s).map(a=>a.loanFX)))*(s.exchangeRate-prev.exchangeRate);
+  const bankFXRevaluation=(b.foreignAssetsUSD-(b.foreignArrearsUSD??0)+sum(borrowers(s).map(a=>a.loanFX)))*(s.exchangeRate-prev.exchangeRate);
   b.equity+=bankFXRevaluation;
   if(interventionUSD!==0) {
     gov.reservesUSD-=interventionUSD; foreignPayment(s,gov,interventionUSD); flow.reserveSale=interventionUSD*s.exchangeRate;
@@ -476,7 +562,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   advanceInstitutionOutcomes(s);
   advanceLabor(s,prev,events);
   s.institutions.investmentEfficiency=clamp(.72+.30*(p.taxEnforcement/100-.60)+k.competitionEfficiencyElasticity*(s.institutions.competition-.60),.35,.9);
-  advanceEducation(s,prev.lastReport.fiscal?.education??75);
+  advanceEducation(s,prev.lastReport.fiscal?.education??(s.economy?.revision>=4?s.base.monthlyGDP*p.education/100:75));
   prepareInfrastructure(s,prev,events);
   let completed=0;
   for(const f of s.firms){f.capital*=1+annualToMonthly(-k.annualDepreciation);if(s.economy)f.knowledgeCapital*=Math.pow(1-s.economy.parameters.knowledgeDepreciation,1/12);}
@@ -488,7 +574,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   }
   synchronizeInfrastructure(s);
   s.projects=s.projects.filter(x=>x.due>s.month);
-  const trace={schema:1,sourceBuild:CALCULATION_BUILD,decisionMonth:prev.month,month:s.month,before:accountSnapshot(prev),households:[],investment:[],labor:[],debtService:[],creditGate:null};
+  const trace={schema:2,sourceBuild:CALCULATION_BUILD,decisionMonth:prev.month,month:s.month,before:accountSnapshot(prev),households:[],investment:[],labor:[],debtService:[],creditGate:null};
   if(!s.diagnosticBaseline)s.diagnosticBaseline=initialDiagnostic(prev,prev.economy?investmentOpportunities(prev,prev,1):[]);
   const desiredWorkers=s.firms.map((f,i)=>{
     const profile=MODEL_PROFILES[s.modelProfile];
@@ -537,7 +623,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   b.lendingRate+=k.ratePassThrough*(loanTarget-b.lendingRate);
   settleLiquidity(s,flow);
   const loanYield=privateLoans(s)*b.lendingRate*(1-b.npl);
-  const bondYield=sum(gov.domesticBonds.map(bond=>bond.principal*bond.rate));
+  const bondYield=sum(gov.domesticBonds.map(bond=>bankBondPrincipal(bond)*bond.rate));
   const reserveYield=hasDiscretionaryCB(s)?b.reserves*effectiveRate/100*k.reserveRemunerationShare
     :p.monetaryRegime==='dollarized'?Math.min(b.reserves,gov.reservesUSD*s.exchangeRate)*w.globalRate/100:0;
   const foreignAssetYield=Math.max(0,b.foreignAssetsUSD)*s.exchangeRate*w.globalRate/100;
@@ -566,7 +652,10 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
     trace.debtService.push({actor:s.households.includes(a)?'household':'firm',index:s.households.includes(a)?s.households.indexOf(a):s.firms.indexOf(a),debtBefore,averageRate:a.averageRate,interestDue:interest,paid,unpaidCapitalized:unpaid,debtAfter:a.loanLC+a.loanFX*s.exchangeRate,depositInterest});
   }
   const wholesaleCost=Math.max(0,-b.foreignAssetsUSD)*annualToMonthly(w.globalRate/100+flow.sovereignSpread);
-  b.foreignAssetsUSD-=wholesaleCost;b.equity-=wholesaleCost*s.exchangeRate;
+  if(s.economy?.revision>=4){
+    const settlement=settleBankForeignInterest(s,wholesaleCost,availableForeignLiquidity(s),flow);
+    if(settlement.unpaid>1e-7)events.push('Банк не полностью оплатил внешние проценты; просрочка записана отдельно от нового кредита.');
+  }else {b.foreignAssetsUSD-=wholesaleCost;b.equity-=wholesaleCost*s.exchangeRate;}
   const foreignYield=annualToMonthly(w.globalRate/100);
   const bankForeignIncome=Math.max(0,b.foreignAssetsUSD)*foreignYield;
   b.foreignAssetsUSD+=bankForeignIncome;b.equity+=bankForeignIncome*s.exchangeRate;
@@ -592,7 +681,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   flow.centralIncome+=remittance;s.centralBank.equity-=remittance;s.centralBank.lastRemittance=remittance;
   // Budget shares refer to the known trailing-year nominal GDP. No second CPI
   // indexation and no imposed real growth unrelated to the actual tax base.
-  const budgetBase=prev.metrics.nominalGDPAnnual/12;
+  const budgetBase=s.economy?.revision>=4?s.base.monthlyGDP*prev.consumerPriceIndex/100:prev.metrics.nominalGDPAnnual/12;
   const administrationShare=.05+.25*Math.pow(p.taxEnforcement/100,2)+p.antitrustBudget+p.courtBudget+p.soeAuditBudget+p.electionAdministration+p.securityBudget+p.patronageBudget;
   const purchaseShare=p.governmentConsumption+p.publicInvestment+p.education+p.healthcare+p.childcareBudget+p.infrastructureMaintenance+administrationShare;
   const requestedPurchases=budgetBase*purchaseShare/100;
@@ -603,21 +692,24 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const maturities=sum(gov.domesticBonds.filter(x=>x.maturity<=s.month).map(x=>x.principal))+sum(gov.externalBonds.filter(x=>x.maturity<=s.month).map(x=>x.principal))*s.exchangeRate;
   trace.budgetPlan={budgetBase,administrationShare,purchaseShare,requestedPurchases,requestedTransfers,requestedFamily,requestedSupport,coupons,maturities,cashBeforeFunding:gov.cash};
   fundGovernment(s,requestedPurchases+requestedTransfers+requestedFamily+requestedSupport+coupons+maturities,flow);
-  const domesticCoupons=sum(gov.domesticBonds.map(x=>yearCoupon(x.principal,x.rate)));
+  s.households.forEach(h=>{h.bondIncome=0;});
+  const couponShares=domesticCouponShares(s);
+  const domesticCoupons=couponShares.total;
   const dcPaid=Math.min(Math.max(0,gov.cash),domesticCoupons);
-  gov.cash-=dcPaid;b.equity+=dcPaid;flow.interest+=dcPaid;
-  if(dcPaid<domesticCoupons) {
+  gov.cash-=dcPaid;distributeCoupon(s,dcPaid,couponShares);flow.interest+=dcPaid;
+  if(domesticCoupons-dcPaid>(s.economy?.revision>=4?1e-9*Math.max(1,domesticCoupons):0)) {
     const unpaid=domesticCoupons-dcPaid;
     gov.domesticBonds.forEach(bond=>{bond.inDefault=true;});
     const contractRate=s.economy?sum(gov.domesticBonds.map(bond=>yearCoupon(bond.principal,bond.rate)*bond.rate))/domesticCoupons:effectiveRate/100+flow.sovereignSpread;
-    gov.domesticBonds.push({principal:unpaid,rate:contractRate,maturity:s.month,inDefault:true,overdue:unpaid});
-    b.equity+=unpaid;flow.interestCapitalized+=unpaid;flow.interest+=unpaid;
+    const unpaidHoldings=couponShares.households.map(v=>v*unpaid/Math.max(domesticCoupons,1e-9));
+    gov.domesticBonds.push({principal:unpaid,rate:contractRate,maturity:s.month,inDefault:true,overdue:unpaid,...(s.economy?.revision>=4?{householdHoldings:unpaidHoldings}:{})});
+    b.equity+=unpaid-sum(unpaidHoldings);flow.interestCapitalized+=unpaid;flow.interest+=unpaid;
     openDefaultEpisode(s,'payment-default',events);
   }
   const externalCoupons=sum(gov.externalBonds.map(x=>yearCoupon(x.principal,x.rate)));
   const ecPaid=Math.min(Math.max(0,gov.cash)/s.exchangeRate,externalCoupons,treasuryForeignLiquidity(s,externalCoupons,flow));
   foreignPayment(s,gov,-ecPaid);flow.interest+=ecPaid*s.exchangeRate;
-  if(ecPaid<externalCoupons) {
+  if(externalCoupons-ecPaid>(s.economy?.revision>=4?1e-9*Math.max(1,externalCoupons):0)) {
     const unpaid=externalCoupons-ecPaid;
     gov.externalBonds.forEach(bond=>{bond.inDefault=true;});
     const contractRate=s.economy?sum(gov.externalBonds.map(bond=>yearCoupon(bond.principal,bond.rate)*bond.rate))/externalCoupons:w.globalRate/100+flow.sovereignSpread;
@@ -627,7 +719,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   }
   for(const bond of gov.domesticBonds.filter(x=>x.maturity<=s.month)) {
     const paid=Math.min(Math.max(gov.cash,0),bond.principal);
-    gov.cash-=paid;bond.principal-=paid;flow.domesticRedeemed+=paid;
+    gov.cash-=paid;redeemDomestic(s,bond,paid);flow.domesticRedeemed+=paid;
     if(bond.principal>1e-6) {bond.inDefault=true;bond.overdue=bond.principal;openDefaultEpisode(s,'payment-default',events);}
   }
   for(const bond of gov.externalBonds.filter(x=>x.maturity<=s.month)) {
@@ -664,7 +756,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const flightUSD=structuralFinance?.flightUSD??Math.min(Math.max(0,wealthy.cash)/s.exchangeRate*.015,
     budgetBase/s.exchangeRate*Math.max(0,.003+(s.expectedInflation-effectiveRate/100)*.08+(1-s.institutions.confidence)*.009)*(1-p.capitalControls/100));
   if(!s.economy){foreignPayment(s,wealthy,-flightUSD);wealthy.foreignSavingsUSD+=flightUSD;}
-  const remittancesUSD=budgetBase/s.exchangeRate*.01;
+  const remittancesUSD=budgetBase/s.exchangeRate*(s.initialAccounts?.remittancesGDP??1)/100;
   GROUPS.forEach((g,i)=>foreignPayment(s,s.households[i],remittancesUSD*g.transferShare));
   let privateInterest=0;for(const a of borrowers(s)) privateInterest+=a.interestPaid;
   const consumerUnitPrices=s.firms.map(f=>f.price);
@@ -678,13 +770,19 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
     const realSavingRate=realInterestRate(b.depositRate,s.expectedInflation);
     const effectiveRealRate=.55*realPolicy+.45*realSavingRate;
     const sensitive=clamp(Math.exp(-k.interestConsumptionElasticity*(effectiveRealRate-k.neutralRealRate)*(1+(1-h.mpc)*2)),.35,1.7);
-    const desired=Math.max(0,((h.income-h.interestPaid)*h.mpc+h.cash*k.wealthAnnuity)*sensitive);
+    const services=privateServicePlans(s,Array(10).fill(1),s.firms[4].price)[0]?.total??0;
+    // Service demand is proportional to budget; recover purchaser price of its
+    // mixture with ordinary taxed goods without counting VAT on exempt services.
+    const serviceFraction=services*s.firms[4].price;
+    const effectiveUnitPrice=1/((1-serviceFraction)/(cUnit*(1+p.vat/100))+serviceFraction/s.firms[4].price);
+    const macro=s.economy?.revision>=4?macroConsumption(s,h,group,effectiveRealRate,effectiveUnitPrice):null;
+    const desired=macro?.desired??Math.max(0,((h.income-h.interestPaid)*h.mpc+h.cash*k.wealthAnnuity)*sensitive);
     const maxLoan=Math.max(0,h.income*12*.60-h.loanLC-h.loanFX*s.exchangeRate)*.025*b.creditSupply;
     const loan=Math.min(maxLoan,Math.max(0,desired-h.cash)*.5);
     grantLoan(s,h,loan,0);creditCreated+=loan;
-    const smoothed=.22*desired+.78*h.consumption*cUnit*(1+p.vat/100);
+    const smoothed=macro?.smoothed??(.22*desired+.78*h.consumption*cUnit*(1+p.vat/100));
     const budget=Math.min(smoothed,Math.max(0,h.cash)*.88);
-    trace.households.push({group,income:h.income,interestPaid:h.interestPaid,mpc:h.mpc,cashBefore,wealthAnnuity:k.wealthAnnuity,effectiveRealRate,rateResponse:sensitive,desiredSpending:desired,creditLimit:maxLoan,creditRequested:Math.max(0,desired-cashBefore)*.5,loanGranted:loan,smoothedSpending:smoothed,cashSpendingLimit:Math.max(0,h.cash)*.88,budget,cashBound:budget<smoothed,consumerUnitPrice:cUnit,vat:p.vat/100});
+    trace.households.push({group,...(macro?{macro}:{}),income:h.income,interestPaid:h.interestPaid,mpc:h.mpc,cashBefore,wealthAnnuity:k.wealthAnnuity,effectiveRealRate,rateResponse:sensitive,desiredSpending:desired,creditLimit:maxLoan,creditRequested:Math.max(0,desired-cashBefore)*.5,loanGranted:loan,smoothedSpending:smoothed,cashSpendingLimit:Math.max(0,h.cash)*.88,budget,cashBound:budget<smoothed,consumerUnitPrice:cUnit,vat:p.vat/100});
     return budget;
   });
   const servicePrice=s.firms[4].price;
@@ -726,7 +824,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const finalDemand=zeros().map((_,i)=>domesticC[i]+domesticI[i]+domesticG[i]+exportVolumes[i]);
   const externalConstraint=s.economy?{availableUSD:Math.max(0,b.foreignAssetsUSD+foreignCreditLimitUSD(s)),finalImportsUSD:(ordinaryCVolume*importShareC+iVolume*investmentImportShare+gVolume*governmentImportShare)*importPrice/s.exchangeRate,exportsUSD:dot(exportVolumes,s.firms.map(f=>f.price))/s.exchangeRate,intermediateUnitUSD:s.firms.map(f=>f.importCoefficient*importPrice/s.exchangeRate)}:null;
   const proportionalMarket=constrainedProduction(s,finalDemand,capacity,externalConstraint);
-  const market=s.economy?.revision>=2&&proportionalMarket.alpha<1-1e-8?allocateMarket({matrix,inventory:s.firms.map(f=>f.inventory),capacity,domestic:domesticC.map((v,i)=>v+domesticI[i]+domesticG[i]),exports:exportVolumes,prices:s.firms.map(f=>f.price),external:externalConstraint}):proportionalMarket;
+  const market=s.economy?.revision>=2&&proportionalMarket.alpha<1-1e-8?(s.economy.revision>=4?allocateMarketWithStocks:allocateMarket)({matrix,inventory:s.firms.map(f=>f.inventory),capacity,domestic:domesticC.map((v,i)=>v+domesticI[i]+domesticG[i]),exports:exportVolumes,prices:s.firms.map(f=>f.price),external:externalConstraint}):proportionalMarket;
   const alpha=market.alpha,exportAlpha=market.exportAlpha??alpha;
   const deliveredFinalDemand=market.delivered??finalDemand.map(v=>v*alpha);
   const requestedProduction=solveLeontief(finalDemand,matrix);
@@ -790,13 +888,15 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
     foreignPayment(s,f,value/s.exchangeRate);revenue[i]+=value;exportNominal+=value;
     f.inventory=Math.max(0,market.ending[i]);
     f.production=production[i];f.utilization=production[i]/Math.max(capacity[i],1e-9);
-    f.salesExpected+=.25*(requestedProduction[i]-f.salesExpected);
+    if(s.economy?.revision>=4)f.unfilledOrders=Math.max(0,requestedProduction[i]-production[i]);
+    const salesSignal=s.economy?.revision>=4?production[i]:requestedProduction[i];
+    f.salesExpected+=.25*(salesSignal-f.salesExpected);
   });
   flow.infrastructureFees=sum(servicePlans.map(p=>p.fee))*alpha*servicePrice;
   s.firms.forEach((f,i)=>{f.maintenanceInputs=production[i]*(matrix[3][i]*s.firms[3].price+matrix[2][i]*s.firms[2].price)*.35;});
   settleInfrastructure(s,flow,{transfer,fundGovernment},events,iUnit);
-  const householdIncome=s.households.map((h,i)=>h.depositIncome+h.foreignIncome*s.exchangeRate+transfersPaid*GROUPS[i].transferShare+familyPaid*GROUPS[i].familyShare+remittancesUSD*s.exchangeRate*GROUPS[i].transferShare);
-  const householdMarket=s.households.map(h=>h.depositIncome+h.foreignIncome*s.exchangeRate);
+  const householdIncome=s.households.map((h,i)=>h.depositIncome+(h.bondIncome??0)+h.foreignIncome*s.exchangeRate+transfersPaid*GROUPS[i].transferShare+familyPaid*GROUPS[i].familyShare+remittancesUSD*s.exchangeRate*GROUPS[i].transferShare);
+  const householdMarket=s.households.map(h=>h.depositIncome+(h.bondIncome??0)+h.foreignIncome*s.exchangeRate);
   let totalWages=0,foreignDividendsUSD=0,reinvestedFDIUSD=0;
   s.firms.forEach((f,i)=>{
     const payroll=f.workers*f.wage*(p.normalWorkweek/40)*(1-f.labor.strikeShare);
@@ -897,7 +997,10 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const deficit=spending-flow.tax-flow.centralIncome-flow.stateDividends;
   gov.lastDeficit=deficit;
   const currentAccountUSD=(exportNominal-importNominal)/s.exchangeRate+remittancesUSD+foreignInvestmentIncomeUSD-externalCoupons-foreignDividendsUSD-wholesaleCost-reinvestedFDIUSD;
-  const bopUSD=currentAccountUSD+inflowUSD+reinvestedFDIUSD-flightUSD+flow.externalIssued-flow.externalRedeemed;
+  const arrearsRepaid=s.economy?.revision>=4?Math.min(b.foreignArrearsUSD??0,Math.max(0,b.foreignAssetsUSD)):0;
+  if(arrearsRepaid>0){b.foreignAssetsUSD-=arrearsRepaid;b.foreignArrearsUSD-=arrearsRepaid;}
+  flow.bankForeignArrearsRepaidUSD=arrearsRepaid;
+  const bopUSD=currentAccountUSD+inflowUSD+reinvestedFDIUSD-flightUSD+flow.externalIssued-flow.externalRedeemed+(flow.bankForeignArrearsCreatedUSD??0)-arrearsRepaid;
   const employment=sum(s.firms.map(f=>f.workers));
   const unemployment=clamp((1-employment/laborForce)*100,0,100);
   // Hiring adjusts to demand; current staffing is not full-employment capacity.
@@ -952,7 +1055,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   const twelveAgo=s.history.find(x=>x.month===s.month-12);
   const rollingNominal=sum(s.history.filter(x=>x.month>=s.month-11).map(x=>x.nominalGDPMonthly))+nominalGDP;
   const debt=domesticDebt(s)+externalDebtUSD(s)*s.exchangeRate;
-  const realIncome=sum(householdIncome)/(cpi/100)/(s.population/s.base.initialPopulation)/s.base.referenceIncome*100;
+  const realIncome=(s.economy?.revision>=4?sum(s.households.map(h=>h.income-h.interestPaid)):sum(householdIncome))/(cpi/100)/(s.population/s.base.initialPopulation)/s.base.referenceIncome*100;
   s.households.forEach((h,i)=>{h.realIncomeIndex=h.income/(cpi/100)/(s.population/s.base.initialPopulation)/Math.max(s.base.initialGroupIncomes[i],1)*100;});
   const priceHistory=twelveAgo?.sectorPrices??Array(5).fill(Math.pow(1.08,(s.month-12)/12));
   const coreWeights=normalize([0,0,.23,.07,.34]);
@@ -1022,6 +1125,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
     unemploymentChange:unemployment-prev.metrics.unemployment,
     capacityBound:production.map((v,i)=>capacity[i]>0&&v>=capacity[i]*(1-1e-7)),
     inventoryBound:market.ending.map((v,i)=>v<=Math.max(1,s.base.output[i])*1e-7),
+    ...(s.economy?.revision>=4?{foreignFundingGapUSD:externalConstraint?Math.max(0,dot(requestedProduction,externalConstraint.intermediateUnitUSD)+externalConstraint.finalImportsUSD-externalConstraint.exportsUSD-externalConstraint.availableUSD):0,inventoryChoice:market.inventoryChoice??'planned-production'}:{}),
     foreignLiquidityBound:externalConstraint?Math.abs(dot(production,externalConstraint.intermediateUnitUSD)+alpha*externalConstraint.finalImportsUSD-exportAlpha*externalConstraint.exportsUSD-externalConstraint.availableUSD)<=Math.max(1,externalConstraint.availableUSD)*1e-7:false,
     domesticOrderFulfillment:alpha,exportOrderFulfillment:exportAlpha,
     procurementRequested:requestedPurchases,procurementPaid:flow.purchases,
@@ -1044,7 +1148,7 @@ export function advanceMonth(state,policy=state.policy,{preserveEconomicRevision
   trace.households.forEach((row,i)=>{row.ordinaryPlannedVolume=householdPlans[i];row.privateServicePlannedVolume=servicePlans[i].total;row.deliveredVolume=s.households[i].consumption;});
   trace.investment.forEach((row,i)=>{row.deliveredVolume=investmentPlans[i]*alpha;row.deliveryFactor=alpha;});
   trace.report=copy(s.lastReport);
-  trace.warnings=diagnosticWarnings(trace.before,trace.after,s.lastReport);
+  trace.warnings=diagnosticWarnings(trace.before,trace.after,s.lastReport,s.history);
   s.lastReport.calculationTrace=trace;
   appendJournal(s,prev,actionResults,w);
   return s;
@@ -1077,7 +1181,7 @@ export function scheduleRestructuring(s,{haircut=.30,extension=60}={}) {
 export function replayJournal(s) {
   const p=s.provenance;
   const politicalOptions=p.politicalOptions?{...p.politicalOptions,instantRules:p.politicalOptions.instantRules??false}:p.politicalOptions;
-  let result=createSimulation({startYear:s.startYear??2026,...(p.initialMacro?{initialMacro:copy(p.initialMacro)}:{}),...(p.initialGDPPerCapita!==undefined?{initialGDPPerCapita:p.initialGDPPerCapita}:{}),...(p.economicStructure?{economicStructure:copy(p.economicStructure),economicParameters:copy(p.initialEconomicParameters),economicRevision:p.initialEconomicRevision??1}:{}),resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
+  let result=createSimulation({startYear:s.startYear??2026,...(p.initialMacro?{initialMacro:copy(p.initialMacro)}:{}),...(p.initialAccounts?{initialAccounts:copy(p.initialAccounts)}:{}),...(p.initialGDPPerCapita!==undefined?{initialGDPPerCapita:p.initialGDPPerCapita}:{}),...(p.economicStructure?{economicStructure:copy(p.economicStructure),economicParameters:copy(p.initialEconomicParameters),economicRevision:p.initialEconomicRevision??1}:{}),resourceMode:p.resourceMode,seed:p.seed,modelProfile:p.modelProfile,policy:p.initialPolicy,parameters:p.initialParameters,world:p.initialWorld,stochastic:p.initialStochastic,politicalMode:p.politicalMode,politicalOptions});
   for(const entry of s.journal){
     result.parameters=copy(entry.parameters);result.world=copy(entry.world);result.shocks=copy(entry.shocks);result.stochastic=entry.stochastic;result.pendingNote=entry.note;
     if(result.economy){
@@ -1103,6 +1207,7 @@ export function importSimulation(text) {
   if(data.format!=='economy-model') throw new Error('Несовместимый формат сохранения');
   if(data.version!==VERSION||data.state?.version!==VERSION) throw new Error('Несовместимая версия: прошлые эксперименты нельзя продолжить по новым уравнениям 5.0. Старый файл сохраняется для анализа.');
   const s=data.state;
+  if(s.bank?.foreignArrearsUSD!==undefined&&(!Number.isFinite(s.bank.foreignArrearsUSD)||s.bank.foreignArrearsUSD<0))throw new Error('Повреждена внешняя просрочка банка');
   if(!Number.isInteger(s.month)||s.month<0||s.month>12000||!Array.isArray(s.firms)||s.firms.length!==5||!Array.isArray(s.households)||s.households.length!==10||!Array.isArray(s.history)||s.history.length<13||!Array.isArray(s.journal)||s.journal.length!==s.month||!s.provenance||!Array.isArray(s.pendingActions)) throw new Error('Повреждённое состояние или журнал');
   const check=v=>{
     if(typeof v==='number'&&!Number.isFinite(v)) throw new Error('Сохранение содержит недопустимое число');

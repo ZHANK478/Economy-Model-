@@ -3,7 +3,7 @@ export const fixedExchange=s=>['currencyBoard','dollarized'].includes(s.policy.m
 export const hasDiscretionaryCB=s=>['discretion','rule'].includes(s.policy.monetaryRegime);
 export function initializeMonetary(s){
   const regime=s.policy.monetaryRegime;
-  const rate=regime==='discretion'?s.policy.rate:regime==='rule'?s.parameters.neutralRealRate*100+s.policy.inflationTarget+1.5*(8-s.policy.inflationTarget)-4
+  const rate=regime==='discretion'?s.policy.rate:regime==='rule'?s.parameters.neutralRealRate*100+s.policy.inflationTarget+1.5*((s.initialAccounts?s.initialMacro.inflationAnnual*100:8)-s.policy.inflationTarget)-(s.initialAccounts?0:4)
     :fixedExchange(s)?s.world.globalRate:s.world.globalRate+6;
   s.monetary={effectiveRate:clamp(rate,0,40),peg:s.exchangeRate,previousRegime:regime};
 }

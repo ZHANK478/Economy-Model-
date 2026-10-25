@@ -24,7 +24,7 @@ test('allocation respects goods, capacities and currency across scales without f
 test('revision keeps historical equations replayable while new investment plans match opening GDP',()=>{
  for(const country of ['poor','middle','rich']){
   const options={...newGameOptions({country,resource:false}),politicalMode:false};
-  const s=createSimulation(options);assert.equal(s.economy.revision,3);
+  const s=createSimulation(options);assert.equal(s.economy.revision,4);
   near(s.firms.reduce((v,f)=>v+f.lastInvestment,0),s.base.investment);
   let old=createSimulation({...options,economicRevision:1});for(let i=0;i<8;i++)old=advanceMonth(old,old.policy,{preserveEconomicRevision:true});
   assert.deepEqual(replayJournal(importSimulation(exportSimulation(old))).metrics,old.metrics);
@@ -33,8 +33,8 @@ test('revision keeps historical equations replayable while new investment plans 
   assert.equal(upgraded.journal.at(-1).economicRevision,3);
   assert.deepEqual(replayJournal(importSimulation(exportSimulation(upgraded))).metrics,upgraded.metrics);
  }
- const invalid=createSimulation({...newGameOptions(),politicalMode:false});invalid.economy.revision=4;assert.throws(()=>importSimulation(exportSimulation(invalid)));
- const brokenHistory=advanceMonth(createSimulation({...newGameOptions(),politicalMode:false}));brokenHistory.journal[0].economicRevision=4;assert.throws(()=>importSimulation(exportSimulation(brokenHistory)));
+ const invalid=createSimulation({...newGameOptions(),politicalMode:false});invalid.economy.revision=5;assert.throws(()=>importSimulation(exportSimulation(invalid)));
+ const brokenHistory=advanceMonth(createSimulation({...newGameOptions(),politicalMode:false}));brokenHistory.journal[0].economicRevision=5;assert.throws(()=>importSimulation(exportSimulation(brokenHistory)));
 });
 test('employee participation has the same governance effect under private and cooperative ownership',()=>{
  const s=createSimulation({...newGameOptions(),politicalMode:false}),f=s.firms[4];

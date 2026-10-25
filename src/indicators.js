@@ -1,3 +1,4 @@
+import {householdBonds} from './bond-market.js';
 import {humanCapital,OPEN_INPUTS} from './open-economy.js';
 // Statistical definitions are established; synthetic strata/PPP/education
 // behaviour are conditional calibration and must not be reported as observations.
@@ -27,7 +28,7 @@ export function advanceEducation(s,previousEducationSpending=0) {
   const pupils=(s.ageCohorts[0]/s.population)/.28;
   const perPupil=previousEducationSpending/cpi/Math.max(s.population*pupils,.01);
   const privateAccess=Math.max(0,(s.services?.educationCoverage??1)-(s.services?.publicEducationDelivered??1));
-  e.access+=1/36*(clamp(perPupil/7.5+privateAccess,.15,4)-e.access);
+  e.access+=1/36*(clamp(perPupil/(s.economy?.revision>=4?s.base.educationPerPupil/Math.max(.01,s.economy.initial.expectedSchooling/12):7.5)+privateAccess,.15,4)-e.access);
   const target=clamp(12*Math.pow(e.access,s.parameters.educationElasticity),5,18);
   e.expectedYears+=1/60*(target-e.expectedYears);
   // Stock of adult attainment adjusts only as new educated generations enter.
@@ -44,7 +45,7 @@ export function socialIndicators(s,{wages=2500,netPrimaryIncome=0,sectorValueAdd
   const median=weightedQuantile(equivalent,weights),threshold=median*.5;
   const equity=s.firms.map(f=>Math.max(0,(f.capital+(f.knowledgeCapital??0)+(f.infrastructureCapital??0))*(m.investmentPrice??cpi)+f.cash+f.inventory*f.price-f.loanLC-f.loanFX*s.exchangeRate));
   const privateBank=Math.max(0,s.bank.equity)*(1-s.bank.stateOwnership);
-  const wealth=s.households.map((h,i)=>h.cash+h.foreignSavingsUSD*s.exchangeRate-h.loanLC-h.loanFX*s.exchangeRate+sum(equity.map((v,j)=>v*(s.firms[j].domesticOwners[i]+s.firms[j].workerOwners[i])))+privateBank*h.dividendShare);
+  const wealth=s.households.map((h,i)=>h.cash+householdBonds(s,i)+h.foreignSavingsUSD*s.exchangeRate-h.loanLC-h.loanFX*s.exchangeRate+sum(equity.map((v,j)=>v*(s.firms[j].domesticOwners[i]+s.firms[j].workerOwners[i])))+privateBank*h.dividendShare);
   const wealthPerPerson=wealth.map((v,i)=>v/(s.population*weights[i]));
   const richest=wealth.map((v,i)=>({v,per:wealthPerPerson[i],weight:weights[i]})).sort((a,b)=>b.per-a.per);
   let left=.1,topWealth=0;for(const h of richest){const take=Math.min(left,h.weight);topWealth+=h.v*take/h.weight;left-=take;if(left<=0)break;}

@@ -8,8 +8,8 @@ test('every new month records actual consumption, investment, labor and budget c
   const start=createSimulation({...newGameOptions({country}),politicalMode:false});
   const next=advanceMonth(start),t=next.journal[0].calculationTrace;
   assert.equal(t.before.month,0);assert.equal(t.after.month,1);assert.equal(t.households.length,10);assert.equal(t.investment.length,5);assert.equal(t.labor.length,5);assert.equal(t.debtService.length,15);
-  for(const h of t.households){near(h.desiredSpending,Math.max(0,((h.income-h.interestPaid)*h.mpc+h.cashBefore*h.wealthAnnuity)*h.rateResponse));near(h.budget,Math.min(h.smoothedSpending,h.cashSpendingLimit));}
-  for(const i of t.investment){near(i.desired,Math.max(0,i.previousInvestment+i.investmentAdjustment*(i.unsmoothedTarget-i.previousInvestment)));near(i.deliveredVolume,i.fundedPlan*i.deliveryFactor);}
+  for(const h of t.households){if(!h.macro)near(h.desiredSpending,Math.max(0,((h.income-h.interestPaid)*h.mpc+h.cashBefore*h.wealthAnnuity)*h.rateResponse));near(h.budget,Math.min(h.smoothedSpending,h.cashSpendingLimit));}
+  for(const i of t.investment){if(i.errorCorrection!==undefined)near(i.desired,i.previousInvestment*Math.exp(i.errorCorrection+i.shortRun));else near(i.desired,Math.max(0,i.previousInvestment+i.investmentAdjustment*(i.unsmoothedTarget-i.previousInvestment)));near(i.deliveredVolume,i.fundedPlan*i.deliveryFactor);}
   near(t.investment.reduce((a,b)=>a+b.deliveredVolume,0),next.metrics.investment);
   near(t.labor.reduce((a,b)=>a+b.workersAfter,0),next.metrics.employment);
   near(t.budgetPlan.requestedPurchases,t.report.diagnostics.procurementRequested);

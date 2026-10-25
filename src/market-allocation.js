@@ -44,3 +44,19 @@ export function allocateMarket({matrix,inventory,capacity,domestic,exports,price
  if(ending.some(v=>v< -tolerance)||external&&externalNeed>external.availableUSD+Math.max(1,external.availableUSD,Math.abs(external.exportsUSD))*1e-8)throw new Error('Распределение превысило доступные ресурсы');
  return {production,intermediate,ending,alpha,exportAlpha,delivered,feasible:true,externalNeed};
 }
+
+// Revision 4 tie-breaking: fulfill orders first. Among equally good allocations,
+// preserve opening stocks rather than liquidating them merely because inventory
+// carries zero cost in the feasibility LP. If stocks improve deliveries, use them.
+export function allocateMarketWithStocks(input){
+ const using=allocateMarket(input);
+ if(input.inventory.every(v=>v===0))return {...using,inventoryChoice:'none'};
+ const preserving=allocateMarket({...input,inventory:input.inventory.map(()=>0)});
+ const score=m=>input.domestic.reduce((a,v,i)=>a+v*input.prices[i]*m.alpha,0)+input.exports.reduce((a,v,i)=>a+v*input.prices[i]*m.exportAlpha,0);
+ const tolerance=Math.max(1,score(using))*1e-8;
+ if(score(preserving)>=score(using)-tolerance){
+  preserving.ending=preserving.ending.map((v,i)=>v+input.inventory[i]);
+  return {...preserving,inventoryChoice:'preserved'};
+ }
+ return {...using,inventoryChoice:'used-for-delivery'};
+}

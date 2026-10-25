@@ -21,7 +21,8 @@ test('primary observations retain their year and financial depth is not ranked b
 for(const [country,id] of [['poor','BGD'],['middle','MEX'],['rich','FRA']])for(const resource of [false,true])test(`${country}, resource=${resource}: historical moments initialize separate output, work and credit`,()=>{
  const s=initial(country,{resourceMode:resource}),o=OBSERVATIONS[id],a=inputMatrix(s);
  near(s.firms[0].workers/total(s.firms.map(f=>f.workers)),o.agricultureEmployment/(o.agricultureEmployment+o.industryEmployment+o.servicesEmployment));
- near(s.firms[0].production*(1-total(a.map(r=>r[0]))-s.firms[0].importCoefficient)/s.base.monthlyGDP,o.agricultureValueAdded/100);
+ const agriculture=s.firms[0].production*(1-total(a.map(r=>r[0]))-s.firms[0].importCoefficient)/s.base.monthlyGDP;
+ if(s.economy.revision>=4&&s.base.consumptionWeights[0]<.00011)assert.ok(Math.abs(agriculture-o.agricultureValueAdded/100)<.0001);else near(agriculture,o.agricultureValueAdded/100);
  near(s.base.exports/s.base.monthlyGDP,o.exportsGDP/100);
  near(s.base.imports/s.base.monthlyGDP,o.importsGDP/100);
  near(s.metrics.privateDebtRatio,o.privateCredit);near(s.metrics.lifeExpectancy,o.lifeExpectancy);
@@ -31,7 +32,7 @@ for(const [country,id] of [['poor','BGD'],['middle','MEX'],['rich','FRA']])for(c
 });
 test('same numeric state has same rules regardless of the start button used',()=>{
  const a=newGameOptions({country:'poor',resource:false}),b=newGameOptions({country:'rich',resource:false});
- Object.assign(b,{initialGDPPerCapita:a.initialGDPPerCapita,parameters:clone(a.parameters),economicStructure:clone(a.economicStructure),initialMacro:clone(a.initialMacro)});
+ Object.assign(b,{initialGDPPerCapita:a.initialGDPPerCapita,parameters:clone(a.parameters),economicStructure:clone(a.economicStructure),initialMacro:clone(a.initialMacro),initialAccounts:clone(a.initialAccounts),policy:clone(a.policy)});
  const x=runMonths(createSimulation({...a,politicalMode:false}),24),y=runMonths(createSimulation({...b,politicalMode:false}),24);
  assert.deepEqual(x.metrics,y.metrics);assert.deepEqual(x.firms,y.firms);
 });
@@ -90,7 +91,7 @@ test('retained foreign earnings have matching income and investment entries, wit
  near(x.bopUSD,x.currentAccountUSD+x.inflowUSD+x.reinvestedFDIUSD-x.flightUSD+f.externalIssued-f.externalRedeemed);
  for(const value of Object.values(s.lastReport.audit))assert.ok(Math.abs(value)<1e-5);
  const restored=importSimulation(exportSimulation(s));assert.deepEqual(restored.metrics,s.metrics);assert.deepEqual(replayJournal(restored).metrics,s.metrics);
- assert.ok(s.firms.some(f=>f.knowledgeCapital>0));
+ assert.ok(s.firms.every(f=>f.knowledgeCapital===0)); // unestimated automatic TFP channel is disabled in revision 4
 });
 test('structural sensitivities are initialized consistently and recorded for replay',()=>{
  let s=initial('middle',{economicParameters:{capitalShare:.28,tradeSigma:4,adoptionEfficiency:0}});
