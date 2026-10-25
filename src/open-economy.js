@@ -198,7 +198,7 @@ export function investmentOpportunities(s,prev,investmentPrice){
   // assumption. It delays responses; it does not force profitable investment.
   const desired=e.revision>=2?Math.max(0,f.lastInvestment+s.parameters.investmentAdjustment*(target-f.lastInvestment)):target;
   const value=enterpriseValue(s,f),yieldEquity=Math.max(0,f.lastProfit)*12/Math.max(value,1);
-  return {sector:i,desired,operatingYield,required,npvPerUnit:operatingYield/required-1,
+  return {sector:i,desired,investmentPrice,capital:f.capital,expectedValueAdded:f.expectedValueAdded,marginalRent,tax,realBorrow,debtShare,depreciation:delta,risk,opportunityCost:s.parameters.neutralRealRate,q,demandLimit,targetCapitalRatio:targetRatio,unsmoothedTarget:target,previousInvestment:f.lastInvestment,investmentAdjustment:s.parameters.investmentAdjustment,operatingYield,required,npvPerUnit:operatingYield/required-1,
    foreignScore:(1+yieldEquity)*1.02-1-(s.world.globalRate/100+.025+risk),expectedSalesRatio:salesRatio};
  });
 }
