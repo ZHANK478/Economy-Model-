@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#174ca1">
+  <meta name="theme-color" content="#1b2530">
   <meta name="description" content="Исследуйте макроэкономику: управляйте политикой государства, переходите по месяцам и сравнивайте экономические гипотезы.">
-  <title>Экономическая лаборатория</title>
+  <title>Республика</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -15,17 +16,13 @@
   <dialog id="new-dialog">
     <form id="new-form">
       <button class="dialog-close" type="button" aria-label="Закрыть">×</button>
-      <span class="eyebrow">ИСХОДНЫЕ УСЛОВИЯ</span>
-      <h2>Новая игра</h2>
-      <p>Январь 2000 года. Вымышленная страна, 10 млн жителей.</p>
+      <span class="eyebrow">2000</span>
+      <h2>Новая игра</h2><p id="new-government-description" hidden></p><p id="new-country-description" hidden></p>
       <label class="field">За кого играешь?<select name="government" id="new-government"></select></label>
-      <p class="small muted" id="new-government-description"></p>
       <label class="field">Партия<select name="party" id="new-party"></select></label>
       <label class="field">Уровень развития страны<select name="country" id="new-country"></select></label>
-      <p class="small muted" id="new-country-description"></p>
-      <label class="field">Структура экономики<select name="resource"><option value="true">Сырьевая: добыча определяет экспорт</option><option value="false">Диверсифицированная: промышленность и услуги</option></select></label>
-      <p class="muted small">Текущий эксперимент будет заменён. Скачайте сохранение, если хотите к нему вернуться. Коэффициенты условные; модель не откалибрована под конкретную страну.</p>
-      <button class="primary wide" type="submit">Начать с января 2000</button>
+      <label class="field">Структура экономики<select name="resource"><option value="true">Сырьевая</option><option value="false">Диверсифицированная</option></select></label>
+      <button class="primary wide" type="submit">Начать</button>
     </form>
   </dialog>
   <noscript>Для работы модели включите JavaScript в браузере.</noscript>

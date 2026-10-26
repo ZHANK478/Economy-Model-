@@ -1,3 +1,4 @@
+import {compactGameCopy} from './ui-presentation.js';
 import {productionPie} from './game-charts.js';
 import {savedWorldEvents} from './world-events.js';
 import {campaignEvent} from './campaign-events.js';
@@ -75,7 +76,7 @@ const metricNames={gdpPerCapitaReal:'Реальный ВВП на человек
 function chart(series,key,{compare=false,compact=false,multi=false}={}) {
   const data=series.map(x=>({...x,points:x.points.filter(p=>p.month>=0&&Number.isFinite(p[key]))}));
   const points=data.flatMap(x=>x.points);
-  if(points.length<2||new Set(points.map(p=>p.month)).size<2) return '<div class="chart-empty"><div><strong>Первое решение — начало графика</strong><br>Измените политику и перейдите к следующему месяцу.</div></div>';
+  if(points.length<2||new Set(points.map(p=>p.month)).size<2) return '<div class="chart-empty">—</div>';
   const narrow=Number.isFinite(globalThis.innerWidth)&&globalThis.innerWidth<=600;
   const W=narrow?360:compact?420:780,H=compact||narrow?220:260,left=52,right=18,top=18,bottom=36;
   let lo=Math.min(...points.map(p=>p[key])),hi=Math.max(...points.map(p=>p[key]));
@@ -116,7 +117,7 @@ function monthlyChange(key){
  const changed=Number(delta.toFixed(digits))!==0;
  const color=!changed?'neutral':CHANGE_HIGHER.has(key)?(delta>0?'positive':'negative'):CHANGE_LOWER.has(key)?(delta<0?'positive':'negative'):'neutral';
  const arrow=!changed?'':delta>0?'↑ ':'↓ ';
- return `<span class="change ${color}" data-change="${key}">${arrow}${changed?signed(delta,digits):n(0,digits)}${CHANGE_POINTS.has(key)?' п.п.':''} за месяц</span>`;
+ return `<span class="change ${color}" data-change="${key}">${arrow}${changed?signed(delta,digits):n(0,digits)}${CHANGE_POINTS.has(key)?' п.п.':''} </span>`;
 }
 function spark(key) {
   const pts=metricSeries(state,key).slice(-18);if(pts.length<2) return '';
@@ -148,15 +149,9 @@ function cards() {
   return '<div class="kpis">'+allCards.slice(0,6).join('')+'</div><details class="more-indicators"><summary>Ещё показатели страны</summary><div class="kpis">'+allCards.slice(6).join('')+'</div></details>';
 }
 function policyControls() {
-  const locked=state.politics.enabled&&decisionBudget(state).optionalRemaining===0;
-  const applicable=key=>!(key==='rate'&&draft.monetaryRegime!=='discretion')&&!(key==='inflationTarget'&&!['discretion','rule'].includes(draft.monetaryRegime))&&!(key==='energyTariff'&&draft.energyPricing==='market')&&!(key==='fxIntervention'&&['currencyBoard','dollarized'].includes(draft.monetaryRegime))&&!(key==='infrastructureFeeCap'&&draft.infrastructurePricing!=='capped');
-  const authority=key=>state.politics.enabled?`<span class="authority-tag">${({law:'Закон',constitution:'Конституционный закон',executive:'Исполнительная власть',centralBank:'Независимый ЦБ'})[policyAuthority(state,key)]}</span>`:'';
-  return (state.politics.enabled&&state.politics.constitution.independentCB&&policyTab==='Кредит'?`<div class="callout dark-callout">Независимый ЦБ рассчитывает ставку: ${pct(state.monetary.effectiveRate)}. Исполнительная власть задаёт мандат законом. Для прямого управления ставкой измените правило независимости в разделе «Конституция».</div>`:'')+POLICY_CHOICES.filter(x=>x[2]===policyTab).map(([key,label,,choices,help])=>`<label class="field policy-choice">${esc(label)} ${authority(key)}<select data-policy-choice="${key}" ${locked?'disabled':''}>${choices.map(([value,name])=>`<option value="${value}" ${draft[key]===value?'selected':''}>${esc(name)}</option>`).join('')}</select><span class="policy-help">${esc(help)}</span></label>`).join('')+POLICY_FIELDS.filter(x=>x[6]===policyTab&&applicable(x[0])&&policyAuthority(state,x[0])!=='centralBank').map(([key,name,min,max,step,unit,,help])=>`
-    <div class="policy-control"><div class="control-title"><label for="policy-${key}">${name} ${authority(key)}</label><output class="control-value" id="value-${key}">${n(draft[key],step<1?2:0)}</output></div>
-
-    <input type="range" id="range-${key}" min="${min}" max="${max}" step="${step}" value="${draft[key]}" data-policy="${key}" ${locked?'disabled':''} aria-label="${name}">
-    <div class="control-meta"><span>${esc(unit)}</span><input id="policy-${key}" type="number" class="number-entry" min="${min}" max="${max}" step="${step}" value="${draft[key]}" data-policy-number="${key}" ${locked?'disabled':''} aria-label="${name}, точное значение"></div>
-    <div class="policy-help">${help}</div></div>`).join('');
+ const locked=state.politics.enabled&&decisionBudget(state).optionalRemaining===0;
+ const applicable=key=>!(key==='rate'&&draft.monetaryRegime!=='discretion')&&!(key==='inflationTarget'&&!['discretion','rule'].includes(draft.monetaryRegime))&&!(key==='energyTariff'&&draft.energyPricing==='market')&&!(key==='fxIntervention'&&['currencyBoard','dollarized'].includes(draft.monetaryRegime))&&!(key==='infrastructureFeeCap'&&draft.infrastructurePricing!=='capped');
+ return (state.politics.enabled&&state.politics.constitution.independentCB&&policyTab==='Кредит'?`<div class="cb-rate">Ставка ЦБ <b>${pct(state.monetary.effectiveRate)}</b></div>`:'')+POLICY_CHOICES.filter(x=>x[2]===policyTab).map(([key,label,,choices])=>`<label class="field policy-choice">${esc(label)}<select data-policy-choice="${key}" ${locked?'disabled':''}>${choices.map(([value,name])=>`<option value="${value}" ${draft[key]===value?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`).join('')+POLICY_FIELDS.filter(x=>x[6]===policyTab&&applicable(x[0])&&policyAuthority(state,x[0])!=='centralBank').map(([key,name,min,max,step,unit])=>`<div class="policy-control"><div class="control-title"><label for="policy-${key}">${name}</label><output class="control-value" id="value-${key}">${n(draft[key],step<1?2:0)}</output></div><input type="range" id="range-${key}" min="${min}" max="${max}" step="${step}" value="${draft[key]}" data-policy="${key}" ${locked?'disabled':''} aria-label="${name}"><div class="control-meta"><span>${esc(unit)}</span><input id="policy-${key}" type="number" class="number-entry" min="${min}" max="${max}" step="${step}" value="${draft[key]}" data-policy-number="${key}" ${locked?'disabled':''} aria-label="${name}, точное значение"></div></div>`).join('');
 }
 function draftBaseRate(){
   if(state.politics.enabled)return state.monetary.effectiveRate;
@@ -164,21 +159,12 @@ function draftBaseRate(){
   return regime==='discretion'?draft.rate:regime==='rule'?Math.max(0,Math.min(40,state.parameters.neutralRealRate*100+draft.inflationTarget+1.5*(state.metrics.inflationYoY-draft.inflationTarget)+.5*state.metrics.outputGap)):['currencyBoard','dollarized'].includes(regime)?state.world.globalRate:Math.max(0,Math.min(40,state.world.globalRate+state.expectedInflation*100-2+Math.max(0,25-state.metrics.bankLiquidity)*.08));
 }
 function sidebar() {
-  const changes=pending();
-  const stopped=state.politics.enabled&&!state.politics.executive.inOffice;
-  const body=`    <div id="policy-controls">${policyControls()}</div>
-    <div class="policy-checks">${POLICY_CHECKS.filter(f=>f[2]===policyTab&&(f[0]!=='liquiditySupport'||['discretion','rule'].includes(draft.monetaryRegime))).map(([key,label,,help])=>`<label class="check"><input type="checkbox" data-policy-check="${key}" ${state.politics.enabled&&decisionBudget(state).optionalRemaining===0?'disabled':''} ${draft[key]?'checked':''}> ${esc(label)}${state.politics.enabled?`<small class="authority-tag">${({law:'Закон',constitution:'Конституционный закон',executive:'Исполнительная власть',centralBank:'Независимый ЦБ'})[policyAuthority(state,key)]}</small>`:''}</label><p class="policy-help">${esc(help)}</p>`).join('')}</div>
-    ${policyTab==='Структура'?'<p class="small muted">Здесь задаются правила и бюджеты. Фактические сроки, исполнение и управление — в разделе «Институты», их нельзя установить ползунком.</p>':''}
-`;
-  return `<aside class="sidebar policy-panel"><div class="sidebar-head"><div><span class="eyebrow">ВАША РОЛЬ · ${state.politics.enabled?'ИСПОЛНИТЕЛЬНАЯ ВЛАСТЬ':'ГОСУДАРСТВО'}</span><h2>Экономическая политика</h2></div>${mobileOpen?'<button class="dark-button" data-action="controls" aria-label="Закрыть">×</button>':''}</div>
-    <p class="small muted">${state.politics.enabled?esc(executiveDescription(state))+'<br>Выберите значение — голосование и результат появятся сразу.':'Решения действуют со следующего месяца. Реакция экономики занимает время.'}</p>
-    <div class="policy-tabs">${['Кредит','Налоги','Бюджет','Валюта','Структура','Инфраструктура','Услуги','Труд','Институты'].map(t=>`<section class="policy-topic"><button data-policy-tab="${t}" class="${t===policyTab?'active':''}" aria-expanded="${t===policyTab}">${t} <span aria-hidden="true">${t===policyTab?'−':'+'}</span></button>${t===policyTab?body:''}</section>`).join('')}</div>
-    <div class="policy-foot"><div class="policy-summary"><span>Ожидаемая реальная базовая ставка</span><strong id="real-rate">${n(realInterestRate(draftBaseRate()/100,state.expectedInflation)*100,1)}%</strong></div>
-      <div id="pending-note" class="policy-pending">${changes.length?`Изменено решений: ${changes.length}`:'Текущая политика сохранена'}</div>
-      <details class="sidebar-more"><summary>Другие действия</summary>
-      <button class="secondary wide" data-action="cancel-policy" id="cancel-policy" ${changes.length?'':'disabled'}>Сбросить неподтверждённый ввод</button>
-      <label class="field">Гипотеза или причина решения<textarea id="decision-note" data-note maxlength="1000" placeholder="Например: снизить инфляцию, сохранив занятость">${esc(state.pendingNote)}</textarea></label>
-      </details></div></aside>`;
+  const topics=['Кредит','Налоги','Бюджет','Валюта','Структура','Инфраструктура','Услуги','Труд','Институты'];
+  const keys=['rate','vat','governmentConsumption','fxIntervention','registrationProcedures','infrastructureMaintenance','healthcare','minimumWage','courtBudget'];
+  const units=['%','%','%',' млн','','%','%','','%'];
+  const labels=['Ставка','НДС','Госзакупки','Интервенция','Процедуры','Ремонт','Медицина','Мин. зарплата','Суды'];
+  const checks=POLICY_CHECKS.filter(f=>f[2]===policyTab&&(f[0]!=='liquiditySupport'||['discretion','rule'].includes(draft.monetaryRegime))).map(([key,label])=>`<label class="check"><input type="checkbox" data-policy-check="${key}" ${state.politics.enabled&&decisionBudget(state).optionalRemaining===0?'disabled':''} ${draft[key]?'checked':''}>${esc(label)}</label>`).join('');
+  return `<aside class="sidebar policy-panel"><div class="policy-tabs">${topics.map((t,i)=>policyTab&&t!==policyTab?'':`<section class="policy-topic ${t===policyTab?'selected':''}"><button data-policy-tab="${t}" class="${t===policyTab?'active':''}" aria-expanded="${t===policyTab}"><span class="card-band"><span>${String(i+1).padStart(2,'0')}</span><span aria-hidden="true">${t===policyTab?'−':'+'}</span></span><span class="card-name">${t}</span><span class="card-reading">${labels[i]} <b>${n(keys[i]==='rate'?state.monetary.effectiveRate:draft[keys[i]],1)}${units[i]}</b></span></button>${t===policyTab?`<div class="topic-controls"><div id="policy-controls">${policyControls()}</div><div class="policy-checks">${checks}</div></div>`:''}</section>`).join('')}</div></aside>`;
 }
 const ROW_GRAPHS={'ВВП · номинальный':'gdpUSDRolling','ВВП · реальный':'realGDPRolling','Инфляция':'inflationYoY','Безработица':'unemployment','Население':'population','Средняя зарплата · до налогов':'meanWageNominal','Средняя реальная зарплата':'meanWageReal','ИЧР · модельная оценка':'hdi','Джини · после налогов и трансфертов':'giniDisposable','Джини · до перераспределения':'giniMarket','Ожидаемая продолжительность жизни':'lifeExpectancy','Рождаемость':'totalFertilityRate','Государственный долг':'debtRatio','Валютные резервы':'reservesUSD'};
 const graphButton=key=>`<button class="graph-button" data-graph="${key}" aria-label="Динамика: ${esc(METRIC_INFO[key]?.label??key)}" title="Открыть график"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18M6 15l5-5 4 3 5-8" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>`;
@@ -364,8 +350,16 @@ function methodology() {
 
 function missionControl(budget,stopped,waiting){
  const m=state.metrics,balance=currentMetric(state,'budgetBalance'),hasPresident=state.politics.enabled&&state.politics.constitution.form!=='parliamentary',standing=hasPresident?presidentialStanding(state):null;
- const metrics=[['gdpPerCapitaRolling','ВВП на душу',n(currentMetric(state,'gdpPerCapitaRolling'),0),'$ / год','Реальный ВВП на человека за последние 12 месяцев'],['unemployment','Безработица',n(m.unemployment,1),'%','Доля безработных в рабочей силе'],['budgetBalance','Бюджет',balance===null?'—':signed(balance,0),'млн','Баланс бюджета за месяц'],['gdpGrowthYoY','Рост экономики',signed(m.gdpGrowthYoY,1),'%','Рост реального выпуска за 12 месяцев'],['inflationYoY','Инфляция',n(m.inflationYoY,1),'%','Инфляция за 12 месяцев'],['presidentialCandidateRating','Президент',standing?n(standing.share,1):'—','%',hasPresident?'Рейтинг президента — кандидат вашей партии в первом туре':'Президентские выборы не проводятся'],['governmentPartyRating','Парламент',state.politics.enabled?n(m.governmentPartyRating,1):'—','%','Парламентский рейтинг вашей партии на выборах']];
- return `<section class="mission-control game-hud" aria-label="Основные показатели и переход месяца"><div class="hud-heading"><div><strong>${date(state.month)}</strong><span class="hud-attempts">${budget.limit?'Решения '+budget.used+' / '+budget.limit:''}</span></div><button class="primary" data-action="step" ${busy||stopped?'disabled':''}>${busy?'Расчёт…':stopped?'Правление завершено':'Следующий месяц →'}</button></div><div class="hud-metrics">${metrics.map(([key,label,value,unit,title])=>`<div class="hud-metric" title="${title}" aria-label="${title}"><div><span>${label}</span>${key==='presidentialCandidateRating'&&!hasPresident?'':graphButton(key)}</div><strong class="${key==='budgetBalance'&&balance<0?'negative':key==='gdpGrowthYoY'&&m.gdpGrowthYoY<0?'negative':''}">${value}<small>${value==='—'?'':unit}</small></strong>${value==='—'?'<span class="change neutral">—</span>':monthlyChange(key)}</div>`).join('')}</div></section><div class="turn-notifications">${campaignEvent(state)?'<button data-action="campaign-open">Предвыборное событие</button>':''}${waiting?'<button class="proposal-reminder" data-action="proposal-open">Предложение партии</button>':''}</div>`;
+ const metrics=[['gdpPerCapitaRolling','ВВП на душу',n(currentMetric(state,'gdpPerCapitaRolling'),0),'$'],['unemployment','Безработица',n(m.unemployment,1),'%'],['budgetBalance','Бюджет',balance===null?'—':signed(balance,0),'млн'],['gdpGrowthYoY','Рост',signed(m.gdpGrowthYoY,1),'%'],['inflationYoY','Инфляция',n(m.inflationYoY,1),'%'],['presidentialCandidateRating','Президент',standing?n(standing.share,1):'—','%'],['governmentPartyRating','Парламент',state.politics.enabled?n(m.governmentPartyRating,1):'—','%']];
+ const own=state.politics.parties?.find(p=>p.id===state.politics.executive.playerParty);
+ return `<section class="mission-control game-hud"><div class="hud-date"><strong>${date(state.month)}</strong><small>${state.politics.executive.role==='primeMinister'?'Премьер':'Президент'} · ${esc(own?partyDisplayName(own):'Государство')}</small></div><div class="hud-metrics">${metrics.map(([key,label,value,unit])=>`<article class="hud-metric" aria-label="${key==='budgetBalance'?'Баланс бюджета за месяц':key==='presidentialCandidateRating'?'Рейтинг президента':key==='governmentPartyRating'?'Парламентский рейтинг':label}"><div><span>${label}</span>${key==='presidentialCandidateRating'&&!hasPresident?'':graphButton(key)}</div><strong>${value}<small>${value==='—'?'':unit}</small></strong>${value==='—'?'<span class="change neutral">—</span>':monthlyChange(key)}</article>`).join('')}</div><button class="settings-toggle" data-action="settings-open" aria-label="Настройки">⚙</button></section><div class="turn-dock"><span class="decision-counter">${budget.used} / ${budget.limit||3}</span><button class="month-button" aria-label="Следующий месяц" data-action="step" ${busy||stopped?'disabled':''}>${busy?'Расчёт…':stopped?'Завершено':'Конец<br> месяца'}<span aria-hidden="true">→</span></button></div>`;
+}
+function newsRail(waiting){
+ const entries=state.journal.flatMap(e=>e.events.map(text=>({month:e.month,text}))).filter(x=>!x.text.includes('Текущая политика'));
+ const grouped=[];
+ for(const e of entries){if(e.text.includes('трудовой конфликт')){const old=grouped.find(x=>x.month===e.month&&x.labor);if(old){old.count++;old.text='Трудовые конфликты · '+old.count+' отраслей';}else grouped.push({...e,labor:true,count:1,text:'Трудовой конфликт'});}else grouped.push(e);}
+ const news=grouped.slice(-3).reverse();
+ return `<aside class="news-rail"><h2>Телеграф <span>${date(state.month,true)}</span></h2>${news.length?news.map(e=>`<article class="news-item"><time>${date(e.month,true)}</time><p>${esc(e.text)}</p></article>`).join(''):'<div class="news-empty">—</div>'}${waiting?'<button class="dispatch-button" data-action="proposal-open">Предложение партии <span>↗</span></button>':''}${campaignEvent(state)?'<button class="dispatch-button" data-action="campaign-open">Выборы <span>↗</span></button>':''}<div class="rail-stamp">${state.resourceMode?'Сырьевая':'Диверсифицированная'}<br>экономика</div></aside>`;
 }
 function settingsWindow(){
  if(!settingsOpen)return '';
@@ -413,16 +407,17 @@ function render() {
   const campaign=campaignEvent(state);if(campaign&&!campaignFeedback&&campaign.id!==announcedCampaign){announcedCampaign=campaign.id;campaignOpen=true;campaignFeedback=null;}
   const budget=decisionBudget(state);
   const waiting=unresolvedInitiatives(state).length>0,stopped=state.politics.enabled&&!state.politics.executive.inOffice;
-  app.innerHTML=`<div class="app-shell"><header class="topbar settings-bar"><button class="settings-toggle" data-action="settings-open" aria-label="Настройки" title="Настройки" aria-haspopup="dialog">⚙</button></header>
+  app.innerHTML=`<div class="app-shell">
     <div class="workspace"><main class="main">${missionControl(budget,stopped,waiting)}
     ${stopped?`<div class="callout warning"><strong>Ваше правление завершено.</strong> ${esc(state.politics.executive.reason)} <button data-view="government">Итоговый отчёт</button></div>`:''}
-    <nav class="main-navigation" aria-label="Основные экраны">${Object.entries(CATEGORIES).map(([key,c])=>`<button data-category="${key}" class="${openCategory===key?'active':''}" aria-current="${openCategory===key?'page':'false'}">${c.label}${key==='decisions'&&waiting?' <span class="notification-dot" aria-label="Есть предложение"></span>':''}</button>`).join('')}</nav>
+    <div class="cabinet-layout"><div class="cabinet-work"><nav class="main-navigation" aria-label="Основные экраны">${Object.entries(CATEGORIES).map(([key,c])=>`<button data-category="${key}" class="${openCategory===key?'active':''}" aria-current="${openCategory===key?'page':'false'}">${c.label}${key==='decisions'&&waiting?' <span class="notification-dot" aria-label="Есть предложение"></span>':''}</button>`).join('')}</nav>
     ${openCategory?`<section class="screen-content">${CATEGORIES[openCategory].views.length===1?`<div id="view-content">${views[CATEGORIES[openCategory].default]()}</div>`:`<div class="vertical-navigation">${CATEGORIES[openCategory].views.map(([id,label])=>`<section class="navigation-subsection"><button data-view="${id}" class="${view===id?'active':''}" aria-expanded="${view===id}"><span>${label}</span><span aria-hidden="true">${view===id?'−':'+'}</span></button>${view===id?`<div id="view-content" class="subsection-content">${views[id]()}</div>`:''}</section>`).join('')}</div>`}</section>`:''}
-    </main></div>${settingsWindow()}${floatingWindows(views)}</div>`;
+    </div>${newsRail(waiting)}</div></main></div>${settingsWindow()}${floatingWindows(views)}</div>`;
   for(const table of app.querySelectorAll?.('table')??[]){
     const heads=[...table.querySelectorAll('thead th')].map(x=>x.textContent.trim());
     for(const tr of table.querySelectorAll('tbody tr'))for(const [i,td] of [...tr.children].entries())td.dataset.label=heads[i]??'';
   }
+  compactGameCopy(app);
   bindUsage();bindFloatingWindows();
 }
 
@@ -434,7 +429,7 @@ function updateDraft(key,val) {
   const out=document.getElementById('value-'+key);if(out)out.textContent=n(draft[key],field[4]<1?2:0);
   const cancel=document.getElementById('cancel-policy');if(cancel)cancel.disabled=pending().length===0;
   const rr=document.getElementById('real-rate');if(rr)rr.textContent=pct(realInterestRate(draftBaseRate()/100,state.expectedInflation)*100);
-  const pn=document.getElementById('pending-note');if(pn)pn.textContent=pending().length?(state.politics.enabled?'Отпустите ползунок или завершите ввод — голосование пройдёт сразу.':`Изменено решений: ${pending().length}`):'Текущая политика сохранена';
+  const pn=document.getElementById('pending-note');if(pn)pn.textContent=pending().length?(state.politics.enabled?'Изменено':`Изменено решений: ${pending().length}`):'Текущая политика сохранена';
   comparison=null;persist();
 }
 function commitChoice(key){
@@ -462,11 +457,11 @@ function policyValue(key,value){
   const field=POLICY_FIELDS.find(f=>f[0]===key);return typeof value==='number'?n(value,field?.[4]<1?2:0)+(field?' '+field[5]:''):String(value??'—');
 }
 function decisionResult(){
- if(resultExecutive){const d=resultExecutive;return `<h3>Решение принято</h3><p>${esc(decisionName(d.key))}: <b>${esc(policyValue(d.key,d.from))} → ${esc(policyValue(d.key,d.to))}</b></p><p>Изменение действует со следующего месяца.</p>`;}
+ if(resultExecutive){const d=resultExecutive;return `<h3>Решение принято</h3><p>${esc(decisionName(d.key))}: <b>${esc(policyValue(d.key,d.from))} → ${esc(policyValue(d.key,d.to))}</b></p>`;}
  const b=state.politics.bills.find(b=>b.id===resultBillId);if(!b)return '';
  const accepted=['passed','enacted'].includes(b.status),failed=b.articles.filter(a=>a.vote&&!a.vote.passed),vote=b.finalVote??failed[0]?.vote;
  const reason=b.referendum&&!b.referendum.passed?'Парламент одобрил поправку, но референдум её отклонил.':failed.length?'Не все статьи набрали требуемое число голосов. Весь пакет отклонён.':b.finalVote&&!b.finalVote.passed?'Не набран порог в окончательном голосовании.':b.status==='vetoed'?'Президент наложил вето.':b.status==='declined'?'Исполнительная власть отказала в поддержке.':'';
- return `<h3 class="${accepted?'positive':'negative'}">${accepted?(b.byDecree?'Принято указом':'Решение принято'):'Решение не принято'}</h3><p><strong>${esc(b.title)}</strong></p>${reason?`<p>${reason}</p>`:''}${vote?`<div class="vote-totals"><span>За: <b>${vote.yes}</b></span><span>Против: <b>${vote.no}</b></span><span>Воздержались: <b>${vote.abstain}</b></span><span>Нужно: <b>${vote.required}</b>${!vote.passed?' · не хватает '+Math.max(0,vote.required-vote.yes):''}</span></div>`:''}${b.referendum?`<p>Референдум: за ${pct(b.referendum.yesShare)}. Требуется больше 50%.</p>`:''}<div class="decision-changes">${b.articles.map(a=>`<div><strong>${esc(a.key.startsWith('constitution.')?decisionName(a.key):a.label)}</strong><span>Было: ${esc(policyValue(a.key,a.before))}</span><span>Станет: ${esc(policyValue(a.key,a.value))}</span>${a.vote?`<small>За ${a.vote.yes} из требуемых ${a.vote.required} · ${a.vote.passed?'статья одобрена':'статья отклонена'}</small>`:''}</div>`).join('')}</div><p class="small muted">${accepted?'Изменения вступят в силу при расчёте следующего месяца.':'Отклонённые изменения не вступают в силу.'}</p>`;
+ return `<h3 class="${accepted?'positive':'negative'}">${accepted?(b.byDecree?'Принято указом':'Решение принято'):'Решение не принято'}</h3><p><strong>${esc(b.title)}</strong></p>${reason?`<p>${reason}</p>`:''}${vote?`<div class="vote-totals"><span>За: <b>${vote.yes}</b></span><span>Против: <b>${vote.no}</b></span><span>Воздержались: <b>${vote.abstain}</b></span><span>Нужно: <b>${vote.required}</b>${!vote.passed?' · не хватает '+Math.max(0,vote.required-vote.yes):''}</span></div>`:''}${b.referendum?`<p>Референдум: за ${pct(b.referendum.yesShare)}. Требуется больше 50%.</p>`:''}<div class="decision-changes">${b.articles.map(a=>`<div><strong>${esc(a.key.startsWith('constitution.')?decisionName(a.key):a.label)}</strong><span>Было: ${esc(policyValue(a.key,a.before))}</span><span>Станет: ${esc(policyValue(a.key,a.value))}</span>${a.vote?`<small>За ${a.vote.yes} из требуемых ${a.vote.required} · ${a.vote.passed?'статья одобрена':'статья отклонена'}</small>`:''}</div>`).join('')}</div>`;
 }
 function snapshotDecisions(){
  observedDecisionKeys=new Set((state.politics.bills??[]).filter(b=>b.decidedMonth!==undefined).map(b=>'bill:'+b.id+':'+b.decisionSequence));
@@ -572,12 +567,12 @@ app.addEventListener('click',async event=>{
       payload.checkpoint=checkpoint?copy(checkpoint):null;
       payload.previousSave=legacySave?JSON.parse(legacySave):null;
       download(`economy-${date(state.month,true)}.json`,JSON.stringify(payload,null,2));
-      toast('Игра, статистика, все решения и журнал интерфейса сохранены в одном файле.');break;}
+      toast('JSON скачан.');break;}
     case 'import':document.getElementById('import-file').click();break;
     case 'csv':exportCSV();break;
     case 'usage-export':usage.event('export','ui-observation');download(`interface-${date(state.month,true)}.json`,JSON.stringify(usage.report(),null,2));break;
-    case 'ownership-queue':try{assertDecisionAvailable(state,{kind:'chooseLaw'});scheduleOwnership(state,{sector:Number(document.getElementById('ownership-sector').value),kind:document.getElementById('ownership-kind').value,points:Number(document.getElementById('ownership-points').value),compensation:Number(document.getElementById('ownership-compensation').value)/100});votePendingOperation();persist();comparison=null;render();toast(state.politics.enabled?'Результат голосования показан сразу.':'Операция записана; исполнение со следующего месяца.');}catch(e){toast(e.message);}break;
-    case 'network-queue':try{assertDecisionAvailable(state,{kind:'chooseLaw'});scheduleNetwork(state,{network:document.getElementById('network-id').value,kind:document.getElementById('network-kind').value,points:Number(document.getElementById('network-points').value)});votePendingOperation();persist();comparison=null;render();toast(state.politics.enabled?'Результат голосования показан сразу.':'Передача инфраструктуры запланирована.');}catch(e){toast(e.message);}break;
+    case 'ownership-queue':try{assertDecisionAvailable(state,{kind:'chooseLaw'});scheduleOwnership(state,{sector:Number(document.getElementById('ownership-sector').value),kind:document.getElementById('ownership-kind').value,points:Number(document.getElementById('ownership-points').value),compensation:Number(document.getElementById('ownership-compensation').value)/100});votePendingOperation();persist();comparison=null;render();toast('Рассмотрено.');}catch(e){toast(e.message);}break;
+    case 'network-queue':try{assertDecisionAvailable(state,{kind:'chooseLaw'});scheduleNetwork(state,{network:document.getElementById('network-id').value,kind:document.getElementById('network-kind').value,points:Number(document.getElementById('network-points').value)});votePendingOperation();persist();comparison=null;render();toast('Рассмотрено.');}catch(e){toast(e.message);}break;
     case 'restructure-queue':try{assertDecisionAvailable(state,{kind:'chooseLaw'});scheduleRestructuring(state,{haircut:Number(document.getElementById('debt-haircut').value)/100,extension:Number(document.getElementById('debt-extension').value)});votePendingOperation();persist();comparison=null;render();toast(state.politics.enabled?'Голосование по обмену долга завершено.':'Обмен запланирован. Потеря приведённой стоимости будет считаться дефолтом.');}catch(e){toast(e.message);}break;
     case 'journal-export':download(`economy-decisions-${date(state.month,true)}.json`,JSON.stringify({format:'economy-decisions',version:VERSION,provenance:state.provenance,journal:state.journal,currentTurnPoliticalCommands:state.politics.turnCommands??[]},null,2));break;
     case 'replay':if(!busy){busy=true;render();await new Promise(r=>setTimeout(r,0));try{const replay=replayJournal(state);const errors=Object.entries(state.metrics).map(([k,v])=>Math.abs(v-replay.metrics[k])/Math.max(1,Math.abs(v)));toast(Math.max(...errors)<1e-10?'Журнал точно воспроизвёл текущие показатели.':'Журнал не воспроизвёл результат: проверьте версию и данные.');}catch(e){toast('Воспроизведение остановлено: '+e.message);}busy=false;render();}break;
@@ -635,8 +630,7 @@ document.getElementById('new-party').innerHTML=PARTY_FAMILIES.map(p=>`<option va
 governmentSelect.value='presidential';countrySelect.value='middle';
 function updateStartDescription(){
  document.getElementById('new-government-description').textContent=GOVERNMENT_PRESETS[governmentSelect.value].description;
- const c=COUNTRY_PRESETS[countrySelect.value];
- document.getElementById('new-country-description').textContent=`Стартовый ВВП — $${n(c.gdp,0)} на человека в ценах 2000 года. Рождаемость — ${n(c.fertility,1)} ребёнка на женщину. Возрастной состав задан профилем страны; далее население меняется каждый месяц. Это условный сценарий, а не копия реальной страны.`;
+ const c=COUNTRY_PRESETS[countrySelect.value];document.getElementById('new-country-description').textContent=`$${n(c.gdp,0)}`;
 }
 governmentSelect.addEventListener('change',updateStartDescription);countrySelect.addEventListener('change',updateStartDescription);updateStartDescription();
 document.getElementById('new-form').addEventListener('submit',async event=>{
