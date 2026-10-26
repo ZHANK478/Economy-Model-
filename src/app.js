@@ -1,3 +1,4 @@
+import {ownershipBoard,infrastructureBoard} from './asset-views.js';
 import {compactGameCopy} from './ui-presentation.js';
 import {productionPie} from './game-charts.js';
 import {savedWorldEvents} from './world-events.js';
@@ -38,6 +39,7 @@ let worldNewsOpen=false,announcedWorldMonth=null,worldNewsNotice=null,campaignOp
 let openCategory='decisions',resultBillId=null,resultExecutive=null,observedDecisionKeys=new Set(),trackedView=null,trackedCategory=null,trackedPolicy=null,trackedWindows=new Set(),sectionObserver=null;
 let usageStorage=null;try{usageStorage=globalThis.localStorage;}catch{}
 const usage=createUIObservation({storage:usageStorage});
+const assetUI={sector:null,network:null,ownershipKind:'privatize',networkKind:'networkSale',points:10,networkPoints:10,compensation:100};
 let mobileOpen=false,busy=false,toastTimer,saveStatus='Сохраняется на этом устройстве';
 try {
   const saved=await storage.get(STORE);
@@ -192,10 +194,7 @@ function countryDetails() {
     <section class="panel"><h2>Люди и качество жизни</h2>${row('Население',n(m.population,3)+' млн')}${row('Ожидаемая продолжительность жизни',n(m.lifeExpectancy,1)+' лет')}${row('Рождаемость',n(m.totalFertilityRate,2)+' детей / женщину')}${row('Доля населения 65+',pct(m.elderlyShare))}${row('Средние годы обучения взрослых',n(m.meanSchooling,1)+' лет')}${row('Ожидаемые годы обучения детей',n(m.expectedSchooling,1)+' лет')}${row('ИЧР · модельная оценка',n(m.hdi,3),'Формула UNDP; образование и ВНД по ППС — условные входы')}${row('Джини · после налогов и трансфертов',n(m.giniDisposable,1)+' / 100','Меньше — равномернее; расчёт по 10 группам за 12 месяцев')}${row('Джини · до перераспределения',n(m.giniMarket,1)+' / 100')}${row('Относительная бедность',pct(m.relativePoverty),'Доход ниже 50% медианного эквивалентного дохода')}${row('Фиксированный порог бедности',pct(m.absolutePoverty),'Ниже '+n(state.parameters.absolutePovertyRealMonthly,0)+' $ базы / человек / месяц; не международный порог')}${row('Доля доходов верхних 10%',pct(m.top10IncomeShare))}${row('Доля богатства верхних 10%',pct(m.top10WealthShare),'С учётом депозитов, долгов и долей предприятий')}</section></div>
     <section class="panel" style="margin-top:15px"><h2>Финансы и устройство экономики</h2><div class="two-cols"><div>${row('Государственный долг',pct(m.debtRatio)+' ВВП')}${row('Баланс бюджета',m.deficitRatio>0?'Дефицит '+pct(m.deficitRatio):'Профицит '+pct(-m.deficitRatio))}${row('Валютные резервы',money(m.reservesUSD)+' млрд $')}${row('Сырьевой фонд',money(m.fundUSD)+' млрд $')}${row('Эпизоды суверенного дефолта',n(m.defaultEpisodes??0,0),state.government.defaultActive?'Сейчас есть непогашенный дефолт':'Текущие платежи исполняются или проведён обмен')}</div><div>${row('Государственная доля активов предприятий',pct(m.stateAssetShare))}${row('Иностранная доля активов',pct(m.foreignAssetShare))}${row('Отечественная частная доля активов',pct(100-m.stateAssetShare-m.foreignAssetShare))}${row('Государственная доля выпуска',pct(m.stateOutputShare),'Взвешенная по добавленной стоимости, не по количеству предприятий')}${row('Профиль допущений',esc(MODEL_PROFILES[state.modelProfile].name))}</div></div><div class="callout" style="margin-top:15px">Джини — приближение по группам; различия внутри групп не наблюдаются. ИЧР использует правильную структуру индекса, но модельные данные. Площадь, столица и международное место не выдумываются.</div></section>`;
 }
-function ownershipView() {
-  return `<section class="panel"><h2>Структура собственности</h2><div class="table-wrap"><table class="table ownership-summary"><thead><tr><th>Отрасль</th><th>Государство</th><th>Частный отечественный сектор</th><th>Иностранный сектор</th></tr></thead><tbody>${state.firms.map(f=>`<tr><td>${esc(f.name)}</td><td>${pct((f.ownership.state+f.ownership.municipal)*100)}</td><td>${pct((f.ownership.domestic+f.ownership.cooperative)*100)}</td><td>${pct(f.ownership.foreign*100)}</td></tr>`).join('')}</tbody></table></div></section>
-    <section class="panel"><h2>Запланировать операцию</h2><div class="world-grid"><label class="field">Отрасль<select id="ownership-sector">${state.firms.map((f,i)=>`<option value="${i}">${esc(f.name)}</option>`).join('')}</select></label><label class="field">Действие<select id="ownership-kind"><option value="purchase">Купить долю государству</option><option value="privatize">Продать отечественным инвесторам</option><option value="foreignSale">Продать иностранным инвесторам</option><option value="cooperatize">Продать долю кооперативу работников</option><option value="municipalize">Передать долю муниципалитетам</option><option value="nationalize">Национализировать</option><option value="recapitalize">Внести капитал за новую долю</option></select></label><label class="field">Доля, процентных пунктов<input id="ownership-points" type="number" min="1" max="100" value="10"></label><label class="field">Компенсация при национализации, %<input id="ownership-compensation" type="number" min="0" max="100" value="100"></label></div><button data-action="ownership-queue">${state.politics.enabled?'Голосовать по операции':'Запланировать со следующего месяца'}</button>${queuedActions()}</section>`;
-}
+function ownershipView(){return ownershipBoard(state,assetUI,{n,pct,esc})+queuedActions();}
 function queuedActions() {
   return state.pendingActions.length?`<div class="callout">Операции следующего месяца:<br>${state.pendingActions.map(a=>`${a.kind==='restructure'?'Реструктуризация долга':esc(a.network?state.networks.find(n=>n.id===a.network)?.name:state.firms[a.sector].name)+' · '+esc(actionName(a.kind))+' · '+n(a.points,0)+' п.п.'} <button data-cancel-action="${a.id}">Отменить</button>`).join('<br>')}</div>`:'';
 }
@@ -372,7 +371,7 @@ function floatingWindows(views){
     const info=METRIC_INFO[trendMetric],series=metricSeries(state,trendMetric),last=series.at(-1),first=series[0];
     out+=`<dialog id="trend-dialog" class="trend-popup" aria-labelledby="trend-heading"><div class="popup-head"><h2 id="trend-heading">${esc(info.label)}</h2><button data-action="trend-close" aria-label="Закрыть график">×</button></div><p class="small muted">${esc(info.unit)} · каждая точка — месяц</p><div class="chart-wrap">${chart([{name:'Ваша страна',points:series}],trendMetric,{compact:true})}</div>${last?`<div class="trend-values"><span>Сейчас <b>${n(last[trendMetric],info.digits)}</b></span>${first&&last.month!==first.month?`<span>С начала <b>${signed(last[trendMetric]-first[trendMetric],info.digits)}</b></span>`:''}</div>`:''}${trendMetric==='budgetBalance'?'<p class="small muted">Плюс — профицит, минус — дефицит. Налоги, неналоговые доходы и все бюджетные расходы, включая проценты. Заимствования относятся к финансированию, а не к доходам. Баланс отличается от остатка денег казначейства.</p>':''}<button class="wide" data-action="trend-close">Закрыть</button></dialog>`;
   }
-  if(resultBillId!==null||resultExecutive)out+=`<dialog id="result-dialog" class="result-popup" aria-labelledby="result-heading"><div class="popup-head"><h2 id="result-heading">Результат решения</h2><button data-action="result-close" aria-label="Закрыть результат">×</button></div>${decisionResult()}<button class="primary wide" data-action="result-close">Понятно</button></dialog>`;
+  if(resultBillId!==null||resultExecutive)out+=`<dialog id="result-dialog" class="result-popup" aria-labelledby="result-heading"><button class="ballot-close" data-action="result-close" aria-label="Закрыть результат">×</button>${decisionResult()}</dialog>`;
   if(campaignOpen&&!worldNewsOpen&&!proposal&&!settingsOpen&&resultBillId===null&&!resultExecutive){const e=campaignEvent(state);if(e||campaignFeedback)out+=`<dialog id="campaign-dialog" aria-labelledby="campaign-heading"><div class="popup-head"><h2 id="campaign-heading">${esc(campaignFeedback?'Ответ опубликован':e.title)}</h2><button data-action="campaign-close" aria-label="Закрыть событие">×</button></div>${campaignFeedback?`<p>${esc(campaignFeedback)}</p><p class="small muted">Реакция избирателей отразится в опросах после следующего месяца.</p><button class="wide" data-action="campaign-close">Готово</button>`:`<p>${esc(e.text)}</p><p class="small muted">До ${e.kind==='president'?'президентских':'парламентских'} выборов ${e.remaining} мес.</p><div class="settings-actions">${e.choices.map((c,i)=>`<button data-campaign-choice="${i}" data-event-id="${esc(e.id)}"><strong>${esc(c.label)}</strong><span style="display:block" class="small muted">${esc(c.hint)}</span></button>`).join('')}</div><button class="wide" data-action="campaign-close">Позже</button>`}</dialog>`;}
   if(worldNewsOpen&&!proposal&&!settingsOpen&&resultBillId===null&&!resultExecutive&&worldNewsNotice)out+=`<dialog id="world-news-dialog" aria-labelledby="world-news-heading"><div class="popup-head"><h2 id="world-news-heading">${esc(worldNewsNotice.title)}</h2><button data-action="world-news-close" aria-label="Закрыть новость">×</button></div><p>${esc(worldNewsNotice.text)}</p><p><strong>${signed((worldNewsNotice.multiplier-1)*100,0)}% к обычному уровню · ${worldNewsNotice.duration} мес.</strong></p><button class="primary wide" data-action="world-news-close">Понятно</button></dialog>`;
   return out;
@@ -396,7 +395,7 @@ const CATEGORIES={
   political:{label:'Политика',default:'government',views:[['government','Парламент'],['elections','Выборы'],['electorate','Динамика электората'],['constitution','Конституция']]}
 };
 function render() {
-  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date})};
+  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date}),infrastructure:()=>infrastructureBoard(state,assetUI,{n,pct,esc})+queuedActions()};
   detectDecisionResult();
   if(announcedWorldMonth===null)announcedWorldMonth=state.month;
   if(state.month>announcedWorldMonth){announcedWorldMonth=state.month;const e=[state.lastReport.worldNews,...savedWorldEvents(state)].find(e=>e?.start===state.month);if(e){worldNewsNotice=e;worldNewsOpen=true;}}
@@ -457,11 +456,10 @@ function policyValue(key,value){
   const field=POLICY_FIELDS.find(f=>f[0]===key);return typeof value==='number'?n(value,field?.[4]<1?2:0)+(field?' '+field[5]:''):String(value??'—');
 }
 function decisionResult(){
- if(resultExecutive){const d=resultExecutive;return `<h3>Решение принято</h3><p>${esc(decisionName(d.key))}: <b>${esc(policyValue(d.key,d.from))} → ${esc(policyValue(d.key,d.to))}</b></p>`;}
- const b=state.politics.bills.find(b=>b.id===resultBillId);if(!b)return '';
- const accepted=['passed','enacted'].includes(b.status),failed=b.articles.filter(a=>a.vote&&!a.vote.passed),vote=b.finalVote??failed[0]?.vote;
- const reason=b.referendum&&!b.referendum.passed?'Парламент одобрил поправку, но референдум её отклонил.':failed.length?'Не все статьи набрали требуемое число голосов. Весь пакет отклонён.':b.finalVote&&!b.finalVote.passed?'Не набран порог в окончательном голосовании.':b.status==='vetoed'?'Президент наложил вето.':b.status==='declined'?'Исполнительная власть отказала в поддержке.':'';
- return `<h3 class="${accepted?'positive':'negative'}">${accepted?(b.byDecree?'Принято указом':'Решение принято'):'Решение не принято'}</h3><p><strong>${esc(b.title)}</strong></p>${reason?`<p>${reason}</p>`:''}${vote?`<div class="vote-totals"><span>За: <b>${vote.yes}</b></span><span>Против: <b>${vote.no}</b></span><span>Воздержались: <b>${vote.abstain}</b></span><span>Нужно: <b>${vote.required}</b>${!vote.passed?' · не хватает '+Math.max(0,vote.required-vote.yes):''}</span></div>`:''}${b.referendum?`<p>Референдум: за ${pct(b.referendum.yesShare)}. Требуется больше 50%.</p>`:''}<div class="decision-changes">${b.articles.map(a=>`<div><strong>${esc(a.key.startsWith('constitution.')?decisionName(a.key):a.label)}</strong><span>Было: ${esc(policyValue(a.key,a.before))}</span><span>Станет: ${esc(policyValue(a.key,a.value))}</span>${a.vote?`<small>За ${a.vote.yes} из требуемых ${a.vote.required} · ${a.vote.passed?'статья одобрена':'статья отклонена'}</small>`:''}</div>`).join('')}</div>`;
+ const b=state.politics.bills.find(b=>b.id===resultBillId);
+ const accepted=Boolean(resultExecutive)||Boolean(b&&['passed','enacted'].includes(b.status));
+ const vote=b?.finalVote??b?.articles.find(a=>a.vote&&!a.vote.passed)?.vote;
+ return `<div class="ballot-result ${accepted?'ballot-accepted':'ballot-rejected'}"><div class="ballot-emblem" aria-hidden="true">${accepted?'✓':'×'}</div><h2 id="result-heading">${accepted?'Принято':'Отклонено'}</h2>${vote?`<div class="ballot-counts"><div><span>За:</span><b>${vote.yes}</b></div><div><span>Против:</span><b>${vote.no}</b></div></div>`:''}</div>`;
 }
 function snapshotDecisions(){
  observedDecisionKeys=new Set((state.politics.bills??[]).filter(b=>b.decidedMonth!==undefined).map(b=>'bill:'+b.id+':'+b.decisionSequence));
@@ -524,6 +522,10 @@ function exportCSV() {
 app.addEventListener('click',async event=>{
   const target=event.target.closest('button,a');if(!target)return;
   usage.event('click',target.dataset.campaignChoice!==undefined?'campaign:'+target.dataset.campaignChoice:target.dataset.graph?'graph:'+target.dataset.graph:target.dataset.view?'view:'+target.dataset.view:target.dataset.category?'category:'+target.dataset.category:target.dataset.action?'action:'+target.dataset.action:target.dataset.politicalAction?'political:'+target.dataset.politicalAction:target.dataset.policyTab?'policy:'+target.dataset.policyTab:target.dataset.chart?'chart:'+target.dataset.chart:'link_or_control');
+  if(target.dataset.assetSector!==undefined){assetUI.sector=Number(target.dataset.assetSector);usage.event('select','asset:sector:'+assetUI.sector);render();return;}
+  if(target.dataset.networkAsset){assetUI.network=target.dataset.networkAsset;usage.event('select','asset:network:'+assetUI.network);render();return;}
+  if(target.dataset.assetClose){assetUI[target.dataset.assetClose==='network'?'network':'sector']=null;render();return;}
+  if(target.dataset.assetKind){assetUI[target.dataset.assetDomain==='network'?'networkKind':'ownershipKind']=target.dataset.assetKind;render();return;}
   if(target.dataset.action==='world-news-close'){worldNewsOpen=false;render();return;}
   if(target.dataset.action==='campaign-open'){campaignOpen=true;campaignFeedback=null;proposalOpen=false;render();return;}
   if(target.dataset.action==='campaign-close'){campaignOpen=false;campaignFeedback=null;render();return;}
@@ -584,6 +586,8 @@ app.addEventListener('click',async event=>{
 });
 app.addEventListener('input',event=>{
   const e=event.target;
+  if(e.dataset.assetInput){const key=e.dataset.assetInput,value=Number(e.value);if(!['points','networkPoints','compensation'].includes(key)||e.value===''||!Number.isFinite(value))return;assetUI[key]=Math.max(key==='compensation'?0:1,Math.min(100,value));for(const input of app.querySelectorAll?.(`[data-asset-input="${key}"]`)??[])if(input!==e)input.value=assetUI[key];return;}
+
   if(e.dataset.policy)updateDraft(e.dataset.policy,e.value);
   if(e.dataset.policyNumber&&e.value!=='')updateDraft(e.dataset.policyNumber,e.value);
   if(e.hasAttribute?.('data-note')){state.pendingNote=e.value.slice(0,1000);persist();}
