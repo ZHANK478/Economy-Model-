@@ -2,7 +2,7 @@ import {partyDisplayName,PARTY_DESCRIPTIONS} from './political-config.js';
 export {partyDisplayName,PARTY_DESCRIPTIONS};
 export function presidentialStanding(s){
  const p=s.politics,player=p.executive.playerParty;
- const candidates=(p.poll?.parties??[]).slice().sort((a,b)=>b.candidateShare-a.candidateShare);
+ const candidates=(p.poll?.parties??[]).filter(x=>!p.electionExperience||p.constitution.form!=='presidential'||p.majorPartyIds.includes(x.id)).slice().sort((a,b)=>b.candidateShare-a.candidateShare);
  return {share:candidates.find(x=>x.id===player)?.candidateShare??0,rank:candidates.findIndex(x=>x.id===player)+1,candidates};
 }
 export function electionOutcome(s){

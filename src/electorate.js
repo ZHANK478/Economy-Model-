@@ -73,6 +73,9 @@ export function voterUtility(s,g,party,kind='parliament',district=0){
   return -k.ideologyWeight*distance(g.ideal,party.platform)+k.identityWeight*(loyal?integration:0)+k.economicWeight*economic*burden+k.competenceWeight*candidate+k.organizationWeight*Math.log(.2+party.organization)+local+incumbency+shock*burden-promise*burden+campaignUtility(s,g,party,kind);
 }
 export function choiceProbabilities(s,g,parties,kind='parliament',district=0){
+  const finalists=s.politics.electionExperience&&s.politics.constitution.form==='presidential'&&kind==='president'?s.politics.majorPartyIds:null;
+  const eligible=finalists?parties.filter(x=>finalists.includes(x.id)):parties;
+  if(eligible.length!==parties.length){const values=choiceProbabilities(s,g,eligible,kind,district);return parties.map(x=>{const i=eligible.findIndex(y=>y.id===x.id);return i<0?0:values[i];});}
   const u=parties.map(p=>voterUtility(s,g,p,kind,district)),hi=Math.max(...u),values=u.map(v=>Math.exp(v-hi)),total=sum(values);return values.map(v=>v/total);
 }
 export function turnout(s,g){const p=s.politics;
@@ -112,7 +115,7 @@ function officialProbabilities(s,parties,probabilities){
 }
 export function conductElection(s,kind,{initial=false}={}){
   const p=s.politics,c=p.constitution,{poll,groups,parties:all}=pollElectorate(s,{commitMemory:false});
-  const parties=all.filter(x=>s.policy.competitiveElections||x.id===p.executive.playerParty||x.tolerated),weights=parties.map(()=>0);
+  const parties=all.filter(x=>(s.policy.competitiveElections||x.id===p.executive.playerParty||x.tolerated)&&(!(p.electionExperience&&c.form==='presidential'&&kind==='president')||p.majorPartyIds.includes(x.id))),weights=parties.map(()=>0);
   const ballots=[];let expectedVoters=0;
   for(const g of groups){const weight=g.weight*turnout(s,g);expectedVoters+=weight;const prob=officialProbabilities(s,parties,choiceProbabilities(s,g,parties,kind));prob.forEach((x,i)=>weights[i]+=x*weight);
     const ranking=parties.map(x=>({id:x.id,u:voterUtility(s,g,x,'president')+hash(s.seed,g.id,'rank',x.id)*.4+(!s.policy.competitiveElections&&x.id===p.executive.playerParty?(1-p.electoralIntegrity)*1.5:0)})).sort((a,b)=>b.u-a.u).map(x=>x.id);ballots.push({ranking,weight});}

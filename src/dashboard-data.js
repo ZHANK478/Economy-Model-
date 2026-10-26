@@ -12,7 +12,7 @@ export const METRIC_INFO={
  population:{label:'Население',unit:'млн человек',digits:3},realIncomeIndex:{label:'Реальные доходы',unit:'индекс, начало = 100',digits:1},
  executiveApproval:{label:'Одобрение исполнительной власти',unit:'%',digits:1},presidentApproval:{label:'Одобрение президента',unit:'%',digits:1},
  cabinetApproval:{label:'Одобрение правительства',unit:'%',digits:1},governmentPartyRating:{label:'Ваша партия в опросах',unit:'%',digits:1},
- presidentialCandidateRating:{label:'Поддержка вашего кандидата',unit:'% первого тура',digits:1},debtRatio:{label:'Государственный долг',unit:'% ВВП',digits:1},
+ presidentialCandidateRating:{label:'Рейтинг президента',unit:'% голосов',digits:1},presidentialVoteShare:{label:'Рейтинг президента',unit:'% голосов',digits:1},debtRatio:{label:'Государственный долг',unit:'% ВВП',digits:1},
  giniDisposable:{label:'Джини после перераспределения',unit:'0–100',digits:1},giniMarket:{label:'Джини до перераспределения',unit:'0–100',digits:1},
  hdi:{label:'ИЧР',unit:'0–1',digits:3},meanWageReal:{label:'Средняя реальная зарплата',unit:'$ базы / месяц',digits:0},
  meanWageNominal:{label:'Средняя зарплата до налогов',unit:'нац. валюта / месяц',digits:0},lifeExpectancy:{label:'Продолжительность жизни',unit:'лет',digits:1},
