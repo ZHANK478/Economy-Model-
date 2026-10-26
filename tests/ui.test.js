@@ -61,6 +61,27 @@ test('vertical disclosure, result modals and separate interface exports preserve
   assert.ok(!app.innerHTML.includes('id="result-dialog"'));assert.ok(!app.innerHTML.includes('id="proposal-dialog"'));
   assert.ok(['vetoed','declined'].includes(game().politics.bills.find(b=>b.id===Number(vetoId)).status));assert.ok(app.innerHTML.includes('1 / 3'));
   await click({view:'constitution'});assert.ok(!app.innerHTML.includes('Голосовать за свободные институты'));assert.ok(!app.innerHTML.includes('Голосовать за ограничения'));assert.ok(!app.innerHTML.includes('Эти оценки вычисляются'));
+  // A return to Decisions must show every topic, regardless of the previous drill-down.
+  await click({category:'decisions'});await click({policyTab:'Кредит'});
+  assert.ok(!app.innerHTML.includes('data-policy-tab="Налоги"'));
+  await click({category:'statistics'});await click({category:'decisions'});
+  for(const label of ['Кредит','Налоги','Бюджет','Валюта','Структура'])assert.ok(app.innerHTML.includes(`data-policy-tab="${label}"`));
+  await click({policyTab:'Кредит'});await click({category:'decisions'});await click({category:'decisions'});
+  assert.ok(app.innerHTML.includes('data-policy-tab="Налоги"'));
+  await click({policyTab:'Кредит'});await click({view:'policy'});await click({view:'policy'});
+  assert.ok(app.innerHTML.includes('data-policy-tab="Бюджет"'));
+  // Only the chosen article goes to the existing constitutional vote.
+  await click({category:'political'});await click({view:'constitution'});
+  assert.ok(app.innerHTML.includes('charter-grid'));assert.ok(!app.innerHTML.includes('<table'));
+  await click({charterSection:'terms'});await click({charterStep:'parliamentTerm',direction:'1'});
+  const usedBeforeCharter=game().politics.turnCommands.length;
+  await click({action:'charter-vote'});
+  assert.equal(game().politics.turnCommands.length,usedBeforeCharter+1);
+  assert.deepEqual(game().politics.turnCommands.at(-1).constitutionPatch,{parliamentTerm:60});
+  assert.ok(app.innerHTML.includes('id="result-dialog"'));await click({action:'result-close'});
+  await click({charterSection:'powers'});await click({charterKey:'independentCB',charterValue:'false'});
+  await click({view:'government'});await click({view:'constitution'});
+  assert.ok(app.innerHTML.includes('charter-grid'));assert.ok(!app.innerHTML.includes('charter-editor'));
   await node('new-form').listeners.submit({preventDefault(){},target:{government:'personalist',country:'poor',party:'conservative',resource:'true'}});
   assert.equal(game().metrics.gdpPerCapitaReal,500);assert.equal(game().politics.constitution.regime,'personalist');assert.equal(game().demography.fertility,3.279);
  }finally{globalThis.FormData=NativeFormData;}

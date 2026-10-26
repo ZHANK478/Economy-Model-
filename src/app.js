@@ -1,3 +1,4 @@
+import {constitutionBoard,resetConstitutionUI,stageConstitution,stepConstitution,constitutionPatch,CHARTER_SECTIONS} from './constitution-ui.js';
 import {pendingElectionNotice,acknowledgeElection,electionDialog,electionHome,politicalNews} from './election-ui.js';
 import {ownershipBoard,infrastructureBoard} from './asset-views.js';
 import {compactGameCopy} from './ui-presentation.js';
@@ -40,8 +41,9 @@ let worldNewsOpen=false,announcedWorldMonth=null,worldNewsNotice=null,campaignOp
 let openCategory='decisions',resultBillId=null,resultExecutive=null,observedDecisionKeys=new Set(),trackedView=null,trackedCategory=null,trackedPolicy=null,trackedWindows=new Set(),sectionObserver=null;
 let usageStorage=null;try{usageStorage=globalThis.localStorage;}catch{}
 const usage=createUIObservation({storage:usageStorage});
+const constitutionUI={section:null,patch:{}};
 const assetUI={sector:null,network:null,ownershipKind:'privatize',networkKind:'networkSale',points:10,networkPoints:10,compensation:100};
-let electionOpenId=null;
+let electionOpenId=null,trackedCharter=null;
 let mobileOpen=false,busy=false,toastTimer,saveStatus='Сохраняется на этом устройстве';
 try {
   const saved=await storage.get(STORE);
@@ -54,6 +56,8 @@ if(state.politics.enabled){const edits=Object.fromEntries(Object.entries(draft).
 snapshotDecisions();
 usage.context({seed:state.seed,startYear:state.startYear,month:state.month});usage.session();usage.visibility(document.visibilityState!=='hidden');usage.event('viewport',null,{width:globalThis.innerWidth??null,height:globalThis.innerHeight??null});
 
+// Navigation always returns to the section chooser; simulation state is untouched.
+function resetSectionNavigation(){policyTab=null;assetUI.sector=null;assetUI.network=null;resetConstitutionUI(constitutionUI);}
 function toast(message) {
   const el=document.getElementById('toast');el.textContent=message;el.classList.add('visible');
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),4500);
@@ -396,7 +400,7 @@ const CATEGORIES={
   political:{label:'Политика',default:'government',views:[['government','Парламент'],['constitution','Конституция']]}
 };
 function render() {
-  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date}),infrastructure:()=>infrastructureBoard(state,assetUI,{n,pct,esc})+queuedActions()};
+  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date}),infrastructure:()=>infrastructureBoard(state,assetUI,{n,pct,esc})+queuedActions(),constitution:()=>constitutionBoard(state,constitutionUI,{n,esc,date,canVote:decisionBudget(state).optionalRemaining>0})};
   detectDecisionResult();
   if(['elections','electorate'].includes(view))view='government';
   if(announcedWorldMonth===null)announcedWorldMonth=state.month;
@@ -483,6 +487,9 @@ function bindUsage(){
  for(const id of trackedWindows)if(!windows.has(id))usage.close(id);
  for(const id of windows)if(!trackedWindows.has(id))usage.open(id,id.startsWith('graph:')?METRIC_INFO[id.slice(6)].label:id==='window:proposal'?'Предложение партии':id==='window:new'?'Новая игра':id==='window:settings'?'Настройки':id==='window:campaign'?'Предвыборное событие':id==='window:world-news'?'Мировая новость':id==='window:election'?'Итоги выборов':'Результат решения',id.startsWith('graph:')?'graph':'window',id==='window:result'?'decision':'interface');
  trackedWindows=windows;
+ const charterId=view==='constitution'&&openCategory==='political'&&constitutionUI.section?'constitution:'+constitutionUI.section:null;
+ if(trackedCharter!==charterId){if(trackedCharter)usage.close(trackedCharter);trackedCharter=charterId;}
+ if(charterId){if(windows.size)usage.close(charterId);else usage.open(charterId,CHARTER_SECTIONS[constitutionUI.section].label,'constitution','navigation');}
  const categoryId=openCategory?'category:'+openCategory:null;if(trackedCategory!==categoryId){if(trackedCategory)usage.close(trackedCategory);trackedCategory=categoryId;}
  const policyId=view==='policy'&&policyTab?'policy:'+policyTab:null;if(trackedPolicy!==policyId){if(trackedPolicy)usage.close(trackedPolicy);trackedPolicy=policyId;}
  if(!windows.size){if(categoryId)usage.open(categoryId,CATEGORIES[openCategory].label,'category','return');if(policyId)usage.open(policyId,policyTab,'policy','return');}else{if(categoryId)usage.close(categoryId);if(policyId)usage.close(policyId);}
@@ -524,6 +531,11 @@ function exportCSV() {
 app.addEventListener('click',async event=>{
   const target=event.target.closest('button,a');if(!target)return;
   usage.event('click',target.dataset.campaignChoice!==undefined?'campaign:'+target.dataset.campaignChoice:target.dataset.graph?'graph:'+target.dataset.graph:target.dataset.view?'view:'+target.dataset.view:target.dataset.category?'category:'+target.dataset.category:target.dataset.action?'action:'+target.dataset.action:target.dataset.politicalAction?'political:'+target.dataset.politicalAction:target.dataset.policyTab?'policy:'+target.dataset.policyTab:target.dataset.chart?'chart:'+target.dataset.chart:'link_or_control');
+  if(target.dataset.charterSection){resetConstitutionUI(constitutionUI);constitutionUI.section=target.dataset.charterSection;usage.event('select','constitution:'+constitutionUI.section);render();return;}
+  if(target.dataset.charterBack){resetConstitutionUI(constitutionUI);render();return;}
+  if(target.dataset.charterKey){try{const raw=target.dataset.charterValue;stageConstitution(state,constitutionUI,target.dataset.charterKey,raw==='true'?true:raw==='false'?false:raw);render();}catch(e){toast(e.message);}return;}
+  if(target.dataset.charterStep){stepConstitution(state,constitutionUI,target.dataset.charterStep,Number(target.dataset.direction));render();return;}
+  if(target.dataset.action==='charter-vote'){try{const patch=constitutionPatch(state,constitutionUI);if(!Object.keys(patch).length)return;comparisonBase??=copy(state);executePolitical(state,{kind:'chooseLaw',patch:{},constitutionPatch:patch,title:CHARTER_SECTIONS[constitutionUI.section].label});resetConstitutionUI(constitutionUI);draft=plannedPolicy(state);comparison=null;persist();render();}catch(e){toast(e.message);}return;}
   if(target.dataset.assetSector!==undefined){assetUI.sector=Number(target.dataset.assetSector);usage.event('select','asset:sector:'+assetUI.sector);render();return;}
   if(target.dataset.networkAsset){assetUI.network=target.dataset.networkAsset;usage.event('select','asset:network:'+assetUI.network);render();return;}
   if(target.dataset.assetClose){assetUI[target.dataset.assetClose==='network'?'network':'sector']=null;render();return;}
@@ -543,8 +555,8 @@ app.addEventListener('click',async event=>{
   if(target.dataset.action==='proposal-close'){proposalOpen=false;render();return;}
   if(target.dataset.action==='trend-close'){trendMetric=null;render();return;}
   if(target.dataset.politicalAction){try{comparisonBase??=copy(state);handlePoliticalAction(state,target.dataset,id=>document.getElementById(id));draft=plannedPolicy(state);comparison=null;persist();render();}catch(e){toast(e.message);}return;}
-  if(target.dataset.category){openCategory=openCategory===target.dataset.category?null:target.dataset.category;view=openCategory?CATEGORIES[openCategory].default:null;render();return;}
-  if(target.dataset.view){event.preventDefault();if(!Object.values(CATEGORIES).some(c=>c.views.some(([id])=>id===target.dataset.view)))return;const id=target.dataset.view;openCategory=Object.keys(CATEGORIES).find(key=>CATEGORIES[key].views.some(([v])=>v===id));view=view===id?null:id;render();return;}
+  if(target.dataset.category){resetSectionNavigation();openCategory=openCategory===target.dataset.category?null:target.dataset.category;view=openCategory?CATEGORIES[openCategory].default:null;render();return;}
+  if(target.dataset.view){event.preventDefault();if(!Object.values(CATEGORIES).some(c=>c.views.some(([id])=>id===target.dataset.view)))return;const id=target.dataset.view;resetSectionNavigation();openCategory=Object.keys(CATEGORIES).find(key=>CATEGORIES[key].views.some(([v])=>v===id));view=view===id?null:id;render();return;}
   if(target.dataset.policyTab){openCategory='decisions';view='policy';policyTab=policyTab===target.dataset.policyTab?null:target.dataset.policyTab;render();return;}
   if(target.dataset.chart){chartMetric=target.dataset.chart;render();return;}
   if(target.dataset.compareChart){compareMetric=target.dataset.compareChart;render();return;}
@@ -585,7 +597,7 @@ app.addEventListener('click',async event=>{
     case 'new':if(trackedView)usage.close(trackedView);if(trackedCategory)usage.close(trackedCategory);if(trackedPolicy)usage.close(trackedPolicy);usage.open('window:new','Новая игра','window');document.getElementById('new-dialog').showModal();break;
     case 'checkpoint':
       checkpoint=copy(state);try{await storage.set(CHECKPOINT,JSON.stringify({format:'economy-model',version:VERSION,state:checkpoint}));toast('Точка сравнения сохранена.');}catch(e){toast('Точка сохранена только на время этой сессии. Скачайте файл.');}comparison=null;render();break;
-    case 'restore':if(checkpoint){electionOpenId=null;worldNewsOpen=false;worldNewsNotice=null;announcedWorldMonth=null;campaignOpen=false;campaignFeedback=null;announcedCampaign=null;proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;state=copy(checkpoint);enableInstantPolitics(state);enableElectionExperience(state);if(state.politics.enabled&&state.politics.executive.inOffice&&(!state.politics.livingWorld||state.stochastic))executePolitical(state,{kind:'setLivingWorld'});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.decisionLimit!==3)executePolitical(state,{kind:'setDecisionLimit',limit:3});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.dashboardMode)executePolitical(state,{kind:'setDashboardMode'});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.partyContinuity)executePolitical(state,{kind:'setPartyContinuity'});draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparisonBase=null;comparison=null;snapshotDecisions();persist();render();toast('Эксперимент восстановлен из сохранённой точки.');}break;
+    case 'restore':if(checkpoint){resetSectionNavigation();electionOpenId=null;worldNewsOpen=false;worldNewsNotice=null;announcedWorldMonth=null;campaignOpen=false;campaignFeedback=null;announcedCampaign=null;proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;state=copy(checkpoint);enableInstantPolitics(state);enableElectionExperience(state);if(state.politics.enabled&&state.politics.executive.inOffice&&(!state.politics.livingWorld||state.stochastic))executePolitical(state,{kind:'setLivingWorld'});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.decisionLimit!==3)executePolitical(state,{kind:'setDecisionLimit',limit:3});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.dashboardMode)executePolitical(state,{kind:'setDashboardMode'});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.partyContinuity)executePolitical(state,{kind:'setPartyContinuity'});draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparisonBase=null;comparison=null;snapshotDecisions();persist();render();toast('Эксперимент восстановлен из сохранённой точки.');}break;
   }
 });
 app.addEventListener('input',event=>{
@@ -649,7 +661,7 @@ governmentSelect.addEventListener('change',updateStartDescription);countrySelect
 document.getElementById('new-form').addEventListener('submit',async event=>{
   event.preventDefault();const form=new FormData(event.target);
   try{state=createSimulation(newGameOptions({government:form.get('government')??'presidential',country:form.get('country')??'middle',party:form.get('party')??'liberal',resource:form.get('resource')==='true'}));}catch(e){toast(e.message);return;}
-  electionOpenId=null;worldNewsOpen=false;worldNewsNotice=null;announcedWorldMonth=null;campaignOpen=false;campaignFeedback=null;announcedCampaign=null;proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;
+  resetSectionNavigation();electionOpenId=null;worldNewsOpen=false;worldNewsNotice=null;announcedWorldMonth=null;campaignOpen=false;campaignFeedback=null;announcedCampaign=null;proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;
   draft=state.politics.enabled?plannedPolicy(state):copy(state.policy);comparison=null;comparisonBase=null;view=state.politics.enabled?'policy':'country';checkpoint=null;mobileOpen=false;journalPage=0;
   try{await storage.set(CHECKPOINT,'');}catch(e){toast('Не удалось очистить прежнюю точку сравнения на устройстве.');}
   usage.close('window:new');snapshotDecisions();openCategory=state.politics.enabled?'decisions':'statistics';persist();document.getElementById('new-dialog').close();render();
@@ -659,7 +671,7 @@ document.getElementById('new-dialog').addEventListener('close',()=>{usage.close(
 document.getElementById('new-dialog').addEventListener('cancel',()=>{usage.close('window:new');usage.flush();bindUsage();});
 document.getElementById('import-file').addEventListener('change',async event=>{
   const file=event.target.files[0];if(!file)return;
-  try{if(file.size>100*1024*1024)throw new Error('Файл больше 100 МБ');const text=await file.text();const loaded=importSimulation(text);const loadedDraft=sanitizePolicy(JSON.parse(text).draftPolicy??loaded.policy);state=loaded;electionOpenId=null;worldNewsOpen=false;worldNewsNotice=null;announcedWorldMonth=null;campaignOpen=false;campaignFeedback=null;announcedCampaign=null;proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;enableInstantPolitics(state);enableElectionExperience(state);if(state.politics.enabled&&state.politics.executive.inOffice&&(!state.politics.livingWorld||state.stochastic))executePolitical(state,{kind:'setLivingWorld'});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.decisionLimit!==3)executePolitical(state,{kind:'setDecisionLimit',limit:3});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.dashboardMode)executePolitical(state,{kind:'setDashboardMode'});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.partyContinuity)executePolitical(state,{kind:'setPartyContinuity'});draft=state.politics.enabled?plannedPolicy(state):loadedDraft;comparison=null;comparisonBase=null;view=state.politics.enabled?'policy':'country';openCategory=state.politics.enabled?'decisions':'statistics';journalPage=0;snapshotDecisions();persist();render();toast('Эксперимент восстановлен.');}
+  try{if(file.size>100*1024*1024)throw new Error('Файл больше 100 МБ');const text=await file.text();const loaded=importSimulation(text);const loadedDraft=sanitizePolicy(JSON.parse(text).draftPolicy??loaded.policy);state=loaded;resetSectionNavigation();electionOpenId=null;worldNewsOpen=false;worldNewsNotice=null;announcedWorldMonth=null;campaignOpen=false;campaignFeedback=null;announcedCampaign=null;proposalOpen=false;trendMetric=null;resultBillId=null;resultExecutive=null;announcedProposal=null;enableInstantPolitics(state);enableElectionExperience(state);if(state.politics.enabled&&state.politics.executive.inOffice&&(!state.politics.livingWorld||state.stochastic))executePolitical(state,{kind:'setLivingWorld'});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.agendaSlots!==1)executePolitical(state,{kind:'setAgendaSlots',slots:1});if(state.politics.enabled&&state.politics.executive.inOffice&&state.politics.decisionLimit!==3)executePolitical(state,{kind:'setDecisionLimit',limit:3});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.dashboardMode)executePolitical(state,{kind:'setDashboardMode'});if(state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.partyContinuity)executePolitical(state,{kind:'setPartyContinuity'});draft=state.politics.enabled?plannedPolicy(state):loadedDraft;comparison=null;comparisonBase=null;view=state.politics.enabled?'policy':'country';openCategory=state.politics.enabled?'decisions':'statistics';journalPage=0;snapshotDecisions();persist();render();toast('Эксперимент восстановлен.');}
   catch(e){toast('Не удалось открыть сохранение: '+e.message);}event.target.value='';
 });
 app.addEventListener('toggle',event=>{const el=event.target;if(el.tagName!=='DETAILS')return;const label=el.querySelector('summary')?.textContent?.trim();if(label){const id='detail:'+String(view)+':'+label.slice(0,100);if(el.open)usage.open(id,label,'detail');else usage.close(id);usage.flush();}},true);
