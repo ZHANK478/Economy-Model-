@@ -14,6 +14,12 @@ export function electionResults(e){
  const total=results.reduce((a,r)=>a+r.votes,0);
  return results.map(r=>({...e.results.find(x=>x.id===r.id),...r,share:total?r.votes/total*100:0})).sort((a,b)=>b.votes-a.votes);
 }
+// Compare actual ballots of the same mandate; a poll is never a prior election.
+export function electionComparison(state,e){
+ const previous=state.politics.elections.filter(x=>x.kind===e.kind&&x.id!==e.id&&(x.month<e.month||x.month===e.month&&x.id<e.id)).sort((a,b)=>a.month-b.month||a.id-b.id).at(-1)??null;
+ const old=previous?electionResults(previous):[];
+ return {previous,rows:electionResults(e).map(row=>{const before=old.find(r=>r.id===row.id);return {...row,previous:before??null,shareChange:before?row.share-before.share:null,seatChange:before&&e.kind==='parliament'?row.seats-before.seats:null};})};
+}
 export function electionHeadline(state,e){
  if(e.kind==='parliament')return 'Парламент избран';
  if(state.politics.executive.role!=='president')return 'Избран президент';
@@ -24,8 +30,10 @@ export function electionHeadline(state,e){
  return old&&old!==name?'Ваш кандидат избран':'Вы переизбраны';
 }
 export function electionDialog(state,e,{n,esc,date}){
- const party=id=>state.politics.parties.find(x=>x.id===id);
- return `<dialog id="election-dialog" class="election-popup" aria-labelledby="election-heading"><div class="election-kicker">${e.kind==='president'?'Президентские':'Парламентские'} выборы · ${date(e.month,true)}</div><h2 id="election-heading">${esc(electionHeadline(state,e))}</h2><div class="election-candidates">${electionResults(e).map(r=>`<article class="election-candidate ${r.id===e.winner?'is-winner':''}" style="--party-color:${party(r.id)?.color??'#5079a5'}"><span class="candidate-party">${esc(partyDisplayName(party(r.id)))}</span>${e.kind==='president'?`<strong class="candidate-name">${esc(r.candidateName)}</strong>`:''}<b class="candidate-result">${e.kind==='president'?n(r.share,2)+'%':r.seats+'<small> / '+e.totalSeats+'</small>'}</b><span class="candidate-votes">${n(r.votes,0)} голосов</span></article>`).join('')}</div><div class="election-turnout">Явка ${n(e.turnout,1)}%</div><button class="primary wide" data-action="election-ack" data-election-id="${e.id}">Продолжить</button></dialog>`;
+ const seatWord=value=>{const a=Math.abs(value)%100,b=a%10;return a>=11&&a<=14?'мест':b===1?'место':b>=2&&b<=4?'места':'мест';};
+ const party=id=>state.politics.parties.find(x=>x.id===id),comparison=electionComparison(state,e);
+ const delta=(value,unit,d=2)=>{if(value===null)return '';const v=Number(value.toFixed(d)),tone=v>0?'gain':v<0?'loss':'flat';return `<span class="election-change ${tone}">${v>0?'↑ +':v<0?'↓ ':''}${n(v,d)} ${unit}</span>`;};
+ return `<dialog id="election-dialog" class="election-popup" aria-labelledby="election-heading"><div class="election-kicker">${e.kind==='president'?'Президентские':'Парламентские'} выборы · ${date(e.month,true)}</div><h2 id="election-heading">${esc(electionHeadline(state,e))}</h2><div class="election-candidates">${comparison.rows.map(r=>`<article class="election-candidate ${r.id===e.winner?'is-winner':''}" style="--party-color:${party(r.id)?.color??'#5079a5'}"><span class="candidate-party">${esc(partyDisplayName(party(r.id)))}</span>${e.kind==='president'?`<strong class="candidate-name">${esc(r.candidateName)}</strong>`:''}<b class="candidate-result">${e.kind==='president'?n(r.share,2)+'%':r.seats+'<small> / '+e.totalSeats+'</small>'}</b>${e.kind==='parliament'?delta(r.seatChange,seatWord(r.seatChange??0),0)+`<span class="candidate-vote-share">${n(r.share,2)}%</span>`:''}${delta(r.shareChange,'п.п.')}<span class="candidate-votes">${n(r.votes,0)} голосов</span>${r.previous?`<span class="candidate-previous">Было ${n(r.previous.share,2)}%${e.kind==='parliament'?' · '+r.previous.seats+' '+seatWord(r.previous.seats):''}</span>`:comparison.previous?'<span class="candidate-previous">Первое участие</span>':''}</article>`).join('')}</div><div class="election-comparison-period">${comparison.previous?(comparison.previous.initial?'К стартовому составу · ':'К выборам · ')+date(comparison.previous.month,true):'Первое голосование'}</div><div class="election-turnout">Явка ${n(e.turnout,1)}%</div><button class="primary wide" data-action="election-ack" data-election-id="${e.id}">Продолжить</button></dialog>`;
 }
 export function electionHome(state,{n,esc,date}){
  const p=state.politics;if(!p.enabled)return '';

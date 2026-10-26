@@ -25,7 +25,7 @@ export const CONSTITUTIONAL_POLICY_KEYS=['protectedJudges','judicialReview','fre
 export const EXECUTIVE_KEYS=['fxIntervention','taxEnforcement','stabilizationSaving','foreignBorrowingShare','liquiditySupport'];
 export const CB_KEYS=['rate','reserveRequirement','bankCapitalRequirement'];
 export const POLITICAL_BUDGET_KEYS=['electionAdministration','securityBudget','patronageBudget'];
-export const BUDGET_KEYS=['governmentConsumption','publicInvestment','transfers','education','healthcare','familyBenefits','businessSupport','antitrustBudget','courtBudget','soeAuditBudget','infrastructureMaintenance','childcareBudget',...POLITICAL_BUDGET_KEYS];
+export const BUDGET_KEYS=['governmentConsumption','militaryBudget','publicInvestment','transfers','education','healthcare','familyBenefits','businessSupport','antitrustBudget','courtBudget','soeAuditBudget','infrastructureMaintenance','childcareBudget',...POLITICAL_BUDGET_KEYS];
 export const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 export const clone=v=>JSON.parse(JSON.stringify(v));
 export const logistic=x=>1/(1+Math.exp(-clamp(x,-40,40)));

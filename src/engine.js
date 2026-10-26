@@ -520,7 +520,7 @@ function advanceMonthCandidate(state,policy=state.policy,{preserveEconomicRevisi
   advanceMonetary(s,prev,w,events);
   const effectiveRate=s.monetary.effectiveRate;
   const flow={tax:0,vat:0,tariff:0,incomeTax:0,corporateTax:0,royalty:0,
-    purchases:0,transfers:0,familyBenefits:0,healthcare:0,education:0,childcare:0,infrastructureMaintenance:0,concessionGuarantees:0,institutionCost:0,antitrust:0,courts:0,soeAudits:0,politicalElections:0,politicalSecurity:0,politicalPatronage:0,businessSupport:0,interest:0,bankRescue:0,centralIncome:0,
+    purchases:0,militaryPurchases:0,transfers:0,familyBenefits:0,healthcare:0,education:0,childcare:0,infrastructureMaintenance:0,concessionGuarantees:0,institutionCost:0,antitrust:0,courts:0,soeAudits:0,politicalElections:0,politicalSecurity:0,politicalPatronage:0,businessSupport:0,interest:0,bankRescue:0,centralIncome:0,
     domesticIssued:0,externalIssued:0,domesticRedeemed:0,externalRedeemed:0,
     reserveSale:0,fundWithdrawal:0,fundDeposit:0,domesticHaircut:0,externalHaircut:0,
     interestCapitalized:0,unfunded:0,sovereignSpread:0,stateDividends:0,equityPurchases:0,equitySales:0,networkPurchases:0,networkSales:0,externalEquityRevaluation:0,reserveConversion:0};
@@ -683,14 +683,14 @@ function advanceMonthCandidate(state,policy=state.policy,{preserveEconomicRevisi
   // indexation and no imposed real growth unrelated to the actual tax base.
   const budgetBase=s.economy?.revision>=4?s.base.monthlyGDP*prev.consumerPriceIndex/100:prev.metrics.nominalGDPAnnual/12;
   const administrationShare=.05+.25*Math.pow(p.taxEnforcement/100,2)+p.antitrustBudget+p.courtBudget+p.soeAuditBudget+p.electionAdministration+p.securityBudget+p.patronageBudget;
-  const purchaseShare=p.governmentConsumption+p.publicInvestment+p.education+p.healthcare+p.childcareBudget+p.infrastructureMaintenance+administrationShare;
+  const purchaseShare=p.governmentConsumption+(p.militaryBudget??0)+p.publicInvestment+p.education+p.healthcare+p.childcareBudget+p.infrastructureMaintenance+administrationShare;
   const requestedPurchases=budgetBase*purchaseShare/100;
   const requestedTransfers=budgetBase*p.transfers/100*(.6+.4*(s.ageCohorts[2]/s.population)/.07);
   const requestedFamily=budgetBase*p.familyBenefits/100*(s.ageCohorts[0]/s.population)/.28;
   const requestedSupport=budgetBase*p.businessSupport/100;
   const coupons=sum(gov.domesticBonds.map(x=>yearCoupon(x.principal,x.rate)))+sum(gov.externalBonds.map(x=>yearCoupon(x.principal,x.rate)))*s.exchangeRate;
   const maturities=sum(gov.domesticBonds.filter(x=>x.maturity<=s.month).map(x=>x.principal))+sum(gov.externalBonds.filter(x=>x.maturity<=s.month).map(x=>x.principal))*s.exchangeRate;
-  trace.budgetPlan={budgetBase,administrationShare,purchaseShare,requestedPurchases,requestedTransfers,requestedFamily,requestedSupport,coupons,maturities,cashBeforeFunding:gov.cash};
+  trace.budgetPlan={requestedMilitary:budgetBase*(p.militaryBudget??0)/100,budgetBase,administrationShare,purchaseShare,requestedPurchases,requestedTransfers,requestedFamily,requestedSupport,coupons,maturities,cashBeforeFunding:gov.cash};
   fundGovernment(s,requestedPurchases+requestedTransfers+requestedFamily+requestedSupport+coupons+maturities,flow);
   s.households.forEach(h=>{h.bondIncome=0;});
   const couponShares=domesticCouponShares(s);
@@ -867,6 +867,8 @@ function advanceMonthCandidate(state,policy=state.policy,{preserveEconomicRevisi
     if(actual>allocated) s.projects.push({type:'private',sector:i,amount:actual-allocated,due:s.month+Math.round(k.privateInvestmentDelay),efficiency:1,legacy:false,...(s.economy?{importShare:investmentImportShare}:{})});
   });
   flow.purchases=finalPurchase(gov,gVolume,s.base.governmentWeights,governmentImportShare);
+  // Army is a tagged part of existing final purchases, never an additional GDP flow.
+  flow.militaryPurchases=flow.purchases*(p.militaryBudget??0)/Math.max(purchaseShare,.001);
   flow.healthcare=flow.purchases*p.healthcare/Math.max(purchaseShare,.001);
   flow.education=flow.purchases*p.education/Math.max(purchaseShare,.001);
   flow.childcare=flow.purchases*p.childcareBudget/Math.max(purchaseShare,.001);
@@ -1220,6 +1222,10 @@ export function importSimulation(text) {
   if(!s.demography||['female','male'].some(sex=>!Array.isArray(s.demography[sex])||s.demography[sex].length!==1201||s.demography[sex].some(x=>typeof x!=='number'||x<0))||!Array.isArray(s.demography.pregnancies)||s.demography.pregnancies.length!==s.parameters.pregnancyDelay) throw new Error('Повреждена демография');
   if(Math.abs(sum(cohortTotals(s.demography))-s.population)>1e-7) throw new Error('Нарушен баланс населения');
   for(const f of s.firms)if(!f.ownership||['state','foreign','domestic','municipal','cooperative'].some(key=>!Number.isFinite(f.ownership[key])||f.ownership[key]<0||f.ownership[key]>1)||Math.abs(sum(Object.values(f.ownership))-1)>1e-8||!Array.isArray(f.domesticOwners)||f.domesticOwners.length!==10||f.domesticOwners.some(x=>!Number.isFinite(x)||x<0)||Math.abs(sum(f.domesticOwners)-f.ownership.domestic)>1e-8||!Array.isArray(f.workerOwners)||f.workerOwners.length!==10||f.workerOwners.some(x=>!Number.isFinite(x)||x<0)||Math.abs(sum(f.workerOwners)-f.ownership.cooperative)>1e-8)throw new Error('Нарушен баланс собственности');
+  // This newly separated budget line was not tracked in older saves. Zero
+  // preserves their economic path; do not backfill invented historical spending.
+  if(s.policy.militaryBudget===undefined)s.policy.militaryBudget=0;
+  if(s.politics?.lawPolicy&&s.politics.lawPolicy.militaryBudget===undefined)s.politics.lawPolicy.militaryBudget=0;
   const validatedPolicy=sanitizePolicy(s.policy);
   if(Object.keys(validatedPolicy).some(k=>s.policy[k]!==validatedPolicy[k]))throw new Error('Повреждена политика сохранения');
   validateExtendedState(s);

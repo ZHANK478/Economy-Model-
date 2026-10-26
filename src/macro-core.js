@@ -72,10 +72,10 @@ export function macroConsumption(s,h,index,effectiveRealRate,effectiveUnitPrice)
  const previous=Math.max(1e-9,h.consumption),result=errorCorrection({previous,target:Math.max(1e-9,target),speed:m.consumptionSpeed});
  return {desired:target*effectiveUnitPrice,smoothed:result.value*effectiveUnitPrice,targetVolume:target,plannedVolume:result.value,rateResponse,netRealIncome:net,realWealth:wealth,populationScale:pop,errorCorrection:result.correction};
 }
-export function purchaseShare(p){return p.governmentConsumption+p.publicInvestment+p.education+p.healthcare+p.childcareBudget+p.infrastructureMaintenance+.05+.25*(p.taxEnforcement/100)**2+p.antitrustBudget+p.courtBudget+p.soeAuditBudget+p.electionAdministration+p.securityBudget+p.patronageBudget;}
+export function purchaseShare(p){return p.governmentConsumption+(p.militaryBudget??0)+p.publicInvestment+p.education+p.healthcare+p.childcareBudget+p.infrastructureMaintenance+.05+.25*(p.taxEnforcement/100)**2+p.antitrustBudget+p.courtBudget+p.soeAuditBudget+p.electionAdministration+p.securityBudget+p.patronageBudget;}
 export function publicPolicyFromAccounts(base,accounts){
  const p={...base},fixed=.05+.25*(p.taxEnforcement/100)**2;
- const keys=['governmentConsumption','education','healthcare','childcareBudget','infrastructureMaintenance','antitrustBudget','courtBudget','soeAuditBudget','electionAdministration','securityBudget','patronageBudget'];
+ const keys=['governmentConsumption','militaryBudget','education','healthcare','childcareBudget','infrastructureMaintenance','antitrustBudget','courtBudget','soeAuditBudget','electionAdministration','securityBudget','patronageBudget'];
  const variable=sum(keys.map(k=>p[k])),factor=(accounts.governmentConsumptionGDP-fixed)/variable;
  for(const k of keys)p[k]*=factor;
  return p;

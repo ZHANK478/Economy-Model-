@@ -32,7 +32,7 @@ export const MODEL_PROFILES={
 };
 export const BASE_POLICY = {
   rate:8.25, inflationTarget:5, vat:18, incomeTax:18, corporateTax:25,
-  royalty:18, tariff:0, governmentConsumption:7, publicInvestment:3,
+  royalty:18, tariff:0, governmentConsumption:7, publicInvestment:3, militaryBudget:0,
   transfers:3, education:1.5, healthcare:2, familyBenefits:.5, businessSupport:0, minimumWage:100,
   energyTariff:100, fxIntervention:0, reserveRequirement:5,
   bankCapitalRequirement:10, foreignBorrowingShare:25,
@@ -108,6 +108,7 @@ export const POLICY_FIELDS = [
   ['tariff','Импортная пошлина',0,30,.5,'%','Налоги','Повышает цену импортных товаров и компонентов.'],
   ['taxEnforcement','Налоговый контроль',0,100,1,'индекс / 100','Налоги','Улучшает собираемость и сокращает теневой сектор; администрирование требует бюджетных закупок.'],
   ['governmentConsumption','Государственные закупки',0,35,.5,'% ВВП за 12 мес.','Бюджет','Доля известного ВВП последних 12 месяцев; месячный бюджет = годовая сумма / 12. Социальные услуги отдельно.'],
+  ['militaryBudget','Армия',0,15,.25,'% опорного ВВП','Бюджет','Отдельно выделяемые военные закупки. Годовое назначение делится на 12; оплаченная сумма входит в государственные закупки один раз. Численность и боеготовность пока не моделируются.'],
   ['publicInvestment','Инфраструктура',0,15,.25,'% ВВП за 12 мес.','Бюджет','Сначала спрос на строительство; ввод объектов через 12–24 месяца.'],
   ['transfers','Пособия и пенсии',0,20,.25,'% ВВП за 12 мес.','Бюджет','Перевод дохода семьям; сам перевод не входит в ВВП.'],
   ['education','Образование',0,8,.25,'% ВВП за 12 мес.','Бюджет','Текущие закупки услуг; квалификация меняется медленно.'],

@@ -1,3 +1,4 @@
+import {armyView} from './army-ui.js';
 import {constitutionBoard,resetConstitutionUI,stageConstitution,stepConstitution,constitutionPatch,CHARTER_SECTIONS} from './constitution-ui.js';
 import {pendingElectionNotice,acknowledgeElection,electionDialog,electionHome,politicalNews} from './election-ui.js';
 import {ownershipBoard,infrastructureBoard} from './asset-views.js';
@@ -396,11 +397,12 @@ function electorateView(){
 }
 const CATEGORIES={
   decisions:{label:'Решения',default:'policy',views:[['policy','Законы и бюджет'],['ownership','Собственность'],['infrastructure','Инфраструктура']]},
-  statistics:{label:'Страна',default:'country',views:[['country','Страна']]},
-  political:{label:'Политика',default:'government',views:[['government','Парламент'],['constitution','Конституция']]}
+  statistics:{label:'Статистика',default:'country',views:[['country','Страна']]},
+  political:{label:'Политика',default:'government',views:[['government','Парламент'],['constitution','Конституция']]},
+  army:{label:'Армия',default:'army',views:[['army','Армия']]}
 };
 function render() {
-  const views={country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date}),infrastructure:()=>infrastructureBoard(state,assetUI,{n,pct,esc})+queuedActions(),constitution:()=>constitutionBoard(state,constitutionUI,{n,esc,date,canVote:decisionBudget(state).optionalRemaining>0})};
+  const views={army:()=>armyView(state,plannedPolicy(state),{n}),country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,journal:journalView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date}),infrastructure:()=>infrastructureBoard(state,assetUI,{n,pct,esc})+queuedActions(),constitution:()=>constitutionBoard(state,constitutionUI,{n,esc,date,canVote:decisionBudget(state).optionalRemaining>0})};
   detectDecisionResult();
   if(['elections','electorate'].includes(view))view='government';
   if(announcedWorldMonth===null)announcedWorldMonth=state.month;
@@ -555,7 +557,8 @@ app.addEventListener('click',async event=>{
   if(target.dataset.action==='proposal-close'){proposalOpen=false;render();return;}
   if(target.dataset.action==='trend-close'){trendMetric=null;render();return;}
   if(target.dataset.politicalAction){try{comparisonBase??=copy(state);handlePoliticalAction(state,target.dataset,id=>document.getElementById(id));draft=plannedPolicy(state);comparison=null;persist();render();}catch(e){toast(e.message);}return;}
-  if(target.dataset.category){resetSectionNavigation();openCategory=openCategory===target.dataset.category?null:target.dataset.category;view=openCategory?CATEGORIES[openCategory].default:null;render();return;}
+  if(target.dataset.action==='army-budget'){resetSectionNavigation();openCategory='decisions';view='policy';policyTab='Бюджет';render();return;}
+  if(target.dataset.category){resetSectionNavigation();openCategory=openCategory===target.dataset.category?null:target.dataset.category;view=openCategory?(openCategory==='decisions'?'policy':CATEGORIES[openCategory].views.length===1?CATEGORIES[openCategory].default:null):null;render();return;}
   if(target.dataset.view){event.preventDefault();if(!Object.values(CATEGORIES).some(c=>c.views.some(([id])=>id===target.dataset.view)))return;const id=target.dataset.view;resetSectionNavigation();openCategory=Object.keys(CATEGORIES).find(key=>CATEGORIES[key].views.some(([v])=>v===id));view=view===id?null:id;render();return;}
   if(target.dataset.policyTab){openCategory='decisions';view='policy';policyTab=policyTab===target.dataset.policyTab?null:target.dataset.policyTab;render();return;}
   if(target.dataset.chart){chartMetric=target.dataset.chart;render();return;}
@@ -636,7 +639,9 @@ app.addEventListener('change',event=>{
   if(e.id==='compare-months'){compareMonths=Number(e.value);comparison=null;render();}
 });
 app.addEventListener('keydown',event=>{
-  const e=event.target;if(event.key!=='Enter'||!e.dataset?.policyNumber)return;
+  const e=event.target;if(event.key!=='Enter'||event.isComposing)return;
+  if((resultBillId!==null||resultExecutive)&&!pendingElectionNotice(state)&&electionOpenId===null&&!settingsOpen){event.preventDefault();event.stopPropagation?.();if(!event.repeat){resultBillId=null;resultExecutive=null;render();}return;}
+  if(event.repeat||!e.dataset?.policyNumber)return;
   event.preventDefault();if(e.value!==''){updateDraft(e.dataset.policyNumber,e.value);commitChoice(e.dataset.policyNumber);render();}
 });
 app.addEventListener('pointermove',event=>{

@@ -22,11 +22,11 @@ test('vertical disclosure, result modals and separate interface exports preserve
  assert.ok(app.innerHTML.includes('ВВП на душу'));assert.ok(app.innerHTML.includes('Безработица'));assert.ok(app.innerHTML.includes('data-change="gdpPerCapitaRolling"'));assert.ok(!app.innerHTML.includes('Партии и коалиция'));assert.ok(!app.innerHTML.includes('Власть и полномочия'));assert.ok(app.innerHTML.includes('Рейтинг президента'));assert.ok(app.innerHTML.includes('январь 2000'));
  assert.ok(app.innerHTML.includes('id="proposal-dialog"'));const id=app.innerHTML.match(/data-bill-card="(\d+)"/)[1];
  await click({action:'proposal-close'});await click({category:'statistics'});
- assert.ok(app.innerHTML.includes('country-grid'));assert.equal((app.innerHTML.match(/data-category=/g)??[]).length,3);assert.ok(!app.innerHTML.includes('ВВП · номинальный'));assert.ok(!app.innerHTML.includes('ВВП по условному ППС'));assert.equal((app.innerHTML.match(/class="kpi country-stat"/g)??[]).length,9);
+ assert.ok(app.innerHTML.includes('country-grid'));assert.equal((app.innerHTML.match(/data-category=/g)??[]).length,4);assert.ok(!app.innerHTML.includes('ВВП · номинальный'));assert.ok(!app.innerHTML.includes('ВВП по условному ППС'));assert.equal((app.innerHTML.match(/class="kpi country-stat"/g)??[]).length,9);
  await click({category:'statistics'});assert.ok(!app.innerHTML.includes('country-grid'));await click({category:'statistics'});
  await click({view:'country'});await click({action:'step'});assert.ok(app.innerHTML.includes('январь 2000'));assert.ok(app.innerHTML.includes('Возрастная пирамида'));assert.ok(app.innerHTML.includes('id="proposal-dialog"'));
  await click({politicalAction:'adopt',billId:id});assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(!app.innerHTML.includes('id="proposal-dialog"'));
- assert.ok(app.innerHTML.includes('Принято'));assert.ok(app.innerHTML.includes('ballot-counts'));assert.ok(!app.innerHTML.includes('Воздержались:'));assert.ok(!app.innerHTML.includes('Станет:'));await click({action:'result-close'});assert.ok(!app.innerHTML.includes('id="result-dialog"'));assert.ok(!app.innerHTML.includes('data-bill-card='));
+ assert.ok(app.innerHTML.includes('Принято'));assert.ok(app.innerHTML.includes('ballot-counts'));assert.ok(!app.innerHTML.includes('Воздержались:'));assert.ok(!app.innerHTML.includes('Станет:'));const beforeEnter=game();app.listeners.keydown({key:'Enter',repeat:true,target:{dataset:{}},preventDefault(){}});assert.ok(app.innerHTML.includes('id="result-dialog"'));app.listeners.keydown({key:'Enter',target:{dataset:{}},preventDefault(){}});assert.equal(game().month,beforeEnter.month);assert.equal(game().politics.turnCommands.length,beforeEnter.politics.turnCommands.length);assert.ok(!app.innerHTML.includes('id="result-dialog"'));assert.ok(!app.innerHTML.includes('data-bill-card='));
  await click({view:'policy'});await click({policyTab:'Структура'});assert.ok(app.innerHTML.includes('type="range"'));assert.ok(app.innerHTML.includes('data-policy-number='));
  app.listeners.change({target:{dataset:{policyCheck:'openProcurement'},checked:true,hasAttribute:()=>false}});
  assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(app.innerHTML.includes('За:'));assert.equal(game().month,0);
@@ -36,7 +36,7 @@ test('vertical disclosure, result modals and separate interface exports preserve
  const count=game().politics.bills.length;assert.ok(app.innerHTML.includes('3 / 3'));
  app.listeners.change({target:{dataset:{policyChoice:'monetaryRegime'},value:'dollarized'}});assert.equal(game().politics.bills.length,count);
  await click({action:'step'});assert.equal(game().month,1);assert.equal(game().journal.length,1);assert.ok(app.innerHTML.includes('за месяц'));assert.ok(app.innerHTML.includes('data-change="unemployment"'));
- const views=['government','policy','country','ownership','infrastructure','elections','government','constitution','electorate'];
+ const views=['army','government','policy','country','ownership','infrastructure','elections','government','constitution','electorate'];
  for(const view of views){if(app.innerHTML.includes(`data-view="${view}" class="active"`))await click({view});await click({view});assert.ok(app.innerHTML.includes('Баланс бюджета за месяц'));assert.ok(app.innerHTML.includes('Следующий месяц'));assert.ok(!app.innerHTML.includes('NaN'));assert.ok(!app.innerHTML.includes('undefined'));}
  app.listeners.change({target:{dataset:{policyCheck:'protectedJudges'},checked:false,hasAttribute:()=>false}});assert.ok(app.innerHTML.includes('id="result-dialog"'));assert.ok(app.innerHTML.includes('Отклонено'));assert.ok(!app.innerHTML.includes('Не все статьи'));assert.ok(!app.innerHTML.includes('Воздержались:'));assert.ok(!app.innerHTML.includes('decision-changes'));await click({action:'result-close'});
  await click({view:'infrastructure'});node('network-id').value='roads';node('network-kind').value='networkSale';node('network-points').value='10';await click({action:'network-queue'});assert.ok(app.innerHTML.includes('id="result-dialog"'));await click({action:'result-close'});
@@ -70,6 +70,14 @@ test('vertical disclosure, result modals and separate interface exports preserve
   assert.ok(app.innerHTML.includes('data-policy-tab="Налоги"'));
   await click({policyTab:'Кредит'});await click({view:'policy'});await click({view:'policy'});
   assert.ok(app.innerHTML.includes('data-policy-tab="Бюджет"'));
+  assert.ok(app.innerHTML.includes('Статистика'));assert.ok(app.innerHTML.includes('data-category="army"'));
+  await click({category:'army'});assert.ok(app.innerHTML.includes('Военный бюджет'));await click({action:'army-budget'});
+  assert.ok(app.innerHTML.includes('data-policy-number="militaryBudget"'));
+  await click({category:'political'});assert.ok(!app.innerHTML.includes('government-summary'));assert.ok(!app.innerHTML.includes('charter-grid'));
+  await click({view:'constitution'});await click({charterSection:'terms'});
+  await click({category:'statistics'});await click({category:'political'});
+  assert.ok(!app.innerHTML.includes('charter-editor'));assert.ok(!app.innerHTML.includes('charter-grid'));
+  await click({category:'decisions'});
   // Only the chosen article goes to the existing constitutional vote.
   await click({category:'political'});await click({view:'constitution'});
   assert.ok(app.innerHTML.includes('charter-grid'));assert.ok(!app.innerHTML.includes('<table'));
