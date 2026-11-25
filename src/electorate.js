@@ -1,3 +1,5 @@
+import {applyConstituencyProfiles} from './constituency-votes.js';
+import {UK_REGIONS_2000} from './uk-regional-calibration.js';
 import {worldDecisionById,worldDecisionOpinion} from './world-decisions.js';
 import {territorialActive,territorialGeography} from './territorial-government.js';
 import {policyReputationUtility} from './policy-reputation.js';
@@ -197,11 +199,12 @@ export function territorialVotes(s,parties,{groups=makeElectorate(s,{advanceMemo
   return votes;
 }
 
-function geographicDistricts(s,parties,count,voters,areas,returns,twoRounds){
+function geographicDistricts(s,parties,count,voters,areas,returns,twoRounds,fixedBoundaries){
   const eligible=areas.filter(area=>sum(Object.values(returns['region:'+area.id]))>0);
   if(!eligible.length||count<eligible.length)return null;
   const totals=eligible.map(area=>sum(Object.values(returns['region:'+area.id])));
-  const counts=integerVotes(totals,count-eligible.length).map(n=>n+1);
+  const seatWeights=fixedBoundaries?eligible.map(area=>UK_REGIONS_2000.find(region=>region.id===area.id)?.population??area.population):totals;
+  const counts=integerVotes(seatWeights,count-eligible.length).map(n=>n+1);
   const regionalTurnout=integerVotes(totals,voters);
   const districts=[];
   for(const [areaIndex,area] of eligible.entries()){
@@ -270,7 +273,8 @@ export function conductElection(s,kind,{initial=false,preview=false}={}){
     election.winner=winner;election.winnerCandidate=parties.find(x=>x.id===winner).candidateName;
   }else{
     const count=['parallel','mmp'].includes(c.electoralSystem)?Math.floor(c.seats/2):c.electoralSystem==='pr'?0:c.seats;
-    const geographic=count&&returns?geographicDistricts(s,parties,count,voters,areas,returns,c.electoralSystem==='twoRound'):null;
+    const useProfiles=!initial&&p.constituencyProfileRevision===1&&c.electoralSystem==='plurality'&&s.policy.competitiveElections;
+    const geographic=count&&returns?geographicDistricts(s,parties,count,voters,areas,returns,c.electoralSystem==='twoRound',useProfiles):null;
     const districts=geographic??[];
     const regionalCounts=REGIONS.map((_,r)=>Math.floor(count/REGIONS.length)+(r<count%REGIONS.length?1:0));
     const districtTurnout=Array.from({length:count},(_,d)=>sum(groups.filter(g=>g.region===d%REGIONS.length).map(g=>g.weight*turnout(s,g)))/regionalCounts[d%REGIONS.length]);
@@ -281,6 +285,7 @@ export function conductElection(s,kind,{initial=false,preview=false}={}){
       const district={id:d,region,votes:v};if(c.electoralSystem==='twoRound'){const order=v.map((x,i)=>({i,v:x})).sort((a,b)=>b.v-a.v);if(order[0].v<=sum(v)/2){const final=order.slice(0,2).map(x=>parties[x.i]),rw=[0,0];for(const g of regional){const prob=officialProbabilities(s,final,choiceProbabilities(s,g,final,'district',d));prob.forEach((x,i)=>rw[i]+=x*g.weight*turnout(s,g));}const rv=integerVotes(rw,sum(v));district.runoffVotes=parties.map(x=>{const i=final.findIndex(z=>z.id===x.id);return i<0?0:rv[i];});}}districts.push(district);
     }
     if(initial&&p.guidedOpening&&c.electoralSystem==='plurality')guidedOpeningDistricts(s,parties,districts);
+    if(useProfiles)applyConstituencyProfiles(s.seed,p.elections.find(e=>e.initial&&e.kind==='parliament'),parties,districts);
     if(!initial&&!preview&&c.electoralSystem==='plurality'){
       const pacts=applyElectoralPacts(s,parties,districts);
       if(pacts.length){

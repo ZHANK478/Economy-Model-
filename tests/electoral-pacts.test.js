@@ -4,7 +4,7 @@ import {AXES} from '../src/political-config.js';
 import {applyElectoralPacts, answerElectoralPact, forecastElectoralPacts, pendingElectoralPact, prepareElectoralPacts} from '../src/electoral-pacts.js';
 import {createSimulation,advanceMonth,executePolitical,exportSimulation,importSimulationData,replayJournal} from '../src/engine.js';
 import {scenarioOptions} from '../src/country-scenarios.js';
-import {conductElection} from '../src/electorate.js';
+import {conductElection, pollElectorate} from '../src/electorate.js';
 
 const parties = [['a',.45],['b',-.1],['c',-.2]].map(([id,value]) => ({
   id, platform:Object.fromEntries(AXES.map(axis => [axis,value]))
@@ -61,6 +61,9 @@ test('real constituency forecast leaves the election sequence alone and the upda
   const before=state.politics.nextElectionId;
   assert.equal(conductElection(state,'parliament',{preview:true}).id,before);
   assert.equal(state.politics.nextElectionId,before);
+  const opening = state.politics.elections[0];
+  executePolitical(state,{kind:'enableConstituencyProfiles'});
+  assert.deepEqual(state.politics.elections[0], opening);
   executePolitical(state,{kind:'enableElectoralPacts'});
   state=advanceMonth(state);
   assert.equal(state.politics.electoralPact.due,2);
@@ -101,4 +104,48 @@ test('the election count applies accepted withdrawals before declaring mandates 
   assert.equal(withPact.results.reduce((sum,row)=>sum+row.seats,0),withPact.totalSeats);
   assert.equal(withPact.districts[0].votes[withPact.results.findIndex(row=>row.id===own)],0);
   assert.equal(withPact.districts[1].votes[withPact.results.findIndex(row=>row.id===partner)],0);
+});
+
+test('British constituencies retain opposition strongholds as national support rises',()=>{
+  const options = scenarioOptions('uk-2000');
+  const state = createSimulation({...options,territorialGovernment:true,politicalOptions:{
+    ...options.politicalOptions,guidedOpening:1,openingPollRevision:1,constituencyProfileRevision:1
+  }});
+  const {politics} = state;
+  const own = politics.executive.playerParty;
+  const opening = politics.elections[0];
+  const ownOpening = opening.results.find(row => row.id === own);
+  assert.ok(ownOpening.seats >= opening.totalSeats * .4 && ownOpening.seats <= opening.totalSeats * .5);
+  executePolitical(state,{kind:'negotiateCoalition',partyId:politics.openingPartner,mode:'accept'});
+  executePolitical(state,{kind:'formCabinet'});
+
+  function electionAt(target){
+    let low = -10, high = 10;
+    for (let pass = 0; pass < 22; pass++){
+      const preference = (low + high) / 2;
+      politics.startingPreferences.parliament[own] = preference;
+      const {poll} = pollElectorate(state,{commitMemory:false,assignPoll:false,trackGroups:false});
+      if (poll.parties.find(row => row.id === own).share < target) low = preference;
+      else high = preference;
+    }
+    return conductElection(state,'parliament',{preview:true});
+  }
+
+  const elections = [40,47,60].map(electionAt);
+  const seats = elections.map(election => election.results.find(row => row.id === own).seats);
+  assert.ok(seats[0] < seats[1] && seats[1] < seats[2]);
+  const election = elections[1];
+  assert.ok(seats[1] < election.totalSeats * .8);
+  const initialWinners = new Map(opening.districts.map(row => [row.id,row.winner]));
+  assert.ok(election.districts.some(row => row.winner !== own && row.winner === initialWinners.get(row.id)));
+  assert.ok(election.districts.some(row => row.winner === own && row.winner !== initialWinners.get(row.id)));
+  assert.equal(election.results.reduce((total,row) => total + row.seats,0),election.totalSeats);
+  assert.equal(election.results.reduce((total,row) => total + row.votes,0),election.voters);
+
+  delete politics.constituencyProfileRevision;
+  const oldAt47 = electionAt(47);
+  politics.constituencyProfileRevision = 1;
+  assert.equal(oldAt47.results.find(row => row.id === own).seats,election.totalSeats);
+  assert.ok(Math.abs(oldAt47.results.find(row => row.id === own).share -
+    election.results.find(row => row.id === own).share) < .15);
 });

@@ -109,7 +109,7 @@ let hasExistingSave=false, campaignLeader=null, campaignId=crypto.randomUUID();
 const GUIDE_COMPLETE='whips-opening-guide-complete';
 let guideComplete=await readDevicePreference(GUIDE_COMPLETE)==='1';
 function gameOptions(options){
- return {...options,territorialGovernment:true,londonMayorRevision:1,politicalOptions:{...options.politicalOptions,politicalDynamicsRevision:1,historicalWorld:1,...(options.scenario?.id==='uk-2000'?{ministerialBriefings:1}:{})}};
+ return {...options,territorialGovernment:true,londonMayorRevision:1,politicalOptions:{...options.politicalOptions,politicalDynamicsRevision:1,historicalWorld:1,...(options.scenario?.id==='uk-2000'?{ministerialBriefings:1,constituencyProfileRevision:1}:{})}};
 }
 let state=createSimulation(gameOptions(newGameOptions())),draft=copy(state.policy),checkpoint=null,comparison=null;
 let view='policy',policyTab=null,decisionCollection='treasury',chartMetric='gdpPerCapitaReal',compareMetric='gdpPerCapitaReal',compareMonths=24,compareSource='current';
@@ -153,6 +153,8 @@ function enableTerritorialGovernment(state){
   if(!territorialFiscalReformed(state))executePolitical(state,{kind:'reformTerritorialFiscal'});
 }
 function enableBritishScenario(state){
+  if(state.scenario?.id==='uk-2000'&&state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.constituencyProfileRevision)
+    executePolitical(state,{kind:'enableConstituencyProfiles'});
   if(state.scenario?.id==='uk-2000'&&state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.electoralPactRevision)
     executePolitical(state,{kind:'enableElectoralPacts'});
   if(state.politics.guidedOpening&&state.month===0&&!state.politics.openingPollRevision)

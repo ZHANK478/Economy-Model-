@@ -80,6 +80,10 @@ export function initializePoliticalSystem(s,options={}){
   const {poll}=pollElectorate(s);p.publicSupport=poll.approval;p.hiddenApproval=poll.approval;p.officialApproval=poll.approval;p.presidentApproval=poll.presidentApproval;p.cabinetApproval=poll.cabinetApproval;p.parliamentSupport=coalitionSeats(s)/p.totalSeats;
   p.partyHistory.push({month:0,approval:p.hiddenApproval,officialApproval:p.officialApproval,parliamentSupport:p.parliamentSupport,parties:poll.parties.map(x=>({...x,seats:party(s,x.id).seats})),...(p.dashboardMode?{groups:clone(poll.groups),presidentApproval:p.presidentApproval*100,cabinetApproval:p.cabinetApproval*100}:{})});
   p.initialOptions={constitution:clone(c),parameters:clone(p.parameters),playerFamily:player.family,...(p.electionExperience?{electionExperience:1,nameSeed:p.nameSeed}:{})};
+  if(s.scenario?.id==='uk-2000'&&options.politicalOptions?.constituencyProfileRevision===1){
+    p.constituencyProfileRevision=1;
+    p.initialOptions.constituencyProfileRevision=1;
+  }
   if(p.guidedOpening)p.initialOptions.guidedOpening=1;
   if(p.openingPollRevision)p.initialOptions.openingPollRevision=1;
   if(p.governmentGoals)p.initialOptions.governmentGoalsRevision=p.foreignGoalsEnabled?2:1;
@@ -208,7 +212,7 @@ function allocateCabinet(s){if(presidential(s)){clearPresidentialCoalition(s);re
 }
 export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)throw new Error('Включите политическую игру при создании страны');if(!p.executive.inOffice&&!['unifyLondonMayor','enableGovernmentGoals','retireGovernmentProgramme'].includes(command?.kind))throw new Error('Ваше правление завершено');
   const kinds=['upgradePoliticalDynamics','activateFactionControl','setFactionVote','negotiateCoalition','formCabinet','stabilizePreferences','activateLocalGovernment','upgradePartyPrograms','upgradeOpposition','upgradePresidentialDecisions','upgradeAccountability','activateDefense','defenseResponse','upgradeElections','setLivingWorld','enableHistoricalWorld','campaignResponse','proposeBill','chooseLaw','policyDecision','decideBill','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','amend','acceptAmendment','voteArticle','voteBill','sign','veto','override','withdraw','referendum','coalitionOffer','coalitionLeave','confidence','dissolve','impeach','emergency','ratifyEmergency','endEmergency','constitutionalConflict','partyProgram','promise','partySplit','partyMerge','parameters','renewBudget'];
-  kinds.push('enableGovernmentGoals','retireGovernmentProgramme','alignOpeningPoll','chooseGovernmentMilestone','startTradeCourse','activateTerritorialGovernment','unifyLondonMayor','reformTerritorialFiscal','appointTerritorialLeader','territorialProgramme','regimeAction','activateScenarioDiplomacy','setDiplomacyLevel','setDiplomacyShare','enablePartnerTrade','notifyEUWithdrawal','enablePressMarket','answerWorldDecision','enableMinisterialBriefings','foreignProgrammeStep','startScenarioPilot','enableElectoralPacts','answerElectoralPact');
+  kinds.push('enableGovernmentGoals','retireGovernmentProgramme','alignOpeningPoll','chooseGovernmentMilestone','startTradeCourse','activateTerritorialGovernment','unifyLondonMayor','reformTerritorialFiscal','appointTerritorialLeader','territorialProgramme','regimeAction','activateScenarioDiplomacy','setDiplomacyLevel','setDiplomacyShare','enablePartnerTrade','notifyEUWithdrawal','enablePressMarket','answerWorldDecision','enableMinisterialBriefings','foreignProgrammeStep','startScenarioPilot','enableElectoralPacts','answerElectoralPact','enableConstituencyProfiles');
   if(!kinds.includes(command?.kind))throw new Error('Неизвестное политическое действие');
   const c=clone(command);delete c.id;delete c.month;if(c.kind==='activateDefense')c.assumptions??=clone(DEFENSE_ASSUMPTIONS);
   if(['proposeBill','chooseLaw','policyDecision'].includes(c.kind)){validatePolicyPatch(c.patch??{});if(c.constitutionPatch)constitutionFrom({...p.constitution,...c.constitutionPatch});if(c.actions)c.actions.forEach(validateLegislativeAction);}
@@ -216,7 +220,7 @@ export function schedulePolitical(s,command){const p=s.politics;if(!p.enabled)th
   if(c.kind==='partyProgram'&&(!c.platform||AXES.some(k=>!Number.isFinite(c.platform[k])||Math.abs(c.platform[k])>1)))throw new Error('Неверная программа партии');
   const request={...c,id:p.nextCommandId++,month:s.month};p.pendingCommands.push(request);return request;
 }
-const FREE_COMMANDS=new Set(['enableGovernmentGoals','retireGovernmentProgramme','alignOpeningPoll','chooseGovernmentMilestone','startTradeCourse','activateTerritorialGovernment','unifyLondonMayor','reformTerritorialFiscal','appointTerritorialLeader','enablePressMarket','enablePartnerTrade','activateScenarioDiplomacy','upgradePoliticalDynamics','activateFactionControl','setFactionVote','stabilizePreferences','activateLocalGovernment','upgradePartyPrograms','upgradeOpposition','upgradePresidentialDecisions','upgradeAccountability','activateDefense','upgradeElections','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','parameters','campaignResponse','setLivingWorld','enableHistoricalWorld','answerWorldDecision','enableMinisterialBriefings','enableElectoralPacts','answerElectoralPact']);
+const FREE_COMMANDS=new Set(['enableGovernmentGoals','retireGovernmentProgramme','alignOpeningPoll','chooseGovernmentMilestone','startTradeCourse','activateTerritorialGovernment','unifyLondonMayor','reformTerritorialFiscal','appointTerritorialLeader','enablePressMarket','enablePartnerTrade','activateScenarioDiplomacy','upgradePoliticalDynamics','activateFactionControl','setFactionVote','stabilizePreferences','activateLocalGovernment','upgradePartyPrograms','upgradeOpposition','upgradePresidentialDecisions','upgradeAccountability','activateDefense','upgradeElections','activateInstantRules','setAgendaSlots','setDecisionLimit','setDashboardMode','setPartyContinuity','parameters','campaignResponse','setLivingWorld','enableHistoricalWorld','answerWorldDecision','enableMinisterialBriefings','enableElectoralPacts','answerElectoralPact','enableConstituencyProfiles']);
 export function decisionBudget(s){
  const p=s.politics;if(!p.enabled||!p.decisionLimit)return {limit:null,used:0,remaining:Infinity,optionalRemaining:Infinity};
  const commands=p.turnCommands??[],start=commands.findLastIndex(c=>c.kind==='setDecisionLimit');
@@ -339,6 +343,9 @@ function processCommand(s,command,events){const p=s.politics,c=p.constitution;
   if(presidential(s)&&['coalitionOffer','coalitionLeave','confidence','partySplit','partyMerge'].includes(command.kind))throw new Error('В президентском сценарии две партии и независимые; коалиций и смены кабинета парламентом нет.');
   if(accountable(s)&&command.kind==='promise')throw new Error('Обещания отключены: поддержка зависит от решений и результатов.');
   switch(command.kind){
+    case 'enableConstituencyProfiles':
+      if(s.scenario?.id==='uk-2000')p.constituencyProfileRevision=1;
+      return;
     case 'alignOpeningPoll':{
       if(!p.guidedOpening||s.month!==0||p.openingPollRevision)throw new Error('Стартовый опрос уже установлен или недоступен.');
       calibrateParliamentaryStart(s,{seatShares:true});
