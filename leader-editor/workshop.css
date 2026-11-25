@@ -1,0 +1,38 @@
+.workshop .layout { align-items:stretch; }
+.workshop .editor { min-width:0; }
+.workshop .heading h1 { margin-bottom:10px; }
+.workshop .heading p { padding-bottom:14px; }
+.workshop .portrait-mount,
+.generated-card canvas {
+  background:radial-gradient(ellipse at 50% 36%,#53605a,#28352f 67%,#1c2722);
+}
+#live-portrait { width:100%; aspect-ratio:4/5; display:block; }
+#loading { position:absolute; inset:0; display:grid; place-items:center; padding:20px; margin:0; color:#f5dfb4; background:#18201be6; font-size:15px; }
+#loading[hidden] { display:none; }
+#categories { display:flex; flex-wrap:wrap; gap:2px 14px; margin:11px 0 0; border-bottom:1px solid #65644f; }
+#categories button { border:0; border-bottom:2px solid transparent; background:none; padding:8px 3px 10px; color:#b4ac8e; font-size:14px; }
+#categories button:hover, #categories button[aria-pressed=true] { color:#e3cf94; border-bottom-color:#b59b65; }
+#controls { border:0; margin:0; padding:0; flex:1; min-width:0; }
+.workshop .selectors { min-height:220px; padding:14px 0; }
+.workshop .row { grid-template-columns:minmax(118px,30%) 37px minmax(90px,1fr) 37px; min-height:45px; }
+.workshop .row-value { line-height:1.2; }
+.workshop .actions { padding-top:15px; }
+.workshop .footnote { align-items:baseline; margin-top:9px; }
+#workshop-status { margin:0; color:#a5a38e; }
+.workshop .footnote a { color:#c8b486; white-space:nowrap; }
+#generated-portraits { grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+.generated-card { min-width:0; }
+.generated-card canvas { aspect-ratio:4/5; }
+#character-gallery .gallery-actions { justify-content:flex-end; }
+.workshop .signature { overflow-wrap:anywhere; max-width:100%; }
+@media(max-width:900px) {
+  .workshop .row { grid-template-columns:minmax(100px,29%) 32px minmax(76px,1fr) 32px; }
+}
+@media(max-width:660px) {
+  .workshop .selectors { min-height:0; }
+  .workshop .row { grid-template-columns:minmax(88px,27%) 30px minmax(68px,1fr) 30px; gap:5px; }
+  .workshop .arrow { width:30px; height:30px; }
+  .workshop .row-label { font-size:13px; }
+  .workshop .footnote { flex-wrap:wrap; }
+  #generated-portraits { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}

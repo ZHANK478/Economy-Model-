@@ -1,0 +1,86 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createSimulation,advanceMonth,exportSimulation,importSimulation,replayJournal,executePolitical} from '../src/engine.js';
+import {worldEvent,savedWorldEvents} from '../src/world-events.js';
+const options={seed:42,stochastic:false,politicalMode:true,politicalOptions:{livingWorld:true,constitution:{presidentTerm:84,parliamentTerm:84,parliamentOffset:84}}};
+test('seeded world episodes are rare, bounded and include good and bad news',()=>{
+ const titles=new Set(),signs=new Set();
+ for(let seed=0;seed<40;seed++){
+  const starts=[];for(let month=1;month<=120;month++){
+   const e=worldEvent({seed,month,politics:{livingWorld:true}});if(!e)continue;
+   titles.add(e.title);signs.add(e.multiplier>1?'up':'down');assert.ok(e.duration>=6&&e.duration<=14);if(e.start===month)starts.push(month);
+  }
+  assert.equal(starts.length,4);for(let i=1;i<starts.length;i++)assert.ok(starts[i]-starts[i-1]>=19);
+ }
+ assert.ok(titles.size>=8);assert.equal(signs.size,2);assert.equal(worldEvent({seed:42,month:12,politics:{}}),null);
+});
+test('world shocks affect actual conditions; value added and balances reconcile; save replay is exact',()=>{
+ let s=createSimulation(options),news=0;
+ for(let i=0;i<60;i++){
+  s=advanceMonth(s,s.policy);const e=worldEvent(s);assert.equal(s.lastReport.worldNews?.id,e?.id);
+  if(e?.start===s.month){news++;assert.ok(s.lastReport.events.some(x=>x.startsWith(e.title)));}
+  const sum=s.lastReport.gdp.sectorValueAdded.reduce((a,b)=>a+b,0),tax=s.lastReport.fiscal.vat+s.lastReport.fiscal.tariff;
+  assert.ok(Math.abs(sum+tax-s.metrics.nominalGDPMonthly)<1e-7);
+  for(const v of Object.values(s.lastReport.audit))assert.ok(Math.abs(v)<.001);
+ }
+ assert.equal(news,2);const r=replayJournal(importSimulation(exportSimulation(s)));
+ for(const [k,v] of Object.entries(s.metrics))if(typeof v==='number')assert.ok(Math.abs(v-r.metrics[k])/Math.max(1,Math.abs(v))<1e-10,k);
+});
+test('activation of the living world on an old game preserves prior history and replays',()=>{
+ let s=createSimulation({politicalMode:true});const initialStochastic=s.provenance.initialStochastic;
+ executePolitical(s,{kind:'setLivingWorld'});assert.equal(s.stochastic,false);assert.equal(s.provenance.initialStochastic,initialStochastic);
+ for(let i=0;i<18;i++)s=advanceMonth(s,s.policy);const r=replayJournal(s);assert.equal(r.stochastic,false);assert.equal(r.politics.livingWorld,true);assert.deepEqual(r.metrics,s.metrics);
+});
+
+test('old scheduled world shocks remain visible until their end',()=>{const s={month:10,shocks:[{key:'energyPrice',multiplier:1.3,start:6,duration:12}]};assert.equal(savedWorldEvents(s)[0].title,'Стоимость импортной энергии');assert.equal(savedWorldEvents(s)[0].multiplier,1.3);s.month=18;assert.deepEqual(savedWorldEvents(s),[]);});
+
+test('the British historical calendar is dated, seed-independent, and applies to foreign markets',async()=>{
+ const {HISTORICAL_WORLD,historicalWorldFactors,historicalNews}=await import('../src/historical-world.js');
+ const {externalWorldAccounts}=await import('../src/world-accounts.js');
+ const {updatePress}=await import('../src/press-ui.js');
+ const world={seed:1,startYear:2000,scenario:{id:'uk-2000'},politics:{historicalWorldStart:0,livingWorld:true,pressRevision:1}};
+ const at=(year,month)=>(year-2000)*12+month-1;
+ assert.equal(HISTORICAL_WORLD.length,17);
+ assert.ok(!HISTORICAL_WORLD.some(e=>/brexit/i.test(e.id)));
+ for(let month=1;month<324;month++){
+  assert.deepEqual(historicalWorldFactors(world,month),historicalWorldFactors({...world,seed:888},month));
+  assert.equal(worldEvent({...world,month}),null);
+ }
+ const recession=externalWorldAccounts(world,at(2009,1));
+ const baseline=externalWorldAccounts({...world,politics:{}},at(2009,1));
+ assert.ok(recession.markets.us.realGDP<baseline.markets.us.realGDP);
+ assert.ok(recession.markets.cn.realGDP>baseline.markets.cn.realGDP);
+ const pandemic=historicalWorldFactors(world,at(2020,6));
+ assert.ok(pandemic.services<.8&&pandemic.channels.importAvailability<.9);
+ assert.ok(historicalWorldFactors(world,at(2022,9)).channels.energyPrice>1.5);
+ assert.equal(historicalNews(world,at(2026,2)).at(-1).id,'history:hormuz');
+ assert.deepEqual(historicalNews({...world,politics:{historicalWorldStart:at(2025,1)}},at(2026,2)).map(e=>e.id),
+   ['history:tariffs','history:hormuz']);
+ const {scenarioOptions}=await import('../src/country-scenarios.js');
+ const opts=scenarioOptions();
+ let state=createSimulation({...opts,politicalOptions:{...opts.politicalOptions,historicalWorld:1}});
+ let control=createSimulation(opts);
+ const press={};
+ for(let i=0;i<4;i++){
+  state=advanceMonth(state,state.policy);
+  control=advanceMonth(control,control.policy);
+  updatePress(state,press);
+ }
+ assert.ok(state.lastReport.world.foreignDemand<control.lastReport.world.foreignDemand);
+ assert.notEqual(state.metrics.realGDPMonthly,control.metrics.realGDPMonthly);
+ assert.equal(Object.values(press.editions).flat().filter(issue=>issue.id==='history:dotcom').length,1);
+ assert.deepEqual(replayJournal(importSimulation(exportSimulation(state))).metrics,state.metrics);
+});
+
+test('existing journal entries replay across the historical calendar migration',async()=>{
+ const {scenarioOptions}=await import('../src/country-scenarios.js');
+ const opts=scenarioOptions();
+ let state=createSimulation({...opts,politicalOptions:{...opts.politicalOptions,livingWorld:true}});
+ state=advanceMonth(state,state.policy);
+ executePolitical(state,{kind:'enableHistoricalWorld'});
+ assert.equal(state.politics.historicalWorldStart,2);
+ state=advanceMonth(state,state.policy);
+ const replay=replayJournal(importSimulation(exportSimulation(state)));
+ assert.equal(replay.politics.historicalWorldStart,2);
+ assert.deepEqual(replay.metrics,state.metrics);
+});

@@ -1,0 +1,148 @@
+#main-menu{position:fixed;inset:0;z-index:1000;isolation:isolate;background:#34362b;color:#d7d0a4;font-family:Georgia,'Times New Roman',serif;overflow:hidden}#main-menu[hidden]{display:none}.on-main-menu{overflow:hidden}.menu-map{position:absolute;inset:-3%;z-index:-3;background:#8b9884 url('./assets/menu-britain.svg') left center/64% 110% no-repeat;transform:rotate(-3deg) scale(1.05);filter:sepia(.26) saturate(.7) brightness(.76);animation:menu-arrival 1s ease-out both}.menu-light{position:absolute;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(90deg,#1817123d,transparent 40%,#11100d38 60%,transparent 95%),radial-gradient(ellipse at center,transparent 20%,#17160e8c 100%)}.menu-content{position:absolute;left:59.7%;top:0;bottom:0;width:33.6%;background:linear-gradient(105deg,#080909f8,#080909fc 70%,#0d0d0cf7);border-left:2px solid #77765b;border-right:2px solid #77765b;box-shadow:-12px 0 28px #1118,14px 0 30px #1116;text-align:center;display:flex;flex-direction:column}.menu-content header{margin-top:10vh;min-height:14.8vh;border-top:1px solid #60513e;border-bottom:1px solid #62543f;background:linear-gradient(90deg,#1d1212,#2b1818 50%,#211413);display:grid;place-items:center;padding:12px 8px}.menu-content h1{margin:0;font:900 clamp(25px,3.7vw,58px)/1.1 Oswald,Impact,'Arial Narrow',sans-serif;letter-spacing:-.02em;color:#dfd5a4;text-shadow:1px 2px 1px #6d573c,0 0 12px #dbbb6f20;transform:scaleX(.95)}.menu-content nav{display:flex;flex:1;flex-direction:column;justify-content:space-evenly;padding:4vh 8px 10vh;gap:7px}.menu-content nav button{all:unset;box-sizing:border-box;cursor:pointer;color:#d4cda3;font:normal clamp(17px,2vw,31px)/1.25 Georgia,serif;letter-spacing:.12em;padding:8px 4px;text-shadow:0 2px 3px #000;transition:color .16s,text-shadow .16s}.menu-content nav button:hover,.menu-content nav button:focus-visible{color:#fff3bc;text-shadow:0 0 15px #d8bc7866;outline:0}.menu-content nav button:focus-visible:before{content:'·';position:absolute;left:8%;color:#d4cda3}.menu-version{position:absolute;bottom:2%;right:5%;font:9px Georgia,serif;color:#817e67}#main-menu .menu-audio{padding:11px;min-height:0;width:58px;height:58px;border-radius:50%;border:2px solid #797b70;background:radial-gradient(circle at 38% 25%,#3e4140,#171918 65%);box-shadow:0 0 0 4px #1b1d1a88,0 3px 7px #0008;color:#dddccf;display:grid;place-items:center}#main-menu .menu-audio:hover{border-color:#cbc5a2}#main-menu svg{width:100%;height:100%;fill:currentColor}.icon-line{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}#main-menu .menu-audio{position:absolute;left:1.5%;top:47%;width:45px;height:45px;padding:9px;color:#d5c78c}.menu-audio.muted:after{content:'';position:absolute;inset:20px 4px;border-top:2px solid #c2a97d;transform:rotate(-45deg)}#main-menu .menu-studio{all:unset;position:absolute;left:2%;bottom:2.5%;display:flex;align-items:center;gap:9px;cursor:pointer;color:#d2cfbd;font:10px Georgia,serif;letter-spacing:1px}#main-menu .menu-studio svg{width:35px;height:35px}.menu-options{color:#d4cda3;background:#111310;border:1px solid #787557;padding:42px;max-width:480px;width:calc(100% - 32px);box-shadow:0 15px 80px #0009;border-radius:0}.menu-options::backdrop{background:#0009;backdrop-filter:none}.menu-options h2{font:normal 27px Georgia,serif;color:#ddd2a2;margin:0 25px 28px 0}.menu-options-body{font:16px/1.7 Georgia,serif}.menu-options-body label{display:flex;gap:12px;align-items:center}.menu-options-body input{accent-color:#bfb383;width:18px;height:18px}.menu-options button{background:#23271f;border:1px solid #6c7157;color:#d4cda3;font:16px Georgia,serif;box-shadow:none;border-radius:0;padding:13px;display:block;width:100%;margin:14px 0;cursor:pointer}.menu-options button:disabled{opacity:.35;cursor:default}.menu-options .menu-options-close{position:absolute;right:9px;top:5px;width:32px;border:0;margin:0;padding:2px;background:none;font-size:26px}.still .menu-map{animation:none}@keyframes menu-arrival{from{opacity:.5}to{opacity:1}}@media(prefers-reduced-motion:reduce){.menu-map{animation:none}}@media(max-width:650px){.menu-content{left:33%;width:60%}.menu-map{background-size:auto 105%;background-position:26% center}.menu-content h1{font-size:clamp(22px,5vw,36px)}.menu-content nav button{font-size:clamp(15px,3.7vw,22px);letter-spacing:.08em}.menu-studio span{display:none}.menu-content header{margin-top:13vh}.menu-content nav{padding-bottom:8vh}.menu-version{font-size:7px}}
+/* Menu reference revision: tighter rhythm and warm, legible cartography. */
+.menu-map{inset:0 auto 0 0;width:59.7%;height:100%;background:#9eac98 url('./assets/menu-britain.svg') center/cover no-repeat;transform:none;filter:brightness(.92) saturate(1.08);animation:none}.menu-light{background:linear-gradient(90deg,#221b151a,transparent 42%,#201b141a 59%,transparent 61%),radial-gradient(ellipse at 35% 44%,transparent 30%,#14130e30 100%)}.menu-content h1{font-family:Oswald,Impact,'Arial Narrow',sans-serif;font-weight:700;font-size:clamp(26px,3.2vw,52px);letter-spacing:.065em;-webkit-text-stroke:.65px currentColor;transform:none}.menu-content nav{flex:0 0 auto;justify-content:flex-start;padding:4vh 8px 0;gap:0}.menu-content nav button{height:8.6vh;min-height:45px;padding:0 4px;display:grid;place-items:center;line-height:1.2}.menu-content nav button:focus-visible:before{display:none}@media(max-width:650px){.menu-map{width:100%;background-position:36% center;background-size:auto 100%}.menu-content h1{font-size:clamp(21px,4.8vw,33px);letter-spacing:.045em}.menu-content nav{padding-top:4vh}.menu-content nav button{height:8.3vh}.menu-light{background:#17130e35}}
+@media(min-width:651px){.menu-map{background-size:contain}}
+
+/* One uninterrupted atlas behind the menu and social controls. */
+#main-menu .menu-map{inset:0;width:100%;height:100%;background-image:url("./assets/menu-backdrop.svg");background-size:cover;background-position:left center;background-repeat:no-repeat}
+/* Country selection: the atlas stays underneath a dossier, rather than a modal. */
+#main-menu .menu-content[hidden]{display:none}.country-selection{position:absolute;inset:0;z-index:2;color:#d2c9a1;font-family:Georgia,'Times New Roman',serif}.country-back{position:absolute;top:25px;left:25px;width:46px;height:46px;border-radius:50%;background:#202820;border:2px solid #9f9a71;color:#e2d6a2;font:27px Georgia,serif;box-shadow:0 3px 8px #0008;cursor:pointer}.country-map-caption{position:absolute;top:35px;left:92px;font:11px Georgia,serif;letter-spacing:2px;color:#3f4938}.country-dossier{position:absolute;left:59.7%;top:0;bottom:0;width:33.6%;background:#171d19f5;border-left:2px solid #7b795a;border-right:2px solid #7b795a;box-shadow:-12px 0 30px #17201866;display:flex;flex-direction:column;text-align:center}.country-dossier header{padding:24px 12px 16px;background:linear-gradient(90deg,#211514,#2b1918,#211514);border-bottom:1px solid #847856}.country-dossier h2{font:normal clamp(19px,1.9vw,29px)/1.2 Georgia,serif;color:#ded2a2;margin:0 0 6px}.country-dossier header p{font:13px Georgia,serif;color:#aaa78e;margin:0}.country-dossier-body{padding:20px 24px 5px;overflow:auto;flex:1;min-height:0}.country-flag{width:136px;margin:0 auto 18px;box-shadow:0 3px 12px #0005;border:1px solid #7a785b}.country-flag svg{display:block;aspect-ratio:2}.country-dossier dl{margin:0}.country-dossier dl>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #73775c55;font:14px/1.3 Georgia,serif;text-align:left}.country-dossier dt{font-weight:bold;color:#b5af88}.country-dossier dd{margin:0;color:#c6c7b7;text-align:right}.country-story{font:15px/1.6 Georgia,serif;color:#c4c3b0;margin:22px 0 12px;text-align:left}.country-caveat{font:11px/1.6 Georgia,serif;color:#939a89;text-align:left;margin:0}.country-seal{height:125px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#b5a36f;opacity:.8}.country-seal>span{font:65px Georgia,serif;line-height:1}.country-seal small{font:10px Georgia,serif;letter-spacing:3px;margin:10px}.country-dossier footer{padding:15px 20px 22px;border-top:1px solid #6e705244;background:#121814}.country-dossier footer>span{display:block;font:9px Georgia,serif;letter-spacing:1.8px;color:#898f79;margin-bottom:12px}.country-launch{width:100%;min-height:48px;padding:10px;background:linear-gradient(#49302a,#30201d);border:1px solid #9e8d61;border-radius:0;color:#e2d3a0;font:20px Georgia,serif;letter-spacing:2px;cursor:pointer;box-shadow:0 3px 0 #0c100d}.country-launch:hover,.country-launch:focus-visible{background:#584039;outline:1px solid #dfc991;outline-offset:3px}.country-tokens{position:absolute;bottom:35px;left:30px;display:flex;gap:26px}.country-tokens button{position:relative;display:flex;align-items:center;justify-content:center;width:72px;height:72px;padding:10px;border-radius:50%;background:radial-gradient(#626b4b,#242e22);border:3px solid #8b9377;box-shadow:0 4px 10px #0006;cursor:pointer}.country-tokens button[aria-pressed=true]{border-color:#dac78a;box-shadow:0 0 0 3px #a9915b99,0 3px 9px #0008}.country-tokens button svg{height:29px!important;flex-shrink:0;filter:sepia(.15)}.country-tokens button>span{position:absolute;top:78px;white-space:nowrap;font:11px Georgia,serif;color:#e6e1bc;text-shadow:0 1px 4px #172116}.country-pin{position:absolute;left:40.5%;top:76%;width:53px;height:53px;border-radius:50%;background:radial-gradient(#d0bc78,#8c7846);border:3px solid #dfcc91;color:#5f502a;box-shadow:0 4px 8px #0006;font:31px Georgia,serif;cursor:pointer}.country-pin:hover{filter:brightness(1.15)}@media(max-height:760px){.country-dossier header{padding:15px 10px 10px}.country-dossier-body{padding:14px 20px 0}.country-flag{width:112px;margin-bottom:10px}.country-dossier dl>div{font-size:12px;padding:6px 0}.country-story{font-size:13px;line-height:1.5;margin-top:15px}.country-seal{height:85px}.country-seal>span{font-size:45px}.country-dossier footer{padding:10px 15px 14px}.country-launch{font-size:18px;min-height:44px}}@media(max-width:700px){.country-dossier{left:34%;width:66%}.country-dossier-body{padding:12px}.country-dossier dl>div{flex-direction:column;gap:3px;font-size:12px}.country-dossier dd{text-align:left}.country-dossier h2{font-size:19px}.country-story{font-size:12px}.country-caveat{font-size:10px}.country-seal{display:none}.country-map-caption{display:none}.country-tokens{left:12px;bottom:28px;flex-direction:column;gap:35px}.country-tokens button{width:55px;height:55px;padding:6px}.country-tokens button>span{top:58px;font-size:9px}.country-pin{display:none}.country-launch{font-size:14px;letter-spacing:1px}}
+
+#main-menu .menu-studio[hidden]{display:none}
+
+#main-menu .country-back{display:grid;place-items:center;padding:0;line-height:1}#main-menu .country-back svg{width:24px;height:24px;display:block;fill:none}#main-menu .country-back svg path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Keep bold atlas lettering from showing through the UI panels. */
+#main-menu .country-dossier{background:#171d19}#main-menu .menu-content{background:linear-gradient(105deg,#080909,#080909 70%,#0d0d0c)}
+
+.menu-audio.muted .audio-waves { visibility: hidden; }
+.menu-audio:hover, .menu-audio:focus-visible { color: #fff2bd; border-color: #e4d39e; }
+.menu-audio:hover::before, .menu-audio:focus-visible::before {
+  content: attr(data-audio-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #191a16;
+  border: 1px solid #8e8462;
+  padding: 5px 8px;
+  color: #e4d6a8;
+  white-space: nowrap;
+  font: 13px Georgia, serif;
+}
+
+/* The same fixed British vector sheet on both menu screens, without markers. */
+#main-menu .menu-map { background: none; filter: brightness(.82) saturate(1.03); }
+#main-menu .menu-map .atlas-viewport { inset: 0; cursor: default; }
+#main-menu .menu-map .desk-atlas {
+  background: radial-gradient(ellipse at 57% 30%, #a26e5055, transparent 64%),
+    radial-gradient(ellipse at 72% 91%, #1d140d66, transparent 70%),
+    linear-gradient(154deg, #3c2821 2%, #58392c 53%, #32231b);
+  pointer-events: none;
+}
+/* Atmospheric shade only: preserve sharp map lettering and coastlines. */
+#main-menu .menu-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, #17191355 0%, #17191330 23%, transparent 57%);
+}
+/* Fixed square hit area and a geometric X: independent of font metrics. */
+:is(#app, #main-menu, #new-dialog, .campaign-saves) button[data-close-button] {
+  box-sizing: border-box;
+  width: var(--close-size, 32px) !important;
+  height: var(--close-size, 32px) !important;
+  min-width: var(--close-size, 32px) !important;
+  min-height: var(--close-size, 32px) !important;
+  max-width: var(--close-size, 32px);
+  max-height: var(--close-size, 32px);
+  flex: 0 0 var(--close-size, 32px);
+  aspect-ratio: 1;
+  padding: 0 !important;
+  margin: 0;
+  border: 1px solid #80765a;
+  border-radius: 50% !important;
+  background: #191c18 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 5 14 14M5 19 19 5' fill='none' stroke='%23d8c794' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / 24px 24px no-repeat;
+  color: #d8c794;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+:is(#app, #main-menu, #new-dialog, .campaign-saves) button[data-close-button]::before,
+:is(#app, #main-menu, #new-dialog, .campaign-saves) button[data-close-button]::after { content: none; }
+:is(#app, #main-menu, #new-dialog, .campaign-saves) button[data-close-button] :is(svg, span[aria-hidden="true"]) { display: none; }
+
+#main-menu .menu-content h1 { font-size: clamp(21px, 3.3vw, 53px); letter-spacing: .06em; line-height: 1.12; }
+#main-menu .party-selection .country-dossier { width: clamp(360px, 40vw, 560px); left: auto; right: 5%; text-align: left; }
+.party-selection .country-dossier header, .party-selection .country-dossier footer { padding-inline: 22px; }
+.party-selection .country-dossier header p { margin-bottom: 8px; }
+.party-selection .country-dossier-body { padding: 14px 22px; }
+.party-selection-note { color: #c9c6af; margin: 0 0 13px; font: 14px/1.4 Georgia, serif; }
+.campaign-parties { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+.campaign-parties legend { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
+.campaign-parties label { display: flex; align-items: center; gap: 11px; padding: 9px 10px; min-height: 50px; border: 1px solid #69664a; background: #232922; cursor: pointer; }
+.campaign-parties label:has(input:checked) { border-color: #d5bd83; background: #3a382a; }
+.campaign-parties input { flex: 0 0 auto; accent-color: #d5bd83; }
+.campaign-parties label span { border-left: 3px solid var(--party-color); padding-left: 10px; min-width: 0; }
+.campaign-parties strong, .campaign-parties small { display: block; }
+.campaign-parties strong { color: #efe1b5; font-size: 15px; }
+.campaign-parties small { color: #d0cbb5; font: 13px/1.3 Georgia, serif; margin-top: 3px; }
+.party-selection .country-launch { font-size: 16px; letter-spacing: 0; }
+.party-selection .country-launch:disabled { opacity: .58; cursor: default; }
+@media(max-width: 620px) {
+  #main-menu .party-selection .country-dossier { right: 0; width: 100%; }
+  #main-menu .party-selection .country-back { z-index: 1; top: 12px; left: 12px; width: 40px; height: 40px; }
+  .party-selection .country-dossier header { padding-left: 65px; }
+  .party-selection .country-dossier-body, .party-selection .country-dossier footer { padding-inline: 12px; }
+}
+
+#main-menu .menu-version { background: transparent; border: 0; color: #bcb28d; padding: 5px 8px; cursor: pointer; }
+#main-menu .menu-version:hover { color: #f0dfaa; }
+
+.language-picker {
+  width: min(440px, calc(100% - 28px));
+  text-align: center;
+}
+.game-language-name {
+  margin: 0 0 22px;
+  font: 25px/1.2 Georgia, serif;
+}
+.language-picker h1 {
+  margin: 0 0 18px;
+  font: 21px/1.4 Georgia, serif;
+}
+.language-picker h1 span { display: block; }
+.language-picker h1 span + span { font-size: .85em; }
+.game-language-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.game-language-buttons button {
+  min-height: 44px;
+  font: 16px Georgia, serif;
+}
+
+.language-field,
+.menu-options-body .language-field {
+  display: grid;
+  gap: 5px;
+}
+.menu-options-body .language-field { margin-bottom: 16px; }
+.language-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid #756a4e;
+  border-radius: 2px;
+  background: #292e25;
+  color: #eee3cc;
+  font: inherit;
+}
+.language-field select:focus-visible {
+  outline: 2px solid #dec78e;
+  outline-offset: 2px;
+}

@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "revision": 21,
+  "date": "2026-10-31T01:50:51.920Z",
+  "sourceSHA256": "f841f485e1bca1c258fa15b70918780e3fac33161fa5e9c9c2dfa223c995713a",
+  "months": 720,
+  "maxRelativeAudit": 5.6010705355727264e-15,
+  "results": [
+    {
+      "country": "poor",
+      "capitalControls": 0,
+      "months": 120,
+      "minGDP": 399.6299997114563,
+      "finalGDP": 526.3793449895384,
+      "primaryEquityUSD": 133.18026240861641,
+      "secondaryEquityUSD": 275.4797169145637,
+      "completedForeignFundedCapital": 88.63698040157078,
+      "netMigration": -0.3964534563571318,
+      "recognizedEmployedHigh": 0,
+      "unrecognizedHigh": 0,
+      "markets": [
+        {
+          "sector": 2,
+          "companies": 13,
+          "active": 13,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 3,
+          "companies": 7,
+          "active": 7,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 4,
+          "companies": 6,
+          "active": 6,
+          "bankruptcies": 0
+        }
+      ]
+    },
+    {
+      "country": "poor",
+      "capitalControls": 100,
+      "months": 120,
+      "minGDP": 389.0449817105256,
+      "finalGDP": 523.6271580562207,
+      "primaryEquityUSD": 0,
+      "secondaryEquityUSD": 0,
+      "completedForeignFundedCapital": 0,
+      "netMigration": -0.39622178189642326,
+      "recognizedEmployedHigh": 0,
+      "unrecognizedHigh": 0,
+      "markets": [
+        {
+          "sector": 2,
+          "companies": 10,
+          "active": 10,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 3,
+          "companies": 5,
+          "active": 5,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 4,
+          "companies": 5,
+          "active": 5,
+          "bankruptcies": 0
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "capitalControls": 0,
+      "months": 120,
+      "minGDP": 4789.679384465333,
+      "finalGDP": 6516.752148568861,
+      "primaryEquityUSD": 2639.1360511307516,
+      "secondaryEquityUSD": 2737.921009363017,
+      "completedForeignFundedCapital": 1972.6193447819542,
+      "netMigration": -0.018440404794955848,
+      "recognizedEmployedHigh": 0.0003293026468448871,
+      "unrecognizedHigh": 0.000131014300104157,
+      "markets": [
+        {
+          "sector": 2,
+          "companies": 15,
+          "active": 15,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 3,
+          "companies": 7,
+          "active": 7,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 4,
+          "companies": 8,
+          "active": 8,
+          "bankruptcies": 0
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "capitalControls": 100,
+      "months": 120,
+      "minGDP": 4728.552910121533,
+      "finalGDP": 6379.8050825452865,
+      "primaryEquityUSD": 0,
+      "secondaryEquityUSD": 0,
+      "completedForeignFundedCapital": 0,
+      "netMigration": -0.018842155596820127,
+      "recognizedEmployedHigh": 0.0002885092565990914,
+      "unrecognizedHigh": 0.00011133228379439754,
+      "markets": [
+        {
+          "sector": 2,
+          "companies": 10,
+          "active": 10,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 3,
+          "companies": 6,
+          "active": 6,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 4,
+          "companies": 5,
+          "active": 5,
+          "bankruptcies": 0
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "capitalControls": 0,
+      "months": 120,
+      "minGDP": 20359.811571855465,
+      "finalGDP": 21169.43780115422,
+      "primaryEquityUSD": 7283.301275229889,
+      "secondaryEquityUSD": 8843.211761205112,
+      "completedForeignFundedCapital": 3402.5499295016652,
+      "netMigration": 0.12336317748114804,
+      "recognizedEmployedHigh": 0.029488633468682086,
+      "unrecognizedHigh": 0.0073322090480494335,
+      "markets": [
+        {
+          "sector": 2,
+          "companies": 10,
+          "active": 10,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 3,
+          "companies": 7,
+          "active": 7,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 4,
+          "companies": 7,
+          "active": 7,
+          "bankruptcies": 0
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "capitalControls": 100,
+      "months": 120,
+      "minGDP": 20471.320762567626,
+      "finalGDP": 21634.99026309346,
+      "primaryEquityUSD": 0,
+      "secondaryEquityUSD": 0,
+      "completedForeignFundedCapital": 0,
+      "netMigration": 0.12053060941549237,
+      "recognizedEmployedHigh": 0.02857926989277802,
+      "unrecognizedHigh": 0.007060957823428975,
+      "markets": [
+        {
+          "sector": 2,
+          "companies": 8,
+          "active": 8,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 3,
+          "companies": 6,
+          "active": 6,
+          "bankruptcies": 0
+        },
+        {
+          "sector": 4,
+          "companies": 5,
+          "active": 5,
+          "bankruptcies": 0
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Technical checks, not causal estimates or national calibration.",
+    "Fixed initial policies apart from capital controls; no politics or defense; three fictional starts.",
+    "Zero and full controls change several external channels; scenario differences are not identified treatment effects.",
+    "Aggregate interindustry complementarity can magnify simultaneous company failures.",
+    "Founder origin is a cohort label, not an observed individual registry."
+  ],
+  "persistenceFollowUp": {
+    "sourceSHA256": "bbb1f5fcd8c1658026aabb95e3de68598d847dc78393638b44ed80af6fc7151d",
+    "change": "Only src/save-files.js reader limit increased from 100 to 256 MiB, with dynamic error text. Economic equations unchanged.",
+    "verification": "All 459 tests passed; save-files.test.js additionally rerun after the reader change (3 passed). Full 30-year JSON/gzip verification rerun in current-validation.json."
+  },
+  "diagnosticFollowUp": {
+    "sourceSHA256": "41c35fe1788e8b92305da50cfb9fad3e90f8d6aa3a035987a4cc51434d8fee4b",
+    "change": "Only recognitionCapacityUsed reporting corrected to subtract from funded available capacity, not unfunded spare capacity. Recognition amounts, labor, financing, GDP and all economic equations unchanged.",
+    "verification": "All 14 firms-capital-talent tests passed after the reporting correction, including zero-funded-education backlog."
+  }
+}

@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createSimulation,advanceMonth,copy,replayJournal,exportSimulation,importSimulation} from '../src/engine.js';
+import {newGameOptions} from '../src/start-presets.js';
+import {partyPolicyTargets} from '../src/party-programs.js';
+import {createBill,rollCall} from '../src/legislation.js';
+import {enableOppositionCompetition,decisionBudget} from '../src/political-system.js';
+const start=()=>{const o=newGameOptions({resource:false});o.politicalOptions.nameSeed=7;return createSimulation(o);};
+test('friendly opposition remains a rival without changing own-party or independent votes',()=>{
+ const current=start(),p=current.politics,own=p.executive.playerParty;
+ const opposition=p.parties.find(x=>x.active&&!x.independent&&x.id!==own);
+ opposition.executiveLoyalty=1;
+ const old=copy(current);delete old.politics.oppositionRevision;
+ const vote=s=>{const b=createBill(s,{incomeTax:s.policy.incomeTax});return rollCall(s,b);};
+ const legacy=vote(old),revised=vote(current),find=(v,id)=>v.parties.find(x=>x.id===id);
+ assert.ok(find(revised,opposition.id).yes<find(legacy,opposition.id).yes/2);
+ for(const x of p.parties.filter(x=>x.active&&(x.id===own||x.independent)))assert.deepEqual(find(revised,x.id),find(legacy,x.id));
+ const favorable=start(),op=favorable.politics.parties.find(x=>x.id===opposition.id);
+ op.executiveLoyalty=1;
+ const targets=partyPolicyTargets(favorable,op);
+ const patch=op.platform.economy>0?{corporateTax:targets.corporateTax}:{transfers:targets.transfers};
+ const b=createBill(favorable,patch,{sponsor:op.id}),support=rollCall(favorable,b).parties.find(x=>x.id===op.id);
+ assert.ok(support.yes>op.seats/2,'rival still supports a substantive priority');
+});
+test('opposition migration is free, preserves history, and replays the recorded boundary',()=>{
+ const options=newGameOptions({resource:false});delete options.politicalOptions.oppositionRevision;
+ let s=createSimulation(options);for(let i=0;i<3;i++)s=advanceMonth(s);
+ const before=JSON.stringify(s.journal),used=decisionBudget(s).used;
+ enableOppositionCompetition(s);
+ assert.equal(s.politics.oppositionRevision,1);assert.equal(decisionBudget(s).used,used);
+ assert.equal(JSON.stringify(s.journal),before);
+ const restored=importSimulation(exportSimulation(s));assert.deepEqual(replayJournal(restored).politics,s.politics);
+ s=advanceMonth(s);assert.deepEqual(replayJournal(importSimulation(exportSimulation(s))).metrics,s.metrics);
+});

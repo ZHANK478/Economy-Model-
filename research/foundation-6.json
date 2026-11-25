@@ -1,0 +1,15 @@
+{
+  "equationRevision": 6,
+  "status": "research-informed conditional simulation; not empirically estimated",
+  "accounting": "existing national accounts, common goods allocator and stock-flow audits",
+  "mechanisms": {
+    "employment": "Pissarides 2010 Nobel lecture: search, vacancies and separations",
+    "banking": "Bank of England 2014 money creation; 2026 resolution transfer guidance",
+    "technology": "Comin and Hobijn AER 2010; World Bank firm technology surveys",
+    "households": "Auclert, Rognlie and Straub 2024/2025 heterogeneous-agent policy review",
+    "networks": "Engel, Fischer and Galetovic 2020; IMF 2014 infrastructure maintenance",
+    "services": "WHO UHC and workforce; World Bank WDR 2018 learning"
+  },
+  "numerical_parameters": "Scenario assumptions recorded in src/economic-foundation.js and state.provenance.foundationAssumptions; references do not identify their values.",
+  "full_specification": "docs/FOUNDATION.md"
+}

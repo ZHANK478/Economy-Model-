@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "revision": 21,
+  "date": "2026-10-31T01:48:50.980Z",
+  "results": [
+    {
+      "country": "poor",
+      "months": 60,
+      "startUrban": 0.233145114975244,
+      "endUrban": 0.24334407243959133,
+      "totalInternalMoves": 0.1509232990785978,
+      "relocationServicesPaid": 5.235149922634779,
+      "foodCompensation": 1.8179041318962594,
+      "incomeGini": 53.13876445066678,
+      "wealthGini": 82.7368212255921,
+      "top01WealthShare": 28.73616808414906,
+      "maxModeledWealthUSD": 1636516.953176333,
+      "realGDPPerCapita": 488.9785059689909,
+      "unemployment": 39.76539360257792,
+      "auditError": 7.958078640513122e-13,
+      "measurementSensitivity": [
+        {
+          "tailShare": 0.1,
+          "ownerWealth": 843.6458205190488,
+          "totalWealth": 5897.601617610541
+        },
+        {
+          "tailShare": 0.3,
+          "ownerWealth": 1872.945264534772,
+          "totalWealth": 5897.601617610541
+        },
+        {
+          "tailShare": 0.5,
+          "ownerWealth": 2902.2447085504955,
+          "totalWealth": 5897.60161761054
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "months": 60,
+      "startUrban": 0.749203113970256,
+      "endUrban": 0.7472709686128539,
+      "totalInternalMoves": 0.08803568217810984,
+      "relocationServicesPaid": 90.18070101275086,
+      "foodCompensation": 8.282467030734487,
+      "incomeGini": 40.23780367445783,
+      "wealthGini": 75.45318194552438,
+      "top01WealthShare": 27.63540770628794,
+      "maxModeledWealthUSD": 15881178.486568114,
+      "realGDPPerCapita": 6286.658655088194,
+      "unemployment": 19.676335749691244,
+      "auditError": 1.864464138634503e-11,
+      "measurementSensitivity": [
+        {
+          "tailShare": 0.1,
+          "ownerWealth": 12450.372933183593,
+          "totalWealth": 108468.09204197445
+        },
+        {
+          "tailShare": 0.3,
+          "ownerWealth": 32759.697081239614,
+          "totalWealth": 108468.0920419744
+        },
+        {
+          "tailShare": 0.5,
+          "ownerWealth": 53069.02122929564,
+          "totalWealth": 108468.0920419744
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "months": 60,
+      "startUrban": 0.765143983146093,
+      "endUrban": 0.7596730220465859,
+      "totalInternalMoves": 0.2902591559073919,
+      "relocationServicesPaid": 948.4656399368823,
+      "foodCompensation": 1.6243835862341566e-8,
+      "incomeGini": 25.60466452764356,
+      "wealthGini": 62.21232551160249,
+      "top01WealthShare": 25.670410355676243,
+      "maxModeledWealthUSD": 97834217.94458859,
+      "realGDPPerCapita": 27911.087609633392,
+      "unemployment": 3.077296241830285,
+      "auditError": 3.128661774098873e-10,
+      "measurementSensitivity": [
+        {
+          "tailShare": 0.1,
+          "ownerWealth": 71511.24612109916,
+          "totalWealth": 558374.5295096675
+        },
+        {
+          "tailShare": 0.3,
+          "ownerWealth": 154018.3639903001,
+          "totalWealth": 558374.5295096675
+        },
+        {
+          "tailShare": 0.5,
+          "ownerWealth": 236525.481859501,
+          "totalWealth": 558374.5295096674
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Fixed enacted initial policy, diversified scenarios, no politics or defense.",
+    "Family strata are representative cohorts, not observed individual billionaires.",
+    "Changing the initial tail allocation changes measured concentration without changing national assets; no observed target Gini is imposed.",
+    "Urbanization, income and output need not increase. Migration is not a productivity bonus.",
+    "Natural food consumption is an explicitly limited compensation-in-kind channel inside existing agriculture, not a new unmeasured farm sector."
+  ]
+}

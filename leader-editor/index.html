@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Портретная мастерская · Mandatewright</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="workshop.css">
+</head>
+<body>
+  <div class="room"><div class="window"></div><div class="shelf"></div><div class="desk"></div></div>
+  <main class="atelier workshop">
+    <header class="ribbon">
+      <span class="seal" aria-hidden="true">♜</span>
+      <span>ПОРТРЕТНАЯ МАСТЕРСКАЯ</span>
+      <button class="text-button" id="cabinet" disabled>Кабинет ↗</button>
+    </header>
+    <div class="layout">
+      <aside class="dossier">
+        <div class="identity">
+          <small>ЛИЧНОЕ ДЕЛО</small>
+          <input id="character-name" aria-label="Имя персонажа" maxlength="48" autocomplete="off">
+          <p>Ваш персонаж</p>
+        </div>
+        <div class="portrait-frame portrait-mount">
+          <canvas id="live-portrait" width="480" height="600" role="img" aria-label="Портрет создаваемого персонажа"></canvas>
+          <p id="loading" role="status">Загружаю портрет…</p>
+          <span class="photo-corner tl"></span><span class="photo-corner br"></span>
+        </div>
+        <div class="dossier-footer">
+          <p class="caption">Официальный портрет</p>
+          <span class="ornament" aria-hidden="true">◆</span>
+          <p class="signature" id="signature"></p>
+          <button class="text-button download" id="download" disabled>Скачать портрет PNG <span>↓</span></button>
+        </div>
+      </aside>
+      <section class="editor">
+        <div class="heading">
+          <h1>Персонализация персонажа</h1>
+          <p>Выберите образ будущего члена правительства.</p>
+        </div>
+        <nav id="categories" aria-label="Настройки внешности"></nav>
+        <fieldset id="controls" disabled aria-label="Варианты внешности">
+          <div class="selectors" id="appearance-controls"></div>
+        </fieldset>
+        <footer class="actions">
+          <button class="burgundy" id="random-one" disabled>Рандомизировать</button>
+          <button class="burgundy primary" id="save" disabled>Подтвердить образ <span>→</span></button>
+        </footer>
+        <div class="footnote"><p id="workshop-status" role="status">Портрет будет сохранён вместе с партией</p></div>
+      </section>
+    </div>
+  </main>
+  <dialog id="character-gallery" aria-labelledby="gallery-title">
+    <div class="gallery-header">
+      <div><small>ПОРТРЕТНАЯ МАСТЕРСКАЯ</small><h2 id="gallery-title">Кабинет</h2>
+        <p>Выберите портрет, чтобы продолжить редактирование.</p></div>
+      <form method="dialog"><button class="close" aria-label="Закрыть кабинет">×</button></form>
+    </div>
+    <div id="generated-portraits" class="gallery-grid"></div>
+    <div class="gallery-actions"><button class="burgundy" id="random-ten">Создать 10 персонажей</button></div>
+  </dialog>
+  <script type="module" src="workshop.js"></script>
+</body>
+</html>

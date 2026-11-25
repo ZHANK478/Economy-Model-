@@ -1,0 +1,738 @@
+{
+  "SP.POP.TOTL": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SP.POP.TOTL?date=2000&format=json",
+    "value": 58892514,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SP.POP.TOTL",
+            "value": "Population, total"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 58892514,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "NY.GDP.PCAP.CD": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NY.GDP.PCAP.CD?date=2000&format=json",
+    "value": 28383.8761094996,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NY.GDP.PCAP.CD",
+            "value": "GDP per capita (current US$)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 28383.8761094996,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "NE.CON.PRVT.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NE.CON.PRVT.ZS?date=2000&format=json",
+    "value": 65.7473711461052,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NE.CON.PRVT.ZS",
+            "value": "Households and NPISHs final consumption expenditure (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 65.7473711461052,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "NE.CON.GOVT.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NE.CON.GOVT.ZS?date=2000&format=json",
+    "value": 16.531026223819,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NE.CON.GOVT.ZS",
+            "value": "General government final consumption expenditure (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 16.531026223819,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "NE.GDI.TOTL.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NE.GDI.TOTL.ZS?date=2000&format=json",
+    "value": 18.9469377484139,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NE.GDI.TOTL.ZS",
+            "value": "Gross capital formation (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 18.9469377484139,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "NE.EXP.GNFS.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NE.EXP.GNFS.ZS?date=2000&format=json",
+    "value": 25.5563430576261,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NE.EXP.GNFS.ZS",
+            "value": "Exports of goods and services (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 25.5563430576261,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "NE.IMP.GNFS.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NE.IMP.GNFS.ZS?date=2000&format=json",
+    "value": 26.7816781759642,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NE.IMP.GNFS.ZS",
+            "value": "Imports of goods and services (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 26.7816781759642,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "NV.AGR.TOTL.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NV.AGR.TOTL.ZS?date=2000&format=json",
+    "value": 0.805152979066022,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NV.AGR.TOTL.ZS",
+            "value": "Agriculture, forestry, and fishing, value added (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 0.805152979066022,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "SL.AGR.EMPL.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SL.AGR.EMPL.ZS?date=2000&format=json",
+    "value": 1.70962230909745,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SL.AGR.EMPL.ZS",
+            "value": "Employment in agriculture (% of total employment) (modeled ILO estimate)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 1.70962230909745,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "SL.IND.EMPL.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SL.IND.EMPL.ZS?date=2000&format=json",
+    "value": 25.2644874782121,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SL.IND.EMPL.ZS",
+            "value": "Employment in industry (% of total employment) (modeled ILO estimate)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 25.2644874782121,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "SL.SRV.EMPL.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SL.SRV.EMPL.ZS?date=2000&format=json",
+    "value": 73.025897424248,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SL.SRV.EMPL.ZS",
+            "value": "Employment in services (% of total employment) (modeled ILO estimate)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 73.025897424248,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "SP.DYN.LE00.IN": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SP.DYN.LE00.IN?date=2000&format=json",
+    "value": 77.7414634146342,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SP.DYN.LE00.IN",
+            "value": "Life expectancy at birth, total (years)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 77.7414634146342,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "SP.DYN.TFRT.IN": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SP.DYN.TFRT.IN?date=2000&format=json",
+    "value": 1.64,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SP.DYN.TFRT.IN",
+            "value": "Fertility rate, total (births per woman)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 1.64,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "SP.POP.0014.TO.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SP.POP.0014.TO.ZS?date=2000&format=json",
+    "value": 18.9345716869257,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SP.POP.0014.TO.ZS",
+            "value": "Population ages 0-14 (% of total population)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 18.9345716869257,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "SP.POP.65UP.TO.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SP.POP.65UP.TO.ZS?date=2000&format=json",
+    "value": 15.8897578485505,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SP.POP.65UP.TO.ZS",
+            "value": "Population ages 65 and above (% of total population)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 15.8897578485505,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 0
+        }
+      ]
+    ]
+  },
+  "FS.AST.PRVT.GD.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/FS.AST.PRVT.GD.ZS?date=2000&format=json",
+    "value": 114.294248790913,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "FS.AST.PRVT.GD.ZS",
+            "value": "Domestic credit to private sector (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 114.294248790913,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "FP.CPI.TOTL.ZG": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/FP.CPI.TOTL.ZG?date=2000&format=json",
+    "value": 1.18295624210408,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "FP.CPI.TOTL.ZG",
+            "value": "Inflation, consumer prices (annual %)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 1.18295624210408,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "SL.UEM.TOTL.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/SL.UEM.TOTL.ZS?date=2000&format=json",
+    "value": 5.558,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "SL.UEM.TOTL.ZS",
+            "value": "Unemployment, total (% of total labor force) (modeled ILO estimate)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 5.558,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "NY.GDP.MKTP.KD.ZG": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/NY.GDP.MKTP.KD.ZG?date=2000&format=json",
+    "value": 4.52438074810904,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "NY.GDP.MKTP.KD.ZG",
+            "value": "GDP growth (annual %)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 4.52438074810904,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "FR.INR.LEND": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/FR.INR.LEND?date=2000&format=json",
+    "value": 5.96389166666667,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "FR.INR.LEND",
+            "value": "Lending interest rate (%)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 5.96389166666667,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "FR.INR.DPST": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/FR.INR.DPST?date=2000&format=json",
+    "value": null,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "FR.INR.DPST",
+            "value": "Deposit interest rate (%)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": null,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  },
+  "PA.NUS.FCRF": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/PA.NUS.FCRF?date=2000&format=json",
+    "value": 0.660930833333333,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "PA.NUS.FCRF",
+            "value": "Official exchange rate (LCU per US$, period average)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 0.660930833333333,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 2
+        }
+      ]
+    ]
+  },
+  "GC.DOD.TOTL.GD.ZS": {
+    "url": "https://api.worldbank.org/v2/country/GBR/indicator/GC.DOD.TOTL.GD.ZS?date=2000&format=json",
+    "value": 87.284376049437,
+    "raw": [
+      {
+        "page": 1,
+        "pages": 1,
+        "per_page": 50,
+        "total": 1,
+        "sourceid": "2",
+        "lastupdated": "2026-10-08"
+      },
+      [
+        {
+          "indicator": {
+            "id": "GC.DOD.TOTL.GD.ZS",
+            "value": "Central government debt, total (% of GDP)"
+          },
+          "country": {
+            "id": "GB",
+            "value": "United Kingdom"
+          },
+          "countryiso3code": "GBR",
+          "date": "2000",
+          "value": 87.284376049437,
+          "unit": "",
+          "obs_status": "",
+          "decimal": 1
+        }
+      ]
+    ]
+  }
+}

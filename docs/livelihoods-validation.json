@@ -1,0 +1,203 @@
+{
+  "revision": 24,
+  "transitions": 1058,
+  "maxAudit": 8.63557180062249e-13,
+  "maxLand": 0.11061804378317201,
+  "rows": [
+    {
+      "country": "poor",
+      "resource": false,
+      "month": 128,
+      "gdp": 524.8672690437884,
+      "unemployment": 21.009500808813577,
+      "selfEmployed": 0.007259298458341071,
+      "ownUse": 0.001957829106905993,
+      "mixedIncome": 0.1325309494524102,
+      "ownFood": 0.003956530906594727,
+      "inflation": -5.875003662111111,
+      "lowEarningSelf": 0,
+      "producerCount": 19
+    },
+    {
+      "country": "poor",
+      "resource": true,
+      "month": 128,
+      "gdp": 526.1627347225046,
+      "unemployment": 25.978259670102634,
+      "selfEmployed": 0.007382271422716105,
+      "ownUse": 0.0019880876001682124,
+      "mixedIncome": 0.11554316513900886,
+      "ownFood": 0.0034966435211561675,
+      "inflation": -7.472740805546197,
+      "lowEarningSelf": 0,
+      "producerCount": 19
+    },
+    {
+      "country": "middle",
+      "resource": false,
+      "month": 128,
+      "gdp": 6496.113054358893,
+      "unemployment": 10.015222741615656,
+      "selfEmployed": 0.002159588382888129,
+      "ownUse": 0.002982321829247968,
+      "mixedIncome": 1.7873826241174824,
+      "ownFood": 0.1826572074979864,
+      "inflation": 2.4398241334436133,
+      "lowEarningSelf": 0,
+      "producerCount": 19
+    },
+    {
+      "country": "middle",
+      "resource": true,
+      "month": 128,
+      "gdp": 6841.24851920666,
+      "unemployment": 12.104363406215892,
+      "selfEmployed": 0.0024523606055537467,
+      "ownUse": 0.0032130325170820796,
+      "mixedIncome": 1.6387881238437754,
+      "ownFood": 0.17268429869362897,
+      "inflation": 1.1248338357203957,
+      "lowEarningSelf": 0,
+      "producerCount": 19
+    },
+    {
+      "country": "rich",
+      "resource": false,
+      "month": 128,
+      "gdp": 25645.350364850758,
+      "unemployment": 9.185660664001478,
+      "selfEmployed": 0.004961748329763907,
+      "ownUse": 0.00022532229151321179,
+      "mixedIncome": 9.356287048850767,
+      "ownFood": 1.3742622721739127e-9,
+      "inflation": 0.4691658504512697,
+      "lowEarningSelf": 0,
+      "producerCount": 18
+    },
+    {
+      "country": "rich",
+      "resource": true,
+      "month": 128,
+      "gdp": 23832.592308060754,
+      "unemployment": 22.909719665871112,
+      "selfEmployed": 0.005256999268527388,
+      "ownUse": 0.00004495308688617889,
+      "mixedIncome": 7.959774766015703,
+      "ownFood": 0.021335286404458486,
+      "inflation": -2.432528290087266,
+      "lowEarningSelf": 0,
+      "producerCount": 18
+    }
+  ],
+  "shocks": [
+    {
+      "name": "crop-failure",
+      "month": 48,
+      "gdp": 367.40102317202525,
+      "unemployment": 64.60067088486677,
+      "selfEmployed": 0.010319181256070837,
+      "ownUse": 0.0045599836192062645,
+      "mixedIncome": 0.3683802715061309,
+      "ownFood": 0.02228478104495204,
+      "inflation": -12.633907047982106,
+      "lowEarningSelf": 0
+    },
+    {
+      "name": "spending-cut",
+      "month": 48,
+      "gdp": 398.99949262472,
+      "unemployment": 56.292805076714785,
+      "selfEmployed": 0.008906721950489993,
+      "ownUse": 0.003939854810025456,
+      "mixedIncome": 0.3231074752913686,
+      "ownFood": 0.016098008063178425,
+      "inflation": -11.616408521435995,
+      "lowEarningSelf": 0
+    },
+    {
+      "name": "credit-stress",
+      "month": 48,
+      "gdp": 439.06630899469445,
+      "unemployment": 46.86603758759796,
+      "selfEmployed": 0.0077290282237249056,
+      "ownUse": 0.0039747538203071565,
+      "mixedIncome": 0.32400762714640063,
+      "ownFood": 0.017419360501141002,
+      "inflation": -9.246758057282644,
+      "lowEarningSelf": 0
+    },
+    {
+      "name": "closed-entry",
+      "month": 48,
+      "gdp": 436.7078952736743,
+      "unemployment": 46.54095539610308,
+      "selfEmployed": 0,
+      "ownUse": 0,
+      "mixedIncome": 0,
+      "ownFood": 0,
+      "inflation": -9.201388192279659,
+      "lowEarningSelf": 0
+    },
+    {
+      "name": "no-cash",
+      "month": 48,
+      "gdp": 489.09726342175423,
+      "unemployment": 42.749130433980085,
+      "selfEmployed": 0,
+      "ownUse": 0,
+      "mixedIncome": 0,
+      "ownFood": 0,
+      "inflation": -9.240408964257341,
+      "lowEarningSelf": 0
+    },
+    {
+      "name": "no-land",
+      "month": 48,
+      "gdp": 440.67236967233225,
+      "unemployment": 46.386200346714496,
+      "selfEmployed": 0.002264149660082378,
+      "ownUse": 0,
+      "mixedIncome": 0.2020415694189023,
+      "ownFood": 0,
+      "inflation": -9.131423019357642,
+      "lowEarningSelf": 0
+    }
+  ],
+  "historical": [
+    {
+      "file": "economy-09.2010.json",
+      "oldMonth": 128,
+      "oldRevision": 23,
+      "oldEngineReplay": "exact",
+      "continuation": {
+        "month": 129,
+        "gdp": 7483.158837626061,
+        "unemployment": 4.6526667223173295,
+        "selfEmployed": 0.0005506857234730836,
+        "ownUse": 0.002724378917913232,
+        "mixedIncome": 0.8150802320340048,
+        "ownFood": 0.1669471329018871,
+        "inflation": -2.1058891477815256,
+        "lowEarningSelf": 0
+      }
+    },
+    {
+      "file": "economy-06.2017.json",
+      "oldMonth": 209,
+      "oldRevision": 22,
+      "oldEngineReplay": "exact",
+      "continuation": {
+        "month": 210,
+        "gdp": 136.39377800547797,
+        "unemployment": 85.66114337521456,
+        "selfEmployed": 0.000026523576022284707,
+        "ownUse": 0.0002911584471565883,
+        "mixedIncome": 0.0008241301741759605,
+        "ownFood": 0.000048580868542844205,
+        "inflation": -26.82357679109827,
+        "lowEarningSelf": 0.000026523576022284707
+      }
+    }
+  ],
+  "empiricalCertification": false
+}

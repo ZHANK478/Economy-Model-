@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "retrievedDate": "2026-10-30",
+  "urbanPopulation": {
+    "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SP.URB.TOTL.IN.ZS?date=2000&format=json&per_page=100",
+    "indicator": "SP.URB.TOTL.IN.ZS",
+    "unit": "percent",
+    "year": 2000,
+    "providerMetadata": {
+      "page": 1,
+      "pages": 1,
+      "per_page": 100,
+      "total": 3,
+      "sourceid": "2",
+      "lastupdated": "2026-10-08"
+    },
+    "observations": [
+      {
+        "indicator": {
+          "id": "SP.URB.TOTL.IN.ZS",
+          "value": "Urban population (% of total population)"
+        },
+        "country": {
+          "id": "BD",
+          "value": "Bangladesh"
+        },
+        "countryiso3code": "BGD",
+        "date": "2000",
+        "value": 23.3145114975244,
+        "unit": "",
+        "obs_status": "",
+        "decimal": 0
+      },
+      {
+        "indicator": {
+          "id": "SP.URB.TOTL.IN.ZS",
+          "value": "Urban population (% of total population)"
+        },
+        "country": {
+          "id": "FR",
+          "value": "France"
+        },
+        "countryiso3code": "FRA",
+        "date": "2000",
+        "value": 76.5143983146093,
+        "unit": "",
+        "obs_status": "",
+        "decimal": 0
+      },
+      {
+        "indicator": {
+          "id": "SP.URB.TOTL.IN.ZS",
+          "value": "Urban population (% of total population)"
+        },
+        "country": {
+          "id": "MX",
+          "value": "Mexico"
+        },
+        "countryiso3code": "MEX",
+        "date": "2000",
+        "value": 74.9203113970256,
+        "unit": "",
+        "obs_status": "",
+        "decimal": 0
+      }
+    ],
+    "limitation": "National urban definitions differ. Aggregate starting residence only; not observed joint income, skills, rents or migration behaviour."
+  },
+  "research": [
+    {
+      "url": "https://www.nber.org/papers/w20625",
+      "title": "Wealth Inequality in the United States since 1913: Evidence from Capitalized Income Tax Data",
+      "usedFor": "Need for within-group tail; not a universal concentration target."
+    },
+    {
+      "url": "https://www.nber.org/papers/w29374",
+      "title": "Top Wealth in America: New Estimates and Implications for Taxing the Rich",
+      "usedFor": "Return heterogeneity changes inferred wealth concentration; no single empirical target imposed."
+    },
+    {
+      "url": "https://www.nber.org/papers/w22822",
+      "title": "Heterogeneity and Persistence in Returns to Wealth",
+      "usedFor": "Different asset returns and risk; no guaranteed return premium coded for wealthy families."
+    },
+    {
+      "url": "https://www.nber.org/papers/w21409",
+      "title": "Poor Little Rich Kids? The Role of Nature versus Nurture in Wealth and Other Economic Outcomes and Behaviors",
+      "usedFor": "Wealth transmission, environment and bequests; no inherited ability bonus."
+    },
+    {
+      "url": "https://www.nber.org/papers/w25350",
+      "title": "Selection into Entrepreneurship and Self-Employment",
+      "usedFor": "Entrepreneurs and self-employed differ; collateral and liquidity matter."
+    },
+    {
+      "url": "https://www.nber.org/papers/w19628",
+      "title": "The Agricultural Productivity Gap",
+      "usedFor": "Measured VA per worker is not an automatic causal migrant productivity gain."
+    },
+    {
+      "url": "https://www.nber.org/papers/w20172",
+      "title": "Under-investment in a Profitable Technology: The Case of Seasonal Migration in Bangladesh",
+      "usedFor": "Experimental evidence on migration incentives, risk and liquidity; not a calibration of permanent migration elasticities."
+    }
+  ],
+  "numericalStatus": "Urban aggregate observations are measured. Joint distributions, portfolio tails, inheritance splitting, moving costs, monthly mobility, sorting, rent ratios and compensation-in-kind shares are disclosed scenario assumptions."
+}

@@ -1,0 +1,46 @@
+Mandatewright — лицензии материалов
+
+Картография Великобритании
+Источник геометрии: Office for National Statistics, ONSdigital/uk-topojson.
+Базовая геометрия: обобщённые границы местных властей за 2016 год.
+Contains National Statistics data © Crown copyright and database right 2016.
+Contains OS data © Crown copyright and database right 2016.
+Региональная статистика: Office for National Statistics.
+Contains public sector information licensed under the Open Government Licence v3.0.
+Источник геометрии: https://github.com/ONSdigital/uk-topojson
+Лицензия: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+Источники региональной статистики перечислены в uk-regions.md.
+
+Картография мира и соседних стран
+Natural Earth — общественное достояние.
+https://www.naturalearthdata.com/about/terms-of-use/
+
+Иллюстрации и флаги Кодекса
+Источники и статусы прав перечислены в codex-reference-images.md и codex-flag-sources.md.
+Правила использования государственных символов действуют отдельно от авторского права.
+
+Шрифты
+Montserrat, IBM Plex Sans и Oswald — SIL Open Font License 1.1.
+Тексты лицензий поставляются рядом со шрифтами в assets/fonts.
+
+Карты регионов и городов
+Вырезки из игрового атласа; к исходной геометрии применяются указанные выше условия ONS и OGL.
+
+Персонажи
+Портреты собираются в игре из геометрии и оформления, поставляемых с проектом.
+Ни портреты, ни партии в сценарии не предназначены для изображения реальных политиков.
+
+Макроэкономические и демографические данные
+World Bank, World Development Indicators (WDI). Стартовые показатели Великобритании и мировой экономики.
+https://databank.worldbank.org/source/world-development-indicators
+Условия использования открытых данных Всемирного банка:
+https://datacatalog.worldbank.org/public-licenses
+https://creativecommons.org/licenses/by/4.0/
+Данные преобразованы для калибровки модели. Расчётные результаты партии создаёт игра.
+
+Музыка
+Композиторы, исполнители, лицензии и ссылки на записи приведены в SOUNDTRACK-LICENSES.txt.
+
+Звуки интерфейса
+Оригинальные синтезированные эффекты для игры. Аудиофайлы в assets/interface-audio доступны по CC0 1.0.
+https://creativecommons.org/publicdomain/zero/1.0/

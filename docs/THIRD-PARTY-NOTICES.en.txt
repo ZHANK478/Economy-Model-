@@ -1,0 +1,46 @@
+Mandatewright — Third-party notices
+
+United Kingdom maps
+Boundary data: Office for National Statistics, ONSdigital/uk-topojson.
+The source geometry uses generalised 2016 local authority boundaries.
+Contains National Statistics data © Crown copyright and database right 2016.
+Contains OS data © Crown copyright and database right 2016.
+Regional statistics: Office for National Statistics.
+Contains public sector information licensed under the Open Government Licence v3.0.
+Boundary data: https://github.com/ONSdigital/uk-topojson
+Licence: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+Regional statistics sources are listed in uk-regions.md.
+
+World and neighbouring countries maps
+Natural Earth — public domain.
+https://www.naturalearthdata.com/about/terms-of-use/
+
+Codex illustrations and flags
+Sources and rights information are listed in codex-reference-images.md and codex-flag-sources.md.
+Rules governing the use of national symbols apply independently of copyright.
+
+Fonts
+Montserrat, IBM Plex Sans and Oswald — SIL Open Font License 1.1.
+Licence texts are distributed with the fonts in assets/fonts.
+
+Regional and city maps
+These are excerpts from the in-game atlas. The ONS and OGL terms above apply to the underlying geometry.
+
+Characters
+The game assembles portraits from geometry and artwork included with the project.
+The scenario's portraits and parties are fictional and are not intended to depict real politicians.
+
+Macroeconomic and demographic data
+World Bank, World Development Indicators (WDI), for the UK and world economy at the start of the scenario.
+https://databank.worldbank.org/source/world-development-indicators
+World Bank open data terms:
+https://datacatalog.worldbank.org/public-licenses
+https://creativecommons.org/licenses/by/4.0/
+Source figures have been transformed to calibrate the model. The game calculates campaign outcomes.
+
+Music
+See SOUNDTRACK-LICENSES.txt for composers, performers, recording licenses and sources.
+
+Interface sound effects
+Original synthesized effects for the game. Audio files in assets/interface-audio are dedicated under CC0 1.0.
+https://creativecommons.org/publicdomain/zero/1.0/

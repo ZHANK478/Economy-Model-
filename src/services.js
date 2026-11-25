@@ -1,3 +1,6 @@
+import {consumptionActive,privateServiceShares} from './household-consumption.js';
+import {foundationActive,serviceSettlement} from './economic-foundation.js';
+import {serviceDeliveryFactor} from './local-government.js';
 // Public service capacity and paid private services; sector 4 delivers the latter.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const sum=a=>a.reduce((x,v)=>x+v,0);
@@ -7,6 +10,7 @@ export function initializeServices(s){s.services={publicHealthCapacity:1,publicE
 export function privateServicePlans(s,ordinaryBudget,servicePrice){
   const a=s.services,p=s.policy,k=s.parameters;
   return s.households.map((h,i)=>{
+    if(consumptionActive(s)&&s.householdEconomy){const shares=privateServiceShares(s,i);return Object.fromEntries(Object.entries(shares).map(([key,value])=>[key,ordinaryBudget[i]*value/servicePrice]));}
     const healthGap=Math.max(0,1-a.publicHealthCapacity),schoolGap=Math.max(0,1-a.publicEducationCapacity);
     const health=p.privateHealthEntry?ordinaryBudget[i]*clamp(k.privateHealthDemand+.11*healthGap,0,.20):0;
     const education=p.privateEducationEntry?ordinaryBudget[i]*clamp(k.privateEducationDemand+.08*schoolGap,0,.15):0;
@@ -18,9 +22,11 @@ export function privateServicePlans(s,ordinaryBudget,servicePrice){
 }
 export function settleServices(s,prev,flow,plans,alpha,price,publicPrice=price){
   const a=s.services,k=s.parameters;
-  const publicHealth=flow.healthcare/publicPrice/Math.max(s.population*10,1);
+  const healthCost=s.economy?.revision>=4?s.base.serviceReference.health:10;
+  const schoolCost=s.economy?.revision>=4?s.base.serviceReference.school:7.5;
+  const publicHealth=flow.healthcare*serviceDeliveryFactor(s,'health')/publicPrice/Math.max(s.population*healthCost,1e-9);
   const pupilRatio=(s.ageCohorts[0]/s.population)/.28;
-  const publicSchool=flow.education/publicPrice/Math.max(s.population*7.5*pupilRatio,1);
+  const publicSchool=flow.education*serviceDeliveryFactor(s,'school')/publicPrice/Math.max(s.population*schoolCost*pupilRatio,1);
   a.publicHealthCapacity+=k.serviceCapacityAdjustment*(clamp(publicHealth,0,2)-a.publicHealthCapacity);
   a.publicEducationCapacity+=k.serviceCapacityAdjustment*(clamp(publicSchool,0,2)-a.publicEducationCapacity);
   a.publicHealthDelivered=Math.min(a.publicHealthCapacity,publicHealth);
@@ -29,12 +35,13 @@ export function settleServices(s,prev,flow,plans,alpha,price,publicPrice=price){
   const privateCapacity=clamp(firm.capital/Math.max(firm.initialCapital,1)*firm.managementEfficiency,.1,5);
   const health=sum(plans.map(p=>p.health))*alpha,school=sum(plans.map(p=>p.education))*alpha,care=sum(plans.map(p=>p.care))*alpha;
   a.privateHealth=health*price;a.privateEducation=school*price;a.privateChildcare=care*price;
-  a.healthByGroup=plans.map((p,i)=>clamp(a.publicHealthDelivered+Math.min(privateCapacity,p.health*alpha/Math.max(s.population*s.households[i].population*10,1e-6)),0,1));
-  a.educationByGroup=plans.map((p,i)=>clamp(a.publicEducationDelivered+Math.min(privateCapacity,p.education*alpha/Math.max(s.population*s.households[i].population*7.5*pupilRatio,1e-6)),0,1));
-  a.healthCoverage=sum(a.healthByGroup.map((v,i)=>v*s.households[i].population));
-  a.educationCoverage=sum(a.educationByGroup.map((v,i)=>v*s.households[i].population));
+  a.healthByGroup=plans.map((p,i)=>clamp(a.publicHealthDelivered+Math.min(privateCapacity,p.health*alpha/Math.max(s.population*s.households[i].population*healthCost,1e-6)),0,1));
+  a.educationByGroup=plans.map((p,i)=>clamp(a.publicEducationDelivered+Math.min(privateCapacity,p.education*alpha/Math.max(s.population*s.households[i].population*schoolCost*pupilRatio,1e-6)),0,1));
+  a.healthCoverage=clamp(sum(a.healthByGroup.map((v,i)=>v*s.households[i].population)),0,1);
+  a.educationCoverage=clamp(sum(a.educationByGroup.map((v,i)=>v*s.households[i].population)),0,1);
   const careTarget=clamp((flow.childcare/publicPrice+care)/Math.max(s.ageCohorts[0]*2.5,1),0,1);
   a.childcareAccess+=k.serviceCapacityAdjustment*(careTarget-a.childcareAccess);
+  if(foundationActive(s))serviceSettlement(s,prev,flow,plans,alpha,price,publicPrice);
   // Housing is a stylised burden proxy; there is no housing asset/land market yet.
   const housingTarget=clamp(k.initialHousingBurden*Math.pow(Math.max(.2,prev.metrics.realIncomeIndex/100),-.15)
     *Math.pow(Math.max(.2,s.population/s.base.initialPopulation),.25),.1,.55);

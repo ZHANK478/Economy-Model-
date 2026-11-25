@@ -22,3 +22,18 @@ test('unavailable primary storage can fall back, but quota failure is not report
   const storage=createBrowserStorage({localStorage:disk,indexedDB});await storage.set('key','value');assert.equal(await storage.get('key'),'value');
   const unavailable=createBrowserStorage({localStorage:{setItem(){throw new Error('quota');},getItem(){return null;}},indexedDB:null});await assert.rejects(unavailable.set('key','value'),/quota/);
 });
+
+test('denied storage getters allow startup and report failed persistence',async()=>{
+  const descriptors=['localStorage','indexedDB'].map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]);
+  try{
+    for(const [name] of descriptors)Object.defineProperty(globalThis,name,{configurable:true,get(){throw new DOMException('Denied','SecurityError');}});
+    const storage=createBrowserStorage();
+    assert.equal(await storage.getSnapshot('slot'),null);
+    await assert.rejects(storage.set('slot','save'),/Хранилище браузера недоступно/);
+  }finally{
+    for(const [name,descriptor] of descriptors){
+      if(descriptor)Object.defineProperty(globalThis,name,descriptor);
+      else delete globalThis[name];
+    }
+  }
+});

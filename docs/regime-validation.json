@@ -1,0 +1,1531 @@
+{
+  "schema": 1,
+  "date": "2026-10-31T01:59:50.963Z",
+  "sourceSHA256": "f841f485e1bca1c258fa15b70918780e3fac33161fa5e9c9c2dfa223c995713a",
+  "months": 1764,
+  "roundTrips": 24,
+  "replays": 12,
+  "maxRelativeAudit": 4.7613727719599444e-15,
+  "results": [
+    {
+      "type": "personalist",
+      "seed": 7,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6678.9656416906755,
+      "growthPercent": 11.316094028177925,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "personalist",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5868.759978190703,
+          "personalControl": 83.28766381522514,
+          "eliteCohesion": 65.67368612961883,
+          "successionReadiness": 20.279059432282573,
+          "nationalMobilization": 0.0001870940004526701,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5652.828203513654,
+          "personalControl": 85.97484244367577,
+          "eliteCohesion": 68.61641233603794,
+          "successionReadiness": 23.002820812228965,
+          "nationalMobilization": 0.7824216531638395,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5638.025576714647,
+          "personalControl": 88.17121329758177,
+          "eliteCohesion": 70.91174175291556,
+          "successionReadiness": 24.424662693443494,
+          "nationalMobilization": 3.107680130005095,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5774.31280967993,
+          "personalControl": 89.96642143030988,
+          "eliteCohesion": 72.64127987267447,
+          "successionReadiness": 25.176508920433754,
+          "nationalMobilization": 4.475049564773351,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6033.071706055719,
+          "personalControl": 91.4337384064398,
+          "eliteCohesion": 73.91222541054914,
+          "successionReadiness": 25.576448464752033,
+          "nationalMobilization": 4.520779912373728,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6229.861699368071,
+          "personalControl": 92.63305288657592,
+          "eliteCohesion": 74.83946310054777,
+          "successionReadiness": 25.783914995426194,
+          "nationalMobilization": 3.9544190475203265,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6441.039202879397,
+          "personalControl": 93.61331498785543,
+          "eliteCohesion": 75.52259318892575,
+          "successionReadiness": 25.885690873263652,
+          "nationalMobilization": 3.07783455022498,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6574.8792889315755,
+          "personalControl": 94.4145341869231,
+          "eliteCohesion": 76.05752835021653,
+          "successionReadiness": 25.931831327396633,
+          "nationalMobilization": 2.059122201883965,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6560.408357125541,
+          "personalControl": 95.06941230994418,
+          "eliteCohesion": 76.51544234541048,
+          "successionReadiness": 25.952882061886275,
+          "nationalMobilization": 1.2891538946470604,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6546.100886403858,
+          "personalControl": 95.60467826027423,
+          "eliteCohesion": 76.93481075092373,
+          "successionReadiness": 25.968091451672326,
+          "nationalMobilization": 0.8513109096385351,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6542.023327925622,
+          "personalControl": 96.04217896080304,
+          "eliteCohesion": 77.33705746287583,
+          "successionReadiness": 25.98541039814095,
+          "nationalMobilization": 0.6402929839521324,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6549.908387033585,
+          "personalControl": 96.39977103787271,
+          "eliteCohesion": 77.7159921113977,
+          "successionReadiness": 26.007336116967455,
+          "nationalMobilization": 0.5583754088500769,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6583.388999065391,
+          "personalControl": 96.69204964092056,
+          "eliteCohesion": 78.05744836083215,
+          "successionReadiness": 26.033441926076623,
+          "nationalMobilization": 0.5349463658327678,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6622.2576128036835,
+          "personalControl": 96.93094414467924,
+          "eliteCohesion": 78.35186618487604,
+          "successionReadiness": 26.061021291877505,
+          "nationalMobilization": 0.5217509457658521,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6678.9656416906755,
+          "personalControl": 97.12620504756772,
+          "eliteCohesion": 78.59977061946518,
+          "successionReadiness": 26.08746724646619,
+          "nationalMobilization": 0.5174309393639505,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "personalist",
+      "seed": 42,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6903.571992577397,
+      "growthPercent": 15.0595332096233,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "personalist",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5840.596836887339,
+          "personalControl": 83.28766381522514,
+          "eliteCohesion": 65.75737451388862,
+          "successionReadiness": 20.286297269002315,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5620.85270213241,
+          "personalControl": 85.97484244367577,
+          "eliteCohesion": 68.87008400502637,
+          "successionReadiness": 23.023968612849174,
+          "nationalMobilization": 0.11800578147339424,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5664.75267800888,
+          "personalControl": 88.17121329758177,
+          "eliteCohesion": 71.3776896829614,
+          "successionReadiness": 24.47748836014362,
+          "nationalMobilization": 1.713710271727384,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5810.449994741543,
+          "personalControl": 89.96642143030988,
+          "eliteCohesion": 73.32513038351419,
+          "successionReadiness": 25.27612788158432,
+          "nationalMobilization": 2.9956599726526196,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6098.374449325012,
+          "personalControl": 91.4337384064398,
+          "eliteCohesion": 74.80330834152382,
+          "successionReadiness": 25.727850587546254,
+          "nationalMobilization": 3.026005549960437,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6339.36945863969,
+          "personalControl": 92.63305288657592,
+          "eliteCohesion": 75.93438927063816,
+          "successionReadiness": 25.98839443547254,
+          "nationalMobilization": 2.372585565944303,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6540.675614074262,
+          "personalControl": 93.61331498785543,
+          "eliteCohesion": 76.81009655355888,
+          "successionReadiness": 26.1372289099184,
+          "nationalMobilization": 1.3225407056384937,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6609.73163987342,
+          "personalControl": 94.4145341869231,
+          "eliteCohesion": 77.52559766973613,
+          "successionReadiness": 26.224742683458807,
+          "nationalMobilization": 0.4145704939072456,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6770.92091023803,
+          "personalControl": 95.06941230994418,
+          "eliteCohesion": 78.1502685617414,
+          "successionReadiness": 26.28355399085647,
+          "nationalMobilization": 0.08728016330722353,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6704.029224153918,
+          "personalControl": 95.60467826027423,
+          "eliteCohesion": 78.70681228478271,
+          "successionReadiness": 26.329557370699753,
+          "nationalMobilization": 0.01523149874176724,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6646.21722224135,
+          "personalControl": 96.04217896080304,
+          "eliteCohesion": 79.2184767719427,
+          "successionReadiness": 26.37069272433039,
+          "nationalMobilization": 0.0024157636949812015,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6649.915269128732,
+          "personalControl": 96.39977103787271,
+          "eliteCohesion": 79.68719431517816,
+          "successionReadiness": 26.411646789249605,
+          "nationalMobilization": 0.0003611833058068168,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6682.413327601977,
+          "personalControl": 96.69204964092056,
+          "eliteCohesion": 80.0966828619534,
+          "successionReadiness": 26.452325823184168,
+          "nationalMobilization": 0.00005185367997833151,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6826.355467519138,
+          "personalControl": 96.93094414467924,
+          "eliteCohesion": 80.43540901824467,
+          "successionReadiness": 26.48947511435883,
+          "nationalMobilization": 0.0000072255901513820714,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6903.571992577397,
+          "personalControl": 97.12620504756772,
+          "eliteCohesion": 80.7101985033395,
+          "successionReadiness": 26.521493527311414,
+          "nationalMobilization": 9.839770144697927e-7,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "personalist",
+      "seed": 219,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6769.866082415026,
+      "growthPercent": 12.831101373583763,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "personalist",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5836.051036112976,
+          "personalControl": 83.28766381522514,
+          "eliteCohesion": 65.67162985294499,
+          "successionReadiness": 20.277270827025635,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5573.473923788626,
+          "personalControl": 85.97484244367577,
+          "eliteCohesion": 68.61957799266997,
+          "successionReadiness": 23.004812110237037,
+          "nationalMobilization": 0.45244962071621897,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5598.280744038886,
+          "personalControl": 88.17121329758177,
+          "eliteCohesion": 70.92778866510288,
+          "successionReadiness": 24.441921576868868,
+          "nationalMobilization": 2.6066161292021857,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5848.533745491827,
+          "personalControl": 89.96642143030988,
+          "eliteCohesion": 72.66042609768006,
+          "successionReadiness": 25.206179510945375,
+          "nationalMobilization": 3.9613196529608734,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6185.521960066245,
+          "personalControl": 91.4337384064398,
+          "eliteCohesion": 73.9183455641883,
+          "successionReadiness": 25.60956960769501,
+          "nationalMobilization": 3.96176123024268,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6242.992236432616,
+          "personalControl": 92.63305288657592,
+          "eliteCohesion": 74.83921933769838,
+          "successionReadiness": 25.81764172628508,
+          "nationalMobilization": 3.1802013545076413,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6459.361218608748,
+          "personalControl": 93.61331498785543,
+          "eliteCohesion": 75.53239530742344,
+          "successionReadiness": 25.921716845025276,
+          "nationalMobilization": 2.2660407219669243,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6555.313807344927,
+          "personalControl": 94.4145341869231,
+          "eliteCohesion": 76.08262598007363,
+          "successionReadiness": 25.97159790517128,
+          "nationalMobilization": 1.357872503650014,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6561.492660590983,
+          "personalControl": 95.06941230994418,
+          "eliteCohesion": 76.55175107242196,
+          "successionReadiness": 25.994372447066,
+          "nationalMobilization": 0.6440042724437436,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6552.4822203341655,
+          "personalControl": 95.60467826027423,
+          "eliteCohesion": 76.9666745710972,
+          "successionReadiness": 26.00620200204086,
+          "nationalMobilization": 0.29122154778404186,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6582.189804765342,
+          "personalControl": 96.04217896080304,
+          "eliteCohesion": 77.35091480676239,
+          "successionReadiness": 26.014473378076197,
+          "nationalMobilization": 0.1444676471077009,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6594.068249841775,
+          "personalControl": 96.39977103787271,
+          "eliteCohesion": 77.71121229202697,
+          "successionReadiness": 26.02586621306724,
+          "nationalMobilization": 0.08165465169103493,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6617.863879687443,
+          "personalControl": 96.69204964092056,
+          "eliteCohesion": 78.03961232138988,
+          "successionReadiness": 26.04279283698292,
+          "nationalMobilization": 0.058607580951429504,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6651.797236658745,
+          "personalControl": 96.93094414467924,
+          "eliteCohesion": 78.32897600847092,
+          "successionReadiness": 26.063387648736168,
+          "nationalMobilization": 0.05034199107108334,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6769.866082415026,
+          "personalControl": 97.12620504756772,
+          "eliteCohesion": 78.5813339114719,
+          "successionReadiness": 26.08536734385191,
+          "nationalMobilization": 0.04552986742734686,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "party",
+      "seed": 7,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6657.196767009597,
+      "growthPercent": 10.953279450159958,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "party",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5872.074731589312,
+          "personalControl": 28.36529597946946,
+          "eliteCohesion": 79.0903299035229,
+          "successionReadiness": 58.387551699701845,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5653.963690072913,
+          "personalControl": 28.663871382630646,
+          "eliteCohesion": 80.16664722020313,
+          "successionReadiness": 54.71429723671258,
+          "nationalMobilization": 0.39823590514282603,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5638.687890954466,
+          "personalControl": 28.9079125886202,
+          "eliteCohesion": 81.1160690682558,
+          "successionReadiness": 52.595538089746384,
+          "nationalMobilization": 2.5608141636992725,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5774.40238220678,
+          "personalControl": 29.107380158923334,
+          "eliteCohesion": 81.87309052405014,
+          "successionReadiness": 51.30533279571735,
+          "nationalMobilization": 4.06139711049528,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6033.6769629518,
+          "personalControl": 29.270415378493333,
+          "eliteCohesion": 82.43303806410849,
+          "successionReadiness": 50.449758754234395,
+          "nationalMobilization": 4.263034563692304,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6230.9093578304955,
+          "personalControl": 29.4036725429529,
+          "eliteCohesion": 82.85714709101654,
+          "successionReadiness": 49.86626761586391,
+          "nationalMobilization": 3.7799386775561103,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6440.197403567527,
+          "personalControl": 29.51259055420618,
+          "eliteCohesion": 83.20355926606253,
+          "successionReadiness": 49.467432851814316,
+          "nationalMobilization": 2.9074905984391592,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6570.75531917231,
+          "personalControl": 29.601614909658146,
+          "eliteCohesion": 83.52704761411887,
+          "successionReadiness": 49.22068422323791,
+          "nationalMobilization": 1.9107007434973466,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6552.887925146551,
+          "personalControl": 29.674379145549366,
+          "eliteCohesion": 83.864055509213,
+          "successionReadiness": 49.09059173106498,
+          "nationalMobilization": 1.1764767929628142,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6535.285764762613,
+          "personalControl": 29.73385314003048,
+          "eliteCohesion": 84.22041365156687,
+          "successionReadiness": 49.05263016407945,
+          "nationalMobilization": 0.7610119225861675,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6530.51640862129,
+          "personalControl": 29.78246432897812,
+          "eliteCohesion": 84.61447692903695,
+          "successionReadiness": 49.10278443645257,
+          "nationalMobilization": 0.5646302744079628,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6535.5605418732985,
+          "personalControl": 29.82219678198586,
+          "eliteCohesion": 85.0269906259814,
+          "successionReadiness": 49.19566769903778,
+          "nationalMobilization": 0.4727923560401012,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6567.550778068166,
+          "personalControl": 29.854672182324514,
+          "eliteCohesion": 85.41956873616532,
+          "successionReadiness": 49.29606097008657,
+          "nationalMobilization": 0.4353969989195954,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6604.658600466808,
+          "personalControl": 29.881216016075484,
+          "eliteCohesion": 85.77112523252204,
+          "successionReadiness": 49.39126421927644,
+          "nationalMobilization": 0.40198329265118454,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6657.196767009597,
+          "personalControl": 29.902911671951983,
+          "eliteCohesion": 86.08060409318291,
+          "successionReadiness": 49.47790619316692,
+          "nationalMobilization": 0.37617411381084603,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "party",
+      "seed": 42,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6883.370071819779,
+      "growthPercent": 14.722834530329653,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "party",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5843.262155126656,
+          "personalControl": 28.36529597946946,
+          "eliteCohesion": 79.10507953657702,
+          "successionReadiness": 58.41359568804781,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5622.077368227075,
+          "personalControl": 28.663871382630646,
+          "eliteCohesion": 80.20929763137723,
+          "successionReadiness": 54.76491918011392,
+          "nationalMobilization": 0.37842919393586566,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5664.452194724247,
+          "personalControl": 28.9079125886202,
+          "eliteCohesion": 81.20437933776581,
+          "successionReadiness": 52.71916893115316,
+          "nationalMobilization": 2.625985139553667,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5809.809339344191,
+          "personalControl": 29.107380158923334,
+          "eliteCohesion": 82.03741130221752,
+          "successionReadiness": 51.59450519316759,
+          "nationalMobilization": 4.1473692840603675,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6097.914973590879,
+          "personalControl": 29.270415378493333,
+          "eliteCohesion": 82.70907514537869,
+          "successionReadiness": 50.993374790863335,
+          "nationalMobilization": 4.238167592461442,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6339.166513648777,
+          "personalControl": 29.4036725429529,
+          "eliteCohesion": 83.26060786881905,
+          "successionReadiness": 50.662912732766806,
+          "nationalMobilization": 3.605452789112322,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6539.822775892295,
+          "personalControl": 29.51259055420618,
+          "eliteCohesion": 83.71628498440128,
+          "successionReadiness": 50.404689914771375,
+          "nationalMobilization": 2.5822764276351684,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6605.707162325222,
+          "personalControl": 29.601614909658146,
+          "eliteCohesion": 84.12013039829489,
+          "successionReadiness": 50.17004955980512,
+          "nationalMobilization": 1.5469527657239979,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6763.824758467376,
+          "personalControl": 29.674379145549366,
+          "eliteCohesion": 84.51438367547249,
+          "successionReadiness": 49.99775944516968,
+          "nationalMobilization": 0.8783839271234214,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6691.933940264882,
+          "personalControl": 29.73385314003048,
+          "eliteCohesion": 84.90354547422562,
+          "successionReadiness": 49.87753692986918,
+          "nationalMobilization": 0.5068355302294911,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6629.797657463639,
+          "personalControl": 29.78246432897812,
+          "eliteCohesion": 85.30449021857657,
+          "successionReadiness": 49.79664323497372,
+          "nationalMobilization": 0.3898738067117707,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6631.444702743405,
+          "personalControl": 29.82219678198586,
+          "eliteCohesion": 85.69923053788607,
+          "successionReadiness": 49.73826436529644,
+          "nationalMobilization": 0.3981462720977454,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6663.748613568531,
+          "personalControl": 29.854672182324514,
+          "eliteCohesion": 86.05170608121138,
+          "successionReadiness": 49.683375362057895,
+          "nationalMobilization": 0.3650094310582954,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6807.909029761648,
+          "personalControl": 29.881216016075484,
+          "eliteCohesion": 86.3430477472989,
+          "successionReadiness": 49.603685365179864,
+          "nationalMobilization": 0.3084241405874478,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6883.370071819779,
+          "personalControl": 29.902911671951983,
+          "eliteCohesion": 86.58180694435298,
+          "successionReadiness": 49.52671411252077,
+          "nationalMobilization": 0.2748648730919691,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "party",
+      "seed": 219,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6754.002093794561,
+      "growthPercent": 12.566701563242688,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "party",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5839.581763017515,
+          "personalControl": 28.36529597946946,
+          "eliteCohesion": 79.09249552169338,
+          "successionReadiness": 58.39273239611757,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5574.69113068933,
+          "personalControl": 28.663871382630646,
+          "eliteCohesion": 80.18518578449874,
+          "successionReadiness": 54.769526205967544,
+          "nationalMobilization": 0.4393317760019336,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5598.530995547668,
+          "personalControl": 28.9079125886202,
+          "eliteCohesion": 81.1657977690061,
+          "successionReadiness": 52.77218487052699,
+          "nationalMobilization": 2.706850721159711,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5848.6168124821725,
+          "personalControl": 29.107380158923334,
+          "eliteCohesion": 81.95991036378788,
+          "successionReadiness": 51.644208172796816,
+          "nationalMobilization": 4.216071265020886,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6185.80049051514,
+          "personalControl": 29.270415378493333,
+          "eliteCohesion": 82.56226886006066,
+          "successionReadiness": 50.97575323760517,
+          "nationalMobilization": 4.344411738491298,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6243.3505014796165,
+          "personalControl": 29.4036725429529,
+          "eliteCohesion": 83.03402659885413,
+          "successionReadiness": 50.57021297970803,
+          "nationalMobilization": 3.6548927503536435,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6459.663400636012,
+          "personalControl": 29.51259055420618,
+          "eliteCohesion": 83.43857289475858,
+          "successionReadiness": 50.333833593508935,
+          "nationalMobilization": 2.7892691308846262,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6553.072625699109,
+          "personalControl": 29.601614909658146,
+          "eliteCohesion": 83.82099228943133,
+          "successionReadiness": 50.213646846951775,
+          "nationalMobilization": 1.9082590657500116,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6554.240395983749,
+          "personalControl": 29.674379145549366,
+          "eliteCohesion": 84.20317578140677,
+          "successionReadiness": 50.149943198228776,
+          "nationalMobilization": 1.2148058387685423,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6541.984712003483,
+          "personalControl": 29.73385314003048,
+          "eliteCohesion": 84.5829744199188,
+          "successionReadiness": 50.113207215153466,
+          "nationalMobilization": 0.8254791979181118,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6570.091433770082,
+          "personalControl": 29.78246432897812,
+          "eliteCohesion": 84.9602463623677,
+          "successionReadiness": 50.055623858088026,
+          "nationalMobilization": 0.637875901662776,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6581.153545863013,
+          "personalControl": 29.82219678198586,
+          "eliteCohesion": 85.33056614697362,
+          "successionReadiness": 50.000922046404725,
+          "nationalMobilization": 0.5250633006556065,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6604.447547574089,
+          "personalControl": 29.854672182324514,
+          "eliteCohesion": 85.68267533798387,
+          "successionReadiness": 49.98234192800518,
+          "nationalMobilization": 0.4519697041197154,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6637.515842635811,
+          "personalControl": 29.881216016075484,
+          "eliteCohesion": 86.00396523629685,
+          "successionReadiness": 49.991403171009615,
+          "nationalMobilization": 0.4104284483704698,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6754.002093794561,
+          "personalControl": 29.902911671951983,
+          "eliteCohesion": 86.28681539006502,
+          "successionReadiness": 50.016760166952636,
+          "nationalMobilization": 0.39134790534216085,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "military",
+      "seed": 7,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6682.918280640181,
+      "growthPercent": 11.381971344003027,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "military",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5869.380029538083,
+          "personalControl": 25.91323994867364,
+          "eliteCohesion": 72.98344707147515,
+          "successionReadiness": 53.99891569543951,
+          "nationalMobilization": 0.00017661749579824472,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5653.138762194557,
+          "personalControl": 26.659678456576604,
+          "eliteCohesion": 74.27634207035369,
+          "successionReadiness": 53.459239957949556,
+          "nationalMobilization": 0.7808635494651212,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5638.38509769218,
+          "personalControl": 27.2697814715505,
+          "eliteCohesion": 75.61749156302253,
+          "successionReadiness": 53.19450924303235,
+          "nationalMobilization": 3.106790411532577,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5774.932929466443,
+          "personalControl": 27.768450397308307,
+          "eliteCohesion": 76.8436716666781,
+          "successionReadiness": 53.085545280531775,
+          "nationalMobilization": 4.47245269979859,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6034.498908496235,
+          "personalControl": 28.17603844623328,
+          "eliteCohesion": 77.88882156359912,
+          "successionReadiness": 53.057728247383054,
+          "nationalMobilization": 4.517442098088787,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6231.662909424407,
+          "personalControl": 28.5091813573822,
+          "eliteCohesion": 78.77121230765881,
+          "successionReadiness": 53.0687492871308,
+          "nationalMobilization": 3.9477603621710875,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6443.193505762392,
+          "personalControl": 28.781476385515397,
+          "eliteCohesion": 79.52789082634042,
+          "successionReadiness": 53.09801766897778,
+          "nationalMobilization": 3.0651063047728613,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6576.8640647522225,
+          "personalControl": 29.00403727414532,
+          "eliteCohesion": 80.21212747914184,
+          "successionReadiness": 53.137207240900075,
+          "nationalMobilization": 2.0425870224642653,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6562.339615484925,
+          "personalControl": 29.185947863873395,
+          "eliteCohesion": 80.85986872056553,
+          "successionReadiness": 53.185029510937476,
+          "nationalMobilization": 1.271808510615415,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6547.914435136192,
+          "personalControl": 29.334632850076186,
+          "eliteCohesion": 81.47953308136432,
+          "successionReadiness": 53.24106367984227,
+          "nationalMobilization": 0.8333186061541719,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6543.965707585355,
+          "personalControl": 29.456160822445288,
+          "eliteCohesion": 82.08416936740277,
+          "successionReadiness": 53.30478118965676,
+          "nationalMobilization": 0.6222487652056897,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6552.186453682495,
+          "personalControl": 29.555491954964637,
+          "eliteCohesion": 82.65698720215936,
+          "successionReadiness": 53.374766067503884,
+          "nationalMobilization": 0.5396968442106118,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6586.157139987258,
+          "personalControl": 29.636680455811266,
+          "eliteCohesion": 83.171824087656,
+          "successionReadiness": 53.44685293961945,
+          "nationalMobilization": 0.5139946386797277,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6625.591000428666,
+          "personalControl": 29.70304004018868,
+          "eliteCohesion": 83.61664283903106,
+          "successionReadiness": 53.51644938397493,
+          "nationalMobilization": 0.4992623644087928,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6682.918280640181,
+          "personalControl": 29.75727917987992,
+          "eliteCohesion": 83.99438047752183,
+          "successionReadiness": 53.580441318233,
+          "nationalMobilization": 0.49254690059634476,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "military",
+      "seed": 42,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6908.24643516793,
+      "growthPercent": 15.137440586132179,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "military",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5841.095888042329,
+          "personalControl": 25.91323994867364,
+          "eliteCohesion": 73.06996805850274,
+          "successionReadiness": 54.0029445429533,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5621.186830337072,
+          "personalControl": 26.659678456576604,
+          "eliteCohesion": 74.540525565946,
+          "successionReadiness": 53.47993844245495,
+          "nationalMobilization": 0.12060532886815899,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5664.993128574134,
+          "personalControl": 27.2697814715505,
+          "eliteCohesion": 76.10668106865967,
+          "successionReadiness": 53.24433260297291,
+          "nationalMobilization": 1.7331227223451275,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5811.002103663761,
+          "personalControl": 27.768450397308307,
+          "eliteCohesion": 77.57661104686626,
+          "successionReadiness": 53.17352758512569,
+          "nationalMobilization": 3.0209630034423705,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6099.50469609313,
+          "personalControl": 28.17603844623328,
+          "eliteCohesion": 78.87566345777634,
+          "successionReadiness": 53.18984187416979,
+          "nationalMobilization": 3.0414094805401573,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6340.807565512473,
+          "personalControl": 28.5091813573822,
+          "eliteCohesion": 80.0057843743495,
+          "successionReadiness": 53.24810818970367,
+          "nationalMobilization": 2.37939852123857,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6542.504262446665,
+          "personalControl": 28.781476385515397,
+          "eliteCohesion": 80.97230121179726,
+          "successionReadiness": 53.3237601651564,
+          "nationalMobilization": 1.3307993312784705,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6611.882479044013,
+          "personalControl": 29.00403727414532,
+          "eliteCohesion": 81.81653263224075,
+          "successionReadiness": 53.40413830412272,
+          "nationalMobilization": 0.4214859790589174,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6773.3738435684745,
+          "personalControl": 29.185947863873395,
+          "eliteCohesion": 82.58789992133939,
+          "successionReadiness": 53.48636110544792,
+          "nationalMobilization": 0.08944880088635511,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6706.546902230306,
+          "personalControl": 29.334632850076186,
+          "eliteCohesion": 83.29550723598315,
+          "successionReadiness": 53.569924323050685,
+          "nationalMobilization": 0.015668265924014827,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6648.974491183073,
+          "personalControl": 29.456160822445288,
+          "eliteCohesion": 83.95581151695059,
+          "successionReadiness": 53.65416572910916,
+          "nationalMobilization": 0.0024904780510267037,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6653.111836171405,
+          "personalControl": 29.555491954964637,
+          "eliteCohesion": 84.56119976314046,
+          "successionReadiness": 53.73866732918533,
+          "nationalMobilization": 0.00037290275421183794,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6686.225040524903,
+          "personalControl": 29.636680455811266,
+          "eliteCohesion": 85.08789302344891,
+          "successionReadiness": 53.819991198883976,
+          "nationalMobilization": 0.00005359396557309478,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6830.968615188208,
+          "personalControl": 29.70304004018868,
+          "eliteCohesion": 85.52460413325956,
+          "successionReadiness": 53.89422635100107,
+          "nationalMobilization": 0.0000074743303778279986,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6908.24643516793,
+          "personalControl": 29.75727917987992,
+          "eliteCohesion": 85.88695045311322,
+          "successionReadiness": 53.959211320848155,
+          "nationalMobilization": 0.0000010185350767057125,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "military",
+      "seed": 219,
+      "months": 180,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 6775.316041755661,
+      "growthPercent": 12.921934029261006,
+      "inOffice": true,
+      "reason": null,
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "military",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5836.88247662053,
+          "personalControl": 25.91323994867364,
+          "eliteCohesion": 72.98447516265328,
+          "successionReadiness": 53.99891762700436,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5574.101638810506,
+          "personalControl": 26.659678456576604,
+          "eliteCohesion": 74.29184873267283,
+          "successionReadiness": 53.460036411804644,
+          "nationalMobilization": 0.4492725953611729,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5598.698685453189,
+          "personalControl": 27.2697814715505,
+          "eliteCohesion": 75.65891903326542,
+          "successionReadiness": 53.19795607891516,
+          "nationalMobilization": 2.599116667573644,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5849.25958842829,
+          "personalControl": 27.768450397308307,
+          "eliteCohesion": 76.9127089132948,
+          "successionReadiness": 53.09302618331835,
+          "nationalMobilization": 3.9537387946776525,
+          "leaderChanges": 0
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6186.560932673263,
+          "personalControl": 28.17603844623328,
+          "eliteCohesion": 77.98861959223842,
+          "successionReadiness": 53.07012228476814,
+          "nationalMobilization": 3.95389257081322,
+          "leaderChanges": 0
+        },
+        {
+          "month": 72,
+          "gdpPerCapita": 6244.331122843934,
+          "personalControl": 28.5091813573822,
+          "eliteCohesion": 78.91148111878896,
+          "successionReadiness": 53.08721355939926,
+          "nationalMobilization": 3.174318448125764,
+          "leaderChanges": 0
+        },
+        {
+          "month": 84,
+          "gdpPerCapita": 6461.403362492102,
+          "personalControl": 28.781476385515397,
+          "eliteCohesion": 79.72012812413412,
+          "successionReadiness": 53.12427054998642,
+          "nationalMobilization": 2.264643935445898,
+          "leaderChanges": 0
+        },
+        {
+          "month": 96,
+          "gdpPerCapita": 6557.535298081991,
+          "personalControl": 29.00403727414532,
+          "eliteCohesion": 80.45166941185514,
+          "successionReadiness": 53.17241641495718,
+          "nationalMobilization": 1.3571253731481836,
+          "leaderChanges": 0
+        },
+        {
+          "month": 108,
+          "gdpPerCapita": 6564.066390236197,
+          "personalControl": 29.185947863873395,
+          "eliteCohesion": 81.13270908811043,
+          "successionReadiness": 53.22866165258975,
+          "nationalMobilization": 0.6396447942465574,
+          "leaderChanges": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6555.18528536008,
+          "personalControl": 29.334632850076186,
+          "eliteCohesion": 81.76666861398861,
+          "successionReadiness": 53.29121675377857,
+          "nationalMobilization": 0.28566291408865435,
+          "leaderChanges": 0
+        },
+        {
+          "month": 132,
+          "gdpPerCapita": 6585.230737269294,
+          "personalControl": 29.456160822445288,
+          "eliteCohesion": 82.35672966667778,
+          "successionReadiness": 53.357848896705484,
+          "nationalMobilization": 0.13969148465631404,
+          "leaderChanges": 0
+        },
+        {
+          "month": 144,
+          "gdpPerCapita": 6597.559506182041,
+          "personalControl": 29.555491954964637,
+          "eliteCohesion": 82.9011239895413,
+          "successionReadiness": 53.42689838473085,
+          "nationalMobilization": 0.08036245329203523,
+          "leaderChanges": 0
+        },
+        {
+          "month": 156,
+          "gdpPerCapita": 6621.909924478194,
+          "personalControl": 29.636680455811266,
+          "eliteCohesion": 83.39130691119937,
+          "successionReadiness": 53.49580850457445,
+          "nationalMobilization": 0.06010613449762453,
+          "leaderChanges": 0
+        },
+        {
+          "month": 168,
+          "gdpPerCapita": 6656.466040980981,
+          "personalControl": 29.70304004018868,
+          "eliteCohesion": 83.82117261611258,
+          "successionReadiness": 53.56194967810983,
+          "nationalMobilization": 0.05413790387324706,
+          "leaderChanges": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 6775.316041755661,
+          "personalControl": 29.75727917987992,
+          "eliteCohesion": 84.19290376751346,
+          "successionReadiness": 53.62320543690247,
+          "nationalMobilization": 0.05294796855376923,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "hybrid",
+      "seed": 7,
+      "months": 48,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 5766.78735084035,
+      "growthPercent": -3.886877485994167,
+      "inOffice": false,
+      "reason": "Поражение на президентских выборах",
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "hybrid",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5878.685525061684,
+          "personalControl": 40.91323994867364,
+          "eliteCohesion": 65.79995599349547,
+          "successionReadiness": 51.68972770497784,
+          "nationalMobilization": 0.0031102207032963377,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5657.716362217022,
+          "personalControl": 41.65967845657661,
+          "eliteCohesion": 68.08899297465253,
+          "successionReadiness": 60.14527379789462,
+          "nationalMobilization": 3.2817804964733672,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5636.883191117118,
+          "personalControl": 42.2697814715505,
+          "eliteCohesion": 69.35750636358902,
+          "successionReadiness": 67.61905024852928,
+          "nationalMobilization": 17.168576486586705,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5766.78735084035,
+          "personalControl": 42.768450397308314,
+          "eliteCohesion": 69.92580643394578,
+          "successionReadiness": 73.41558688265526,
+          "nationalMobilization": 24.61568232978199,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "hybrid",
+      "seed": 42,
+      "months": 48,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 5831.30711938341,
+      "growthPercent": -2.811548010276499,
+      "inOffice": false,
+      "reason": "Поражение на президентских выборах",
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "hybrid",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5848.25330774912,
+          "personalControl": 40.91323994867364,
+          "eliteCohesion": 65.89264580823001,
+          "successionReadiness": 51.68972770497784,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5687.95183597938,
+          "personalControl": 41.65967845657661,
+          "eliteCohesion": 68.37573730002568,
+          "successionReadiness": 60.14527379789462,
+          "nationalMobilization": 0.4811795803936987,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5687.817913272225,
+          "personalControl": 42.2697814715505,
+          "eliteCohesion": 69.89143378042134,
+          "successionReadiness": 67.61905024852928,
+          "nationalMobilization": 8.63947072177728,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5831.30711938341,
+          "personalControl": 42.768450397308314,
+          "eliteCohesion": 70.73920017620975,
+          "successionReadiness": 73.41558688265528,
+          "nationalMobilization": 15.411641389272091,
+          "leaderChanges": 0
+        }
+      ]
+    },
+    {
+      "type": "hybrid",
+      "seed": 219,
+      "months": 48,
+      "initialGDPPerCapita": 6000,
+      "finalGDPPerCapita": 5897.768422913661,
+      "growthPercent": -1.703859618105652,
+      "inOffice": false,
+      "reason": "Поражение на президентских выборах",
+      "leaderChanges": 0,
+      "regimeEnded": false,
+      "finalType": "hybrid",
+      "annual": [
+        {
+          "month": 12,
+          "gdpPerCapita": 5846.114614743352,
+          "personalControl": 40.91323994867364,
+          "eliteCohesion": 65.83281492062872,
+          "successionReadiness": 51.68972770497784,
+          "nationalMobilization": 0,
+          "leaderChanges": 0
+        },
+        {
+          "month": 24,
+          "gdpPerCapita": 5578.841149755499,
+          "personalControl": 41.65967845657661,
+          "eliteCohesion": 68.19925350600383,
+          "successionReadiness": 60.14527379789462,
+          "nationalMobilization": 2.1407639653786426,
+          "leaderChanges": 0
+        },
+        {
+          "month": 36,
+          "gdpPerCapita": 5660.610612288003,
+          "personalControl": 42.2697814715505,
+          "eliteCohesion": 69.57489924212126,
+          "successionReadiness": 67.61905024852928,
+          "nationalMobilization": 13.683521478701522,
+          "leaderChanges": 0
+        },
+        {
+          "month": 48,
+          "gdpPerCapita": 5897.768422913661,
+          "personalControl": 42.768450397308314,
+          "eliteCohesion": 70.26372151079994,
+          "successionReadiness": 73.41558688265526,
+          "nationalMobilization": 19.667662707382146,
+          "leaderChanges": 0
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Fictional scenarios and model assumptions, not observed-country counterfactuals.",
+    "Three seeds do not identify empirical death, coup, protest or democratization rates.",
+    "Same diversified middle-income reference; fixed enacted policy, external shocks/defense disabled. Political support and endogenous events are retained.",
+    "Runs stop on loss of office. Censored runs must not be read as regime-duration estimates.",
+    "GDP differences are endogenous model outcomes, not empirical causal estimates or evidence that one preset is superior."
+  ],
+  "persistenceFollowUp": {
+    "sourceSHA256": "bbb1f5fcd8c1658026aabb95e3de68598d847dc78393638b44ed80af6fc7151d",
+    "change": "Only src/save-files.js reader limit increased from 100 to 256 MiB, with dynamic error text. Economic equations unchanged.",
+    "verification": "All 459 tests passed; save-files.test.js additionally rerun after the reader change (3 passed). Full 30-year JSON/gzip verification rerun in current-validation.json."
+  },
+  "diagnosticFollowUp": {
+    "sourceSHA256": "41c35fe1788e8b92305da50cfb9fad3e90f8d6aa3a035987a4cc51434d8fee4b",
+    "change": "Only recognitionCapacityUsed reporting corrected to subtract from funded available capacity, not unfunded spare capacity. Recognition amounts, labor, financing, GDP and all economic equations unchanged.",
+    "verification": "All 14 firms-capital-talent tests passed after the reporting correction, including zero-funded-education backlog."
+  }
+}

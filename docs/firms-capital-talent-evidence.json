@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "revision": 21,
+  "retrieved": "2026-10-31",
+  "status": "Mechanism evidence, no universal parameter estimates",
+  "sources": [
+    {
+      "url": "https://www.bls.gov/bdm/us_age_naics_00_table7.txt",
+      "kind": "BLS establishment cohort table",
+      "observations": {
+        "cohort": "March 1994",
+        "survival1yearPercent": 79.6,
+        "survival5yearsPercent": 49.6
+      },
+      "limitation": "US establishments, not all firms or all bankruptcies; not an imposed exit lottery"
+    },
+    {
+      "url": "https://www.nber.org/papers/w27778",
+      "title": "Immigration and Entrepreneurship in the United States",
+      "use": "Founder eligibility; no automatic increase in entry probability"
+    },
+    {
+      "url": "https://www.nber.org/papers/w30797",
+      "title": "The Contribution of High-Skilled Immigrants to Innovation in the United States",
+      "use": "Skill and employment channels; patent effect not copied as GDP coefficient"
+    },
+    {
+      "url": "https://www.nber.org/papers/w20668",
+      "title": "The Effects of High-Skilled Immigration Policy on Firms: Evidence from Visa Lotteries",
+      "use": "Counterevidence against universal innovation and employment multiplier"
+    }
+  ],
+  "assumptions": {
+    "constructionServiceFirmsAtOpening": 3,
+    "representativeFirmLimit": 12,
+    "entryIntensityMonthly": 0.04,
+    "entryBudgetShareOfSectorCapital": 0.002,
+    "reopeningExpectedMargin": 0.15,
+    "recognitionMonths": 24,
+    "spareEducationCapacityShare": 0.01,
+    "highSkillBaseShare": 0.15,
+    "lowSkillBaseShare": 0.45
+  },
+  "classification": "Economic purpose of equity flows; not investor-level BPM6 FDI/portfolio classification"
+}

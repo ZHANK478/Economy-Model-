@@ -1,0 +1,7 @@
+{
+  "url": "https://raw.githubusercontent.com/ONSdigital/uk-topojson/main/output/topo.json",
+  "license": "Open Government Licence v3",
+  "retrieved": "2026-11-05",
+  "boundaryUse": "Display only. Contemporary generalised constituent-country boundaries; not 2000 electoral or administrative boundaries.",
+  "sha256": "9feaf90628fee8cf713821801c17fff47691cfa03b60262d4b68e355c485f23d"
+}

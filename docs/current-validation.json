@@ -1,0 +1,455 @@
+{
+  "schema": 1,
+  "date": "2026-10-31T03:25:22.782Z",
+  "sourceSHA256": "685ce88a6664cd4613853c72b05877a3e569e55183fdb42b43e3a711e4ae1aa9",
+  "node": "v24.22.1",
+  "economicRevision": 22,
+  "monthsChecked": 2328,
+  "roundTrips": 18,
+  "continuations": 18,
+  "replays": 9,
+  "maxRelativeAudit": 4.9895814448113084e-14,
+  "benchmark": {
+    "month": 180,
+    "prettyJSONBytes": 96153464,
+    "compactJSONBytes": 49273936,
+    "gzipBytes": 12999626,
+    "oldAutosaveBytes": 53032775,
+    "newAutosaveBytes": 49179979,
+    "note": "File sizes, not phone speed measurements; no records removed."
+  },
+  "results": [
+    {
+      "scope": "laboratory",
+      "country": "poor",
+      "resource": false,
+      "revision": 22,
+      "months": 360,
+      "annual": [
+        {
+          "month": 60,
+          "gdpPerCapitaReal": 503.70631889017346,
+          "unemployment": 35.77908242843672,
+          "inflationYoY": -10.884973383774932,
+          "debtRatio": 47.614068506533705,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapitaReal": 577.9212122781428,
+          "unemployment": 10.070860715060292,
+          "inflationYoY": -5.716904417872248,
+          "debtRatio": 36.1083152546917,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapitaReal": 496.1255245323082,
+          "unemployment": 27.439408180221502,
+          "inflationYoY": -7.377687628712892,
+          "debtRatio": 21.56141201196149,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 240,
+          "gdpPerCapitaReal": 520.7623249495902,
+          "unemployment": 18.187263023018396,
+          "inflationYoY": -5.937025082543224,
+          "debtRatio": 1.2349743931241755,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 300,
+          "gdpPerCapitaReal": 487.78867156770485,
+          "unemployment": 18.152893615013543,
+          "inflationYoY": -4.690183863344954,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 360,
+          "gdpPerCapitaReal": 466.3430716067387,
+          "unemployment": 24.135457527968242,
+          "inflationYoY": -6.7255717136044275,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        }
+      ],
+      "end": {
+        "gdpPerCapitaReal": 466.3430716067387,
+        "unemployment": 24.135457527968242,
+        "inflationYoY": -6.7255717136044275,
+        "debtRatio": 0,
+        "defaultEpisodes": 0
+      }
+    },
+    {
+      "scope": "laboratory",
+      "country": "poor",
+      "resource": true,
+      "revision": 22,
+      "months": 360,
+      "annual": [
+        {
+          "month": 60,
+          "gdpPerCapitaReal": 505.4113491948502,
+          "unemployment": 39.9068058529792,
+          "inflationYoY": -12.344397528504313,
+          "debtRatio": 36.86570707020633,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapitaReal": 591.5944089781901,
+          "unemployment": 11.374802973304954,
+          "inflationYoY": -6.868892240118796,
+          "debtRatio": 7.592105787379172,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapitaReal": 493.20923533729996,
+          "unemployment": 29.449219338336917,
+          "inflationYoY": -8.174354530725514,
+          "debtRatio": 0.39861810482746535,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 240,
+          "gdpPerCapitaReal": 512.9590365163577,
+          "unemployment": 25.05749479288417,
+          "inflationYoY": -8.34225675020609,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 300,
+          "gdpPerCapitaReal": 473.3504456071164,
+          "unemployment": 23.101516401021627,
+          "inflationYoY": -6.5081968788796685,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 360,
+          "gdpPerCapitaReal": 453.2808624994676,
+          "unemployment": 28.359233498759153,
+          "inflationYoY": -8.43485590374623,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        }
+      ],
+      "end": {
+        "gdpPerCapitaReal": 453.2808624994676,
+        "unemployment": 28.359233498759153,
+        "inflationYoY": -8.43485590374623,
+        "debtRatio": 0,
+        "defaultEpisodes": 0
+      }
+    },
+    {
+      "scope": "laboratory",
+      "country": "middle",
+      "resource": false,
+      "revision": 22,
+      "months": 360,
+      "annual": [
+        {
+          "month": 60,
+          "gdpPerCapitaReal": 6241.646444926277,
+          "unemployment": 17.86719877207422,
+          "inflationYoY": 1.0411497509832834,
+          "debtRatio": 22.956302115528004,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapitaReal": 6717.270315220257,
+          "unemployment": 9.871726403634163,
+          "inflationYoY": -0.7208791502282597,
+          "debtRatio": 2.6454710980624085,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapitaReal": 7201.279122435158,
+          "unemployment": 7.067179725273808,
+          "inflationYoY": 1.4899709384665005,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 240,
+          "gdpPerCapitaReal": 7617.780000843636,
+          "unemployment": 4.6395678064757195,
+          "inflationYoY": 0.5640975199713294,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 300,
+          "gdpPerCapitaReal": 7841.529918829013,
+          "unemployment": 4.43778622246187,
+          "inflationYoY": -0.051345704489236255,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 360,
+          "gdpPerCapitaReal": 8283.949751403052,
+          "unemployment": 5.366565068599605,
+          "inflationYoY": -0.8583776041928282,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        }
+      ],
+      "end": {
+        "gdpPerCapitaReal": 8283.949751403052,
+        "unemployment": 5.366565068599605,
+        "inflationYoY": -0.8583776041928282,
+        "debtRatio": 0,
+        "defaultEpisodes": 0
+      }
+    },
+    {
+      "scope": "laboratory",
+      "country": "middle",
+      "resource": true,
+      "revision": 22,
+      "months": 360,
+      "annual": [
+        {
+          "month": 60,
+          "gdpPerCapitaReal": 6413.541920715958,
+          "unemployment": 21.626992829022452,
+          "inflationYoY": -0.6310123521769295,
+          "debtRatio": 13.041867883930092,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapitaReal": 6962.730736702824,
+          "unemployment": 12.890825582220078,
+          "inflationYoY": -2.2319202704467855,
+          "debtRatio": 0.35352802984042275,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapitaReal": 7482.670203078752,
+          "unemployment": 8.79925045745431,
+          "inflationYoY": 0.1567686086131337,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 240,
+          "gdpPerCapitaReal": 7917.359275419284,
+          "unemployment": 6.254875062128795,
+          "inflationYoY": -0.8793448327270692,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 300,
+          "gdpPerCapitaReal": 8000.338120079338,
+          "unemployment": 6.604735758047653,
+          "inflationYoY": -1.5989672986435721,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 360,
+          "gdpPerCapitaReal": 8606.177718722927,
+          "unemployment": 6.256904316395895,
+          "inflationYoY": -1.9132252977478337,
+          "debtRatio": 0,
+          "defaultEpisodes": 0
+        }
+      ],
+      "end": {
+        "gdpPerCapitaReal": 8606.177718722927,
+        "unemployment": 6.256904316395895,
+        "inflationYoY": -1.9132252977478337,
+        "debtRatio": 0,
+        "defaultEpisodes": 0
+      }
+    },
+    {
+      "scope": "laboratory",
+      "country": "rich",
+      "resource": false,
+      "revision": 22,
+      "months": 360,
+      "annual": [
+        {
+          "month": 60,
+          "gdpPerCapitaReal": 26659.15584504769,
+          "unemployment": 5.299218422753793,
+          "inflationYoY": 1.6026625524293348,
+          "debtRatio": 92.95313975652691,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapitaReal": 25738.92174070124,
+          "unemployment": 12.665889645600792,
+          "inflationYoY": -4.634862949178952,
+          "debtRatio": 134.0626586773378,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapitaReal": 22867.51791945551,
+          "unemployment": 5.111460273784429,
+          "inflationYoY": 0.02634551850133615,
+          "debtRatio": 17.25793945222744,
+          "defaultEpisodes": 1
+        },
+        {
+          "month": 240,
+          "gdpPerCapitaReal": 26099.302875357884,
+          "unemployment": 1.5410097055364558,
+          "inflationYoY": 2.790891472559376,
+          "debtRatio": 92.95948818919314,
+          "defaultEpisodes": 1
+        },
+        {
+          "month": 300,
+          "gdpPerCapitaReal": 22603.45311648825,
+          "unemployment": 19.67682472576223,
+          "inflationYoY": -2.478336060884123,
+          "debtRatio": 24.859779859474614,
+          "defaultEpisodes": 2
+        },
+        {
+          "month": 360,
+          "gdpPerCapitaReal": 25830.443476530294,
+          "unemployment": 2.3119575916036417,
+          "inflationYoY": 2.015570107381248,
+          "debtRatio": 69.13028028908073,
+          "defaultEpisodes": 2
+        }
+      ],
+      "end": {
+        "gdpPerCapitaReal": 25830.443476530294,
+        "unemployment": 2.3119575916036417,
+        "inflationYoY": 2.015570107381248,
+        "debtRatio": 69.13028028908073,
+        "defaultEpisodes": 2
+      }
+    },
+    {
+      "scope": "laboratory",
+      "country": "rich",
+      "resource": true,
+      "revision": 22,
+      "months": 360,
+      "annual": [
+        {
+          "month": 60,
+          "gdpPerCapitaReal": 25859.13581564749,
+          "unemployment": 8.03921812275632,
+          "inflationYoY": 0.7646095606369752,
+          "debtRatio": 78.83439727197978,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 120,
+          "gdpPerCapitaReal": 25215.816796356143,
+          "unemployment": 24.741252073995934,
+          "inflationYoY": -8.034781763904174,
+          "debtRatio": 126.37367689157028,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 180,
+          "gdpPerCapitaReal": 26746.17941409087,
+          "unemployment": 12.651057681120248,
+          "inflationYoY": -1.9899316615443086,
+          "debtRatio": 140.35349573656535,
+          "defaultEpisodes": 0
+        },
+        {
+          "month": 240,
+          "gdpPerCapitaReal": 22817.6493800777,
+          "unemployment": 20.645516134538855,
+          "inflationYoY": -2.064950617992878,
+          "debtRatio": 147.30740413215037,
+          "defaultEpisodes": 1
+        },
+        {
+          "month": 300,
+          "gdpPerCapitaReal": 21384.576577125325,
+          "unemployment": 17.7773564792586,
+          "inflationYoY": -0.5593519334495589,
+          "debtRatio": 149.9987428420642,
+          "defaultEpisodes": 2
+        },
+        {
+          "month": 360,
+          "gdpPerCapitaReal": 16277.583825607742,
+          "unemployment": 28.671671793098408,
+          "inflationYoY": -1.8167751797110276,
+          "debtRatio": 155.58188664794866,
+          "defaultEpisodes": 3
+        }
+      ],
+      "end": {
+        "gdpPerCapitaReal": 16277.583825607742,
+        "unemployment": 28.671671793098408,
+        "inflationYoY": -1.8167751797110276,
+        "debtRatio": 155.58188664794866,
+        "defaultEpisodes": 3
+      }
+    },
+    {
+      "scope": "political-with-defense",
+      "government": "presidential",
+      "revision": 22,
+      "months": 48,
+      "inOffice": false,
+      "end": {
+        "gdpPerCapitaReal": 6387.163371828736,
+        "unemployment": 18.71719965698918,
+        "inflationYoY": 2.3452554392070946,
+        "debtRatio": 16.822975929450468,
+        "defaultEpisodes": 0
+      }
+    },
+    {
+      "scope": "political-with-defense",
+      "government": "parliamentary",
+      "revision": 22,
+      "months": 60,
+      "inOffice": true,
+      "end": {
+        "gdpPerCapitaReal": 6939.716685261572,
+        "unemployment": 11.687497622865795,
+        "inflationYoY": 2.8519578603452445,
+        "debtRatio": 14.170064300687821,
+        "defaultEpisodes": 0
+      }
+    },
+    {
+      "scope": "political-with-defense",
+      "government": "personalist",
+      "revision": 22,
+      "months": 60,
+      "inOffice": true,
+      "end": {
+        "gdpPerCapitaReal": 6359.862402280018,
+        "unemployment": 21.077341325138576,
+        "inflationYoY": -0.9677622156689325,
+        "debtRatio": 19.56949658763141,
+        "defaultEpisodes": 0
+      }
+    }
+  ],
+  "limitations": [
+    "Accounting, persistence and replay checks do not establish empirical realism.",
+    "Six 30-year laboratory runs use fixed initial policy, no political or defense systems, and two scheduled shocks.",
+    "Three political runs accept party initiatives and include defense; they stop on loss of office or after 60 months.",
+    "Historical reports have different equations, scenarios and monetary policy; do not compare them as identical experiments."
+  ]
+}

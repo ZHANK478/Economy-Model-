@@ -1,0 +1,1934 @@
+{
+  "revision": 5,
+  "transitions": 1578,
+  "maxAudit": 9.822542779147625e-10,
+  "scenarios": [
+    {
+      "country": "poor",
+      "resource": false,
+      "path": [
+        {
+          "after": 1,
+          "gdpGapPercent": 0,
+          "unemploymentGapPP": 0,
+          "inflationGapPP": 0.001434580487214454,
+          "industryGapPercent": 0,
+          "legacyGDPGapPercent": -9.004587709735334
+        },
+        {
+          "after": 2,
+          "gdpGapPercent": -0.0013387976470768947,
+          "unemploymentGapPP": -0.0000016308590033986547,
+          "inflationGapPP": 0.0041720878800060035,
+          "industryGapPercent": -0.0012354557823668344,
+          "legacyGDPGapPercent": -12.431680579663107
+        },
+        {
+          "after": 3,
+          "gdpGapPercent": -0.003716900154682179,
+          "unemploymentGapPP": 0.00009718473885556023,
+          "inflationGapPP": 0.008061488511190262,
+          "industryGapPercent": -0.0037746573786634485,
+          "legacyGDPGapPercent": -12.366194036949917
+        },
+        {
+          "after": 4,
+          "gdpGapPercent": -0.007425757556778212,
+          "unemploymentGapPP": 0.00040983377488323924,
+          "inflationGapPP": 0.012965272706233932,
+          "industryGapPercent": -0.009906364122791445,
+          "legacyGDPGapPercent": -14.520588345532026
+        },
+        {
+          "after": 5,
+          "gdpGapPercent": -0.08726684240004667,
+          "unemploymentGapPP": 0.001050438090254957,
+          "inflationGapPP": 0.018318250945526415,
+          "industryGapPercent": -0.38830397412965567,
+          "legacyGDPGapPercent": -15.836892419078485
+        },
+        {
+          "after": 6,
+          "gdpGapPercent": -0.11840242950434954,
+          "unemploymentGapPP": 0.004233586593947791,
+          "inflationGapPP": 0.024219183422269808,
+          "industryGapPercent": -0.5262278764598838,
+          "legacyGDPGapPercent": -16.898479504526264
+        },
+        {
+          "after": 7,
+          "gdpGapPercent": -0.16498222347649527,
+          "unemploymentGapPP": 0.009745714761876911,
+          "inflationGapPP": 0.030435974874077232,
+          "industryGapPercent": -0.7373131167377034,
+          "legacyGDPGapPercent": -18.2066599578135
+        },
+        {
+          "after": 8,
+          "gdpGapPercent": -0.18978786719370255,
+          "unemploymentGapPP": 0.017789014687352278,
+          "inflationGapPP": 0.03694169075971665,
+          "industryGapPercent": -0.8403382735355125,
+          "legacyGDPGapPercent": -19.560696445284986
+        },
+        {
+          "after": 9,
+          "gdpGapPercent": -0.20403353684498304,
+          "unemploymentGapPP": 0.027733921950591878,
+          "inflationGapPP": 0.043681236852377126,
+          "industryGapPercent": -0.8898768437596294,
+          "legacyGDPGapPercent": -20.89009966200387
+        },
+        {
+          "after": 10,
+          "gdpGapPercent": -0.2202978082176954,
+          "unemploymentGapPP": 0.038822993047517684,
+          "inflationGapPP": 0.05048950233914695,
+          "industryGapPercent": -0.8724340205367498,
+          "legacyGDPGapPercent": -22.138411610218288
+        },
+        {
+          "after": 11,
+          "gdpGapPercent": -0.19511097812582312,
+          "unemploymentGapPP": 0.05158056719087867,
+          "inflationGapPP": 0.05760348833139162,
+          "industryGapPercent": -0.793024875846482,
+          "legacyGDPGapPercent": -23.314293281638875
+        },
+        {
+          "after": 12,
+          "gdpGapPercent": -0.1943953119459274,
+          "unemploymentGapPP": 0.06333108929657172,
+          "inflationGapPP": 0.06479715726478474,
+          "industryGapPercent": -0.7805694517553419,
+          "legacyGDPGapPercent": -24.59162102286453
+        },
+        {
+          "after": 13,
+          "gdpGapPercent": -0.19829937313853296,
+          "unemploymentGapPP": 0.07430788893196905,
+          "inflationGapPP": 0.07050460822433102,
+          "industryGapPercent": -0.7884487176705202,
+          "legacyGDPGapPercent": -25.859008627434875
+        },
+        {
+          "after": 14,
+          "gdpGapPercent": -0.20291593497840932,
+          "unemploymentGapPP": 0.08465229851450928,
+          "inflationGapPP": 0.07462998607060634,
+          "industryGapPercent": -0.7965867714608277,
+          "legacyGDPGapPercent": -27.071319457166066
+        },
+        {
+          "after": 15,
+          "gdpGapPercent": 0.040703003320907705,
+          "unemploymentGapPP": 0.0945250017793775,
+          "inflationGapPP": 0.07729673612793064,
+          "industryGapPercent": 0.3752286700102525,
+          "legacyGDPGapPercent": -24.08981417105177
+        },
+        {
+          "after": 16,
+          "gdpGapPercent": 0.01757585895965086,
+          "unemploymentGapPP": 0.09648932261511334,
+          "inflationGapPP": 0.07755229008488129,
+          "industryGapPercent": 0.3086817305335554,
+          "legacyGDPGapPercent": -23.094286152001786
+        },
+        {
+          "after": 17,
+          "gdpGapPercent": -0.003074081116849481,
+          "unemploymentGapPP": 0.09460157703557215,
+          "inflationGapPP": 0.07615593340247884,
+          "industryGapPercent": 0.24929456204774159,
+          "legacyGDPGapPercent": -22.07118366667632
+        },
+        {
+          "after": 18,
+          "gdpGapPercent": -0.020855639548489346,
+          "unemploymentGapPP": 0.09131376875184571,
+          "inflationGapPP": 0.07323441013282661,
+          "industryGapPercent": 0.19721738873648142,
+          "legacyGDPGapPercent": -21.034359918960654
+        },
+        {
+          "after": 19,
+          "gdpGapPercent": -0.036236308665482664,
+          "unemploymentGapPP": 0.08803294606195422,
+          "inflationGapPP": 0.06915196637839927,
+          "industryGapPercent": 0.15153584335894088,
+          "legacyGDPGapPercent": -19.972193262506032
+        },
+        {
+          "after": 20,
+          "gdpGapPercent": -0.0493240022543695,
+          "unemploymentGapPP": 0.08548880762060307,
+          "inflationGapPP": 0.06405630867181245,
+          "industryGapPercent": 0.11170181478370456,
+          "legacyGDPGapPercent": -18.870932536513575
+        },
+        {
+          "after": 21,
+          "gdpGapPercent": -0.06046682101367162,
+          "unemploymentGapPP": 0.08397996478911551,
+          "inflationGapPP": 0.05809453204512671,
+          "industryGapPercent": 0.0770019745892192,
+          "legacyGDPGapPercent": -17.724072143321624
+        },
+        {
+          "after": 22,
+          "gdpGapPercent": -0.06989548061990813,
+          "unemploymentGapPP": 0.08354871015591314,
+          "inflationGapPP": 0.05149974902132293,
+          "industryGapPercent": 0.04687257607745021,
+          "legacyGDPGapPercent": -16.525162917889567
+        },
+        {
+          "after": 23,
+          "gdpGapPercent": -0.07779555856888276,
+          "unemploymentGapPP": 0.08409506575458536,
+          "inflationGapPP": 0.044112449495315786,
+          "industryGapPercent": 0.02082600311870131,
+          "legacyGDPGapPercent": -15.443821254220946
+        },
+        {
+          "after": 24,
+          "gdpGapPercent": -0.08453169915328962,
+          "unemploymentGapPP": 0.08544934576406504,
+          "inflationGapPP": 0.036200232321778714,
+          "industryGapPercent": -0.0017313736798918455,
+          "legacyGDPGapPercent": -14.35850290603966
+        },
+        {
+          "after": 25,
+          "gdpGapPercent": -0.09006631986331337,
+          "unemploymentGapPP": 0.08742433709037911,
+          "inflationGapPP": 0.028052102274070734,
+          "industryGapPercent": -0.021027890908364988,
+          "legacyGDPGapPercent": -13.216142895995898
+        },
+        {
+          "after": 26,
+          "gdpGapPercent": -0.0945961877242163,
+          "unemploymentGapPP": 0.08983358373362194,
+          "inflationGapPP": 0.019909597314970995,
+          "industryGapPercent": -0.03745648042386973,
+          "legacyGDPGapPercent": -12.122534433618714
+        },
+        {
+          "after": 27,
+          "gdpGapPercent": -0.09825872789309686,
+          "unemploymentGapPP": 0.0925087488265035,
+          "inflationGapPP": 0.011819394104975345,
+          "industryGapPercent": -0.05133169382046665,
+          "legacyGDPGapPercent": -18.02884133208821
+        },
+        {
+          "after": 28,
+          "gdpGapPercent": -0.10253744224261174,
+          "unemploymentGapPP": 0.09530705945826057,
+          "inflationGapPP": 0.004841564279022492,
+          "industryGapPercent": -0.06401842313845663,
+          "legacyGDPGapPercent": -10.653464904320042
+        },
+        {
+          "after": 29,
+          "gdpGapPercent": -0.10505582383363299,
+          "unemploymentGapPP": 0.09816097259854573,
+          "inflationGapPP": -0.0012118390567934512,
+          "industryGapPercent": -0.07378179930143114,
+          "legacyGDPGapPercent": -10.413262407942703
+        },
+        {
+          "after": 30,
+          "gdpGapPercent": -0.10696325769390391,
+          "unemploymentGapPP": 0.1009719823540145,
+          "inflationGapPP": -0.0065225331761027405,
+          "industryGapPercent": -0.08171114689869974,
+          "legacyGDPGapPercent": -9.890784513454676
+        },
+        {
+          "after": 31,
+          "gdpGapPercent": -0.10790668568184669,
+          "unemploymentGapPP": 0.10366276280914377,
+          "inflationGapPP": -0.011225069919973407,
+          "industryGapPercent": -0.08778801619208076,
+          "legacyGDPGapPercent": -9.318043376216812
+        },
+        {
+          "after": 32,
+          "gdpGapPercent": -0.10632450274126182,
+          "unemploymentGapPP": 0.10614368310241318,
+          "inflationGapPP": -0.015446496904470308,
+          "industryGapPercent": -0.09137410480560826,
+          "legacyGDPGapPercent": -8.71952888870683
+        },
+        {
+          "after": 33,
+          "gdpGapPercent": -0.10431173869847044,
+          "unemploymentGapPP": 0.10819538954877217,
+          "inflationGapPP": -0.01919409104977632,
+          "industryGapPercent": -0.0933699460076709,
+          "legacyGDPGapPercent": -8.116707374314702
+        },
+        {
+          "after": 34,
+          "gdpGapPercent": -0.10191950735196631,
+          "unemploymentGapPP": 0.10973450198503443,
+          "inflationGapPP": -0.02251529344341563,
+          "industryGapPercent": -0.0942302303212239,
+          "legacyGDPGapPercent": -7.522613278349366
+        },
+        {
+          "after": 35,
+          "gdpGapPercent": -0.09918078472764824,
+          "unemploymentGapPP": 0.11072318685690874,
+          "inflationGapPP": -0.02544675887080672,
+          "industryGapPercent": -0.09407517059102366,
+          "legacyGDPGapPercent": -6.946703913574215
+        },
+        {
+          "after": 36,
+          "gdpGapPercent": -0.09612428400062045,
+          "unemploymentGapPP": 0.1111528274013942,
+          "inflationGapPP": -0.028016593692051117,
+          "industryGapPercent": -0.09301617961756659,
+          "legacyGDPGapPercent": -6.391525439454304
+        },
+        {
+          "after": 37,
+          "gdpGapPercent": -0.09228523251183507,
+          "unemploymentGapPP": 0.1110323588689468,
+          "inflationGapPP": -0.03024789268636141,
+          "industryGapPercent": -0.09077338712110139,
+          "legacyGDPGapPercent": -5.947713191530801
+        },
+        {
+          "after": 38,
+          "gdpGapPercent": -0.08800235266424039,
+          "unemploymentGapPP": 0.11036483130994057,
+          "inflationGapPP": -0.03216034768086473,
+          "industryGapPercent": -0.0876860253654077,
+          "legacyGDPGapPercent": -5.93572474187265
+        }
+      ]
+    },
+    {
+      "country": "poor",
+      "resource": true,
+      "path": [
+        {
+          "after": 1,
+          "gdpGapPercent": 0,
+          "unemploymentGapPP": 0,
+          "inflationGapPP": 0.0014545840716921887,
+          "industryGapPercent": 0,
+          "legacyGDPGapPercent": -8.956444283402698
+        },
+        {
+          "after": 2,
+          "gdpGapPercent": -0.0012941277294453712,
+          "unemploymentGapPP": -0.0000016393422495042387,
+          "inflationGapPP": 0.004241528646553583,
+          "industryGapPercent": -0.0012733966095912486,
+          "legacyGDPGapPercent": -12.877926202116063
+        },
+        {
+          "after": 3,
+          "gdpGapPercent": -0.0035971411141422216,
+          "unemploymentGapPP": 0.00009602969777056103,
+          "inflationGapPP": 0.00820853281054923,
+          "industryGapPercent": -0.0037875217540950246,
+          "legacyGDPGapPercent": -12.485826862866778
+        },
+        {
+          "after": 4,
+          "gdpGapPercent": -0.0067418868887836325,
+          "unemploymentGapPP": 0.0004064730347437262,
+          "inflationGapPP": 0.013220372785205825,
+          "industryGapPercent": -0.007385750405963787,
+          "legacyGDPGapPercent": -14.664562082847688
+        },
+        {
+          "after": 5,
+          "gdpGapPercent": -0.010573813733427695,
+          "unemploymentGapPP": 0.0010307937336921924,
+          "inflationGapPP": 0.01915437887929272,
+          "industryGapPercent": -0.011925206430585256,
+          "legacyGDPGapPercent": -16.170387824492018
+        },
+        {
+          "after": 6,
+          "gdpGapPercent": -0.014974844728121717,
+          "unemploymentGapPP": 0.0020457959315614005,
+          "inflationGapPP": 0.025900128597722727,
+          "industryGapPercent": -0.017285002619082945,
+          "legacyGDPGapPercent": -17.47447116915043
+        },
+        {
+          "after": 7,
+          "gdpGapPercent": -0.02867213525834522,
+          "unemploymentGapPP": 0.0035084591414999977,
+          "inflationGapPP": 0.03326887801514822,
+          "industryGapPercent": -0.029403899918245546,
+          "legacyGDPGapPercent": -18.708787797694658
+        },
+        {
+          "after": 8,
+          "gdpGapPercent": -0.02909143972895656,
+          "unemploymentGapPP": 0.0061683847555116245,
+          "inflationGapPP": 0.04129074567563862,
+          "industryGapPercent": -0.03441697002435351,
+          "legacyGDPGapPercent": -19.950640327199054
+        },
+        {
+          "after": 9,
+          "gdpGapPercent": -0.034394798869352705,
+          "unemploymentGapPP": 0.009133565266530752,
+          "inflationGapPP": 0.04983271301823855,
+          "industryGapPercent": -0.04055149678662273,
+          "legacyGDPGapPercent": -21.312893230296027
+        },
+        {
+          "after": 10,
+          "gdpGapPercent": -0.052226009309774835,
+          "unemploymentGapPP": 0.012498351302500765,
+          "inflationGapPP": 0.05872070748602454,
+          "industryGapPercent": -0.05631748549147497,
+          "legacyGDPGapPercent": -22.615644485951748
+        },
+        {
+          "after": 11,
+          "gdpGapPercent": -0.08389913586606124,
+          "unemploymentGapPP": 0.017216019820523343,
+          "inflationGapPP": 0.0677639356296389,
+          "industryGapPercent": -0.08393783933547949,
+          "legacyGDPGapPercent": -23.863049274151305
+        },
+        {
+          "after": 12,
+          "gdpGapPercent": -0.06777084924994847,
+          "unemploymentGapPP": 0.02465639899533656,
+          "inflationGapPP": 0.0767859216646336,
+          "industryGapPercent": -0.08211935358636291,
+          "legacyGDPGapPercent": -24.969293974531226
+        },
+        {
+          "after": 13,
+          "gdpGapPercent": -0.07207058936392619,
+          "unemploymentGapPP": 0.03133217537872923,
+          "inflationGapPP": 0.08422776082836059,
+          "industryGapPercent": -0.0853737313566083,
+          "legacyGDPGapPercent": -26.276954067406134
+        },
+        {
+          "after": 14,
+          "gdpGapPercent": -0.07937257579885282,
+          "unemploymentGapPP": 0.03775199612739044,
+          "inflationGapPP": 0.0901949923254648,
+          "industryGapPercent": -0.09464825452811798,
+          "legacyGDPGapPercent": -27.546683477661894
+        },
+        {
+          "after": 15,
+          "gdpGapPercent": -0.08726497896550667,
+          "unemploymentGapPP": 0.044091310188640875,
+          "inflationGapPP": 0.09335974782256251,
+          "industryGapPercent": -0.10503387548648213,
+          "legacyGDPGapPercent": -24.420589846778263
+        },
+        {
+          "after": 16,
+          "gdpGapPercent": -0.09417109503405685,
+          "unemploymentGapPP": 0.050444288841166696,
+          "inflationGapPP": 0.09403511766997674,
+          "industryGapPercent": -0.11455769886870026,
+          "legacyGDPGapPercent": -23.289617715416313
+        },
+        {
+          "after": 17,
+          "gdpGapPercent": -0.10027045438266713,
+          "unemploymentGapPP": 0.05677916735814392,
+          "inflationGapPP": 0.09253551264490945,
+          "industryGapPercent": -0.12309123533225108,
+          "legacyGDPGapPercent": -22.118417884504073
+        },
+        {
+          "after": 18,
+          "gdpGapPercent": -0.10565718784260048,
+          "unemploymentGapPP": 0.06302778642202966,
+          "inflationGapPP": 0.08913329263269354,
+          "industryGapPercent": -0.1306740567973419,
+          "legacyGDPGapPercent": -21.151431380589592
+        },
+        {
+          "after": 19,
+          "gdpGapPercent": -0.11040594269392523,
+          "unemploymentGapPP": 0.06911352190676112,
+          "inflationGapPP": 0.0841397210240693,
+          "industryGapPercent": -0.13734687232895837,
+          "legacyGDPGapPercent": -25.84183028816376
+        },
+        {
+          "after": 20,
+          "gdpGapPercent": -0.11456272564194236,
+          "unemploymentGapPP": 0.07496573068454992,
+          "inflationGapPP": 0.07765330372387957,
+          "industryGapPercent": -0.14313422885899874,
+          "legacyGDPGapPercent": -21.114264089072876
+        },
+        {
+          "after": 21,
+          "gdpGapPercent": -0.11819722521252407,
+          "unemploymentGapPP": 0.08052684526424159,
+          "inflationGapPP": 0.06990653606757746,
+          "industryGapPercent": -0.1480993629966343,
+          "legacyGDPGapPercent": -20.547648475264204
+        },
+        {
+          "after": 22,
+          "gdpGapPercent": -0.12133508428757711,
+          "unemploymentGapPP": 0.08575519823284239,
+          "inflationGapPP": 0.06115829228009417,
+          "industryGapPercent": -0.1522621157864501,
+          "legacyGDPGapPercent": -19.97731215227987
+        },
+        {
+          "after": 23,
+          "gdpGapPercent": -0.12399334604713541,
+          "unemploymentGapPP": 0.09062451156183116,
+          "inflationGapPP": 0.051671642797522566,
+          "industryGapPercent": -0.15564473316275196,
+          "legacyGDPGapPercent": -19.388258994178862
+        },
+        {
+          "after": 24,
+          "gdpGapPercent": -0.12618466066118827,
+          "unemploymentGapPP": 0.09512146890097029,
+          "inflationGapPP": 0.04168635073957816,
+          "industryGapPercent": -0.15827279603325417,
+          "legacyGDPGapPercent": -18.780889529463796
+        },
+        {
+          "after": 25,
+          "gdpGapPercent": -0.12801404801825456,
+          "unemploymentGapPP": 0.09924266615468724,
+          "inflationGapPP": 0.031486230706722296,
+          "industryGapPercent": -0.16026828611166444,
+          "legacyGDPGapPercent": -18.153369136951113
+        },
+        {
+          "after": 26,
+          "gdpGapPercent": -0.12941973554552177,
+          "unemploymentGapPP": 0.10299531096154979,
+          "inflationGapPP": 0.021127627119664538,
+          "industryGapPercent": -0.1615800649517718,
+          "legacyGDPGapPercent": -17.500920748829074
+        },
+        {
+          "after": 27,
+          "gdpGapPercent": -0.13043386052481454,
+          "unemploymentGapPP": 0.10639178002026384,
+          "inflationGapPP": 0.012053415268077572,
+          "industryGapPercent": -0.16226293314082207,
+          "legacyGDPGapPercent": -16.809394973609205
+        },
+        {
+          "after": 28,
+          "gdpGapPercent": -0.13107113584640562,
+          "unemploymentGapPP": 0.10944807000641532,
+          "inflationGapPP": 0.004131531409402811,
+          "industryGapPercent": -0.1623527155845239,
+          "legacyGDPGapPercent": -16.112807827547005
+        },
+        {
+          "after": 29,
+          "gdpGapPercent": -0.131344429096536,
+          "unemploymentGapPP": 0.11218214938196525,
+          "inflationGapPP": -0.002790378505590496,
+          "industryGapPercent": -0.16188403057464384,
+          "legacyGDPGapPercent": -15.339734796283222
+        },
+        {
+          "after": 30,
+          "gdpGapPercent": -0.13126343617622105,
+          "unemploymentGapPP": 0.11461263919407827,
+          "inflationGapPP": -0.008842603621104672,
+          "industryGapPercent": -0.1608885142016181,
+          "legacyGDPGapPercent": -14.499827808017818
+        },
+        {
+          "after": 31,
+          "gdpGapPercent": -0.13083737939806328,
+          "unemploymentGapPP": 0.1167577731092102,
+          "inflationGapPP": -0.014136554590063355,
+          "industryGapPercent": -0.15939737230621365,
+          "legacyGDPGapPercent": -13.589472165880956
+        },
+        {
+          "after": 32,
+          "gdpGapPercent": -0.13007524933387193,
+          "unemploymentGapPP": 0.11863456339322553,
+          "inflationGapPP": -0.01876761824625106,
+          "industryGapPercent": -0.15744115908313816,
+          "legacyGDPGapPercent": -12.600167372734461
+        },
+        {
+          "after": 33,
+          "gdpGapPercent": -0.1289860698218015,
+          "unemploymentGapPP": 0.12025828609495548,
+          "inflationGapPP": -0.022817581063439007,
+          "industryGapPercent": -0.1550498100855835,
+          "legacyGDPGapPercent": -11.547783406452194
+        },
+        {
+          "after": 34,
+          "gdpGapPercent": -0.12757891970731627,
+          "unemploymentGapPP": 0.12164218106078906,
+          "inflationGapPP": -0.02635746317850618,
+          "industryGapPercent": -0.15225247096236627,
+          "legacyGDPGapPercent": -10.412869674282444
+        },
+        {
+          "after": 35,
+          "gdpGapPercent": -0.12433815200317833,
+          "unemploymentGapPP": 0.12279930425837904,
+          "inflationGapPP": -0.02949699292271646,
+          "industryGapPercent": -0.1481508777766205,
+          "legacyGDPGapPercent": -9.608633635912822
+        },
+        {
+          "after": 36,
+          "gdpGapPercent": -0.1208355561686747,
+          "unemploymentGapPP": 0.12361254329528037,
+          "inflationGapPP": -0.03223099671579632,
+          "industryGapPercent": -0.1434298096314568,
+          "legacyGDPGapPercent": -9.01832308259668
+        },
+        {
+          "after": 37,
+          "gdpGapPercent": -0.11695714560533421,
+          "unemploymentGapPP": 0.12405202196342913,
+          "inflationGapPP": -0.03460104240752315,
+          "industryGapPercent": -0.138299647535145,
+          "legacyGDPGapPercent": -8.38194662377283
+        },
+        {
+          "after": 38,
+          "gdpGapPercent": -0.1128328549408697,
+          "unemploymentGapPP": 0.12410671929969652,
+          "inflationGapPP": -0.0366436508584691,
+          "industryGapPercent": -0.1329059393431753,
+          "legacyGDPGapPercent": -7.7572961698561755
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "resource": false,
+      "path": [
+        {
+          "after": 1,
+          "gdpGapPercent": 0,
+          "unemploymentGapPP": 0,
+          "inflationGapPP": 0.002406703833267798,
+          "industryGapPercent": 0,
+          "legacyGDPGapPercent": -9.548756772671352
+        },
+        {
+          "after": 2,
+          "gdpGapPercent": -0.0026938685214528135,
+          "unemploymentGapPP": -0.000007378902600052584,
+          "inflationGapPP": 0.007034943541881944,
+          "industryGapPercent": -0.002420391948809719,
+          "legacyGDPGapPercent": -12.623282901394372
+        },
+        {
+          "after": 3,
+          "gdpGapPercent": -0.25264281309440584,
+          "unemploymentGapPP": 0.00016733593185502826,
+          "inflationGapPP": 0.03108342269548814,
+          "industryGapPercent": -0.8803115472737932,
+          "legacyGDPGapPercent": -12.350527101406762
+        },
+        {
+          "after": 4,
+          "gdpGapPercent": -0.4308177879349895,
+          "unemploymentGapPP": 0.0008851047482050234,
+          "inflationGapPP": 0.06943219409105694,
+          "industryGapPercent": -1.4852057230957616,
+          "legacyGDPGapPercent": -14.111224324942118
+        },
+        {
+          "after": 5,
+          "gdpGapPercent": -0.48241720239530217,
+          "unemploymentGapPP": 0.0027178831795922065,
+          "inflationGapPP": 0.1145591048409722,
+          "industryGapPercent": -1.6543506416411224,
+          "legacyGDPGapPercent": -15.284113071595218
+        },
+        {
+          "after": 6,
+          "gdpGapPercent": -0.4913332667731529,
+          "unemploymentGapPP": 0.005615152450145544,
+          "inflationGapPP": 0.1620061926988381,
+          "industryGapPercent": -1.6764708365536674,
+          "legacyGDPGapPercent": -16.557455280242316
+        },
+        {
+          "after": 7,
+          "gdpGapPercent": -0.4605643911324786,
+          "unemploymentGapPP": 0.009900209084690914,
+          "inflationGapPP": 0.20922051281513365,
+          "industryGapPercent": -1.5773566786172588,
+          "legacyGDPGapPercent": -17.874330363724845
+        },
+        {
+          "after": 8,
+          "gdpGapPercent": -0.41250154027744346,
+          "unemploymentGapPP": 0.01586315393687876,
+          "inflationGapPP": 0.254799704239006,
+          "industryGapPercent": -1.4105519858475302,
+          "legacyGDPGapPercent": -19.20689747346829
+        },
+        {
+          "after": 9,
+          "gdpGapPercent": -0.36315801840481887,
+          "unemploymentGapPP": 0.023729791317249394,
+          "inflationGapPP": 0.2980114467046713,
+          "industryGapPercent": -1.2310543111034633,
+          "legacyGDPGapPercent": -20.562010811102972
+        },
+        {
+          "after": 10,
+          "gdpGapPercent": -0.31958967013301365,
+          "unemploymentGapPP": 0.033656785661039024,
+          "inflationGapPP": 0.33851259224910724,
+          "industryGapPercent": -1.0639055429331523,
+          "legacyGDPGapPercent": -21.91834006780018
+        },
+        {
+          "after": 11,
+          "gdpGapPercent": -0.2852865496222212,
+          "unemploymentGapPP": 0.04571622693240229,
+          "inflationGapPP": 0.3761712888983748,
+          "industryGapPercent": -0.92192222097075,
+          "legacyGDPGapPercent": -23.267911005181176
+        },
+        {
+          "after": 12,
+          "gdpGapPercent": -0.26150807040161705,
+          "unemploymentGapPP": 0.05989949676735584,
+          "inflationGapPP": 0.41097831301033505,
+          "industryGapPercent": -0.810326384086657,
+          "legacyGDPGapPercent": -24.607117521828027
+        },
+        {
+          "after": 13,
+          "gdpGapPercent": -0.3095260712687731,
+          "unemploymentGapPP": 0.07612724876719845,
+          "inflationGapPP": 0.43957794419546836,
+          "industryGapPercent": -0.5906801612974188,
+          "legacyGDPGapPercent": -25.789397679685877
+        },
+        {
+          "after": 14,
+          "gdpGapPercent": -0.21017447259368272,
+          "unemploymentGapPP": 0.10287238743879001,
+          "inflationGapPP": 0.46365093624625153,
+          "industryGapPercent": -0.4015156535668196,
+          "legacyGDPGapPercent": -26.95645569227727
+        },
+        {
+          "after": 15,
+          "gdpGapPercent": -0.007825354275370344,
+          "unemploymentGapPP": 0.1305878435208232,
+          "inflationGapPP": 0.4610005649275273,
+          "industryGapPercent": 0.3288805605411449,
+          "legacyGDPGapPercent": -23.53030775864714
+        },
+        {
+          "after": 16,
+          "gdpGapPercent": -0.06922062445809951,
+          "unemploymentGapPP": 0.1434215765401028,
+          "inflationGapPP": 0.44127930745463395,
+          "industryGapPercent": 0.1759103265191575,
+          "legacyGDPGapPercent": -22.31547131226346
+        },
+        {
+          "after": 17,
+          "gdpGapPercent": -0.11541002337857043,
+          "unemploymentGapPP": 0.14994490792784632,
+          "inflationGapPP": 0.41214433157992225,
+          "industryGapPercent": 0.04826334663108334,
+          "legacyGDPGapPercent": -21.110459435359097
+        },
+        {
+          "after": 18,
+          "gdpGapPercent": -0.15413660719985067,
+          "unemploymentGapPP": 0.1546247031773742,
+          "inflationGapPP": 0.3782201873228974,
+          "industryGapPercent": -0.06088619468491707,
+          "legacyGDPGapPercent": -19.92086058328545
+        },
+        {
+          "after": 19,
+          "gdpGapPercent": -0.18618949706509236,
+          "unemploymentGapPP": 0.15983810852415736,
+          "inflationGapPP": 0.3421867716075999,
+          "industryGapPercent": -0.1535121204200407,
+          "legacyGDPGapPercent": -18.738791808280077
+        },
+        {
+          "after": 20,
+          "gdpGapPercent": -0.21333094334593516,
+          "unemploymentGapPP": 0.16661857861662988,
+          "inflationGapPP": 0.3055568646027851,
+          "industryGapPercent": -0.23208841252763124,
+          "legacyGDPGapPercent": -17.558978058972265
+        },
+        {
+          "after": 21,
+          "gdpGapPercent": -0.23608806388314418,
+          "unemploymentGapPP": 0.1752563578893973,
+          "inflationGapPP": 0.26920219076311813,
+          "industryGapPercent": -0.2980675969640578,
+          "legacyGDPGapPercent": -16.37974584662715
+        },
+        {
+          "after": 22,
+          "gdpGapPercent": -0.25507984041808207,
+          "unemploymentGapPP": 0.18560825430309436,
+          "inflationGapPP": 0.23349622190536046,
+          "industryGapPercent": -0.3529142597018087,
+          "legacyGDPGapPercent": -15.200341478228829
+        },
+        {
+          "after": 23,
+          "gdpGapPercent": -0.27079084861008074,
+          "unemploymentGapPP": 0.19731467156870508,
+          "inflationGapPP": 0.19865206055811324,
+          "industryGapPercent": -0.3978742999606655,
+          "legacyGDPGapPercent": -14.195833260666557
+        },
+        {
+          "after": 24,
+          "gdpGapPercent": -0.2836319070597004,
+          "unemploymentGapPP": 0.20993152681354488,
+          "inflationGapPP": 0.1647667193198199,
+          "industryGapPercent": -0.43405157824703,
+          "legacyGDPGapPercent": -13.200479059744152
+        },
+        {
+          "after": 25,
+          "gdpGapPercent": -0.29395280660605705,
+          "unemploymentGapPP": 0.22300869920159982,
+          "inflationGapPP": 0.13289965239831059,
+          "industryGapPercent": -0.4624268676869603,
+          "legacyGDPGapPercent": -12.194246723246904
+        },
+        {
+          "after": 26,
+          "gdpGapPercent": -0.30202355720391205,
+          "unemploymentGapPP": 0.23613347334325852,
+          "inflationGapPP": 0.10171512365086954,
+          "industryGapPercent": -0.4838568467430582,
+          "legacyGDPGapPercent": -11.184174600196306
+        },
+        {
+          "after": 27,
+          "gdpGapPercent": -0.3081686596806188,
+          "unemploymentGapPP": 0.2489494551072724,
+          "inflationGapPP": 0.07661783433861036,
+          "industryGapPercent": -0.49916058392011076,
+          "legacyGDPGapPercent": -10.15015667777519
+        },
+        {
+          "after": 28,
+          "gdpGapPercent": -0.31259725895750323,
+          "unemploymentGapPP": 0.26116997908655293,
+          "inflationGapPP": 0.05326882462720617,
+          "industryGapPercent": -0.509031958133066,
+          "legacyGDPGapPercent": -17.34873670915903
+        },
+        {
+          "after": 29,
+          "gdpGapPercent": -0.31535089429314267,
+          "unemploymentGapPP": 0.2725743370236451,
+          "inflationGapPP": 0.031439367009522545,
+          "industryGapPercent": -0.5140136236819193,
+          "legacyGDPGapPercent": -9.065777206326286
+        },
+        {
+          "after": 30,
+          "gdpGapPercent": -0.31665990897534746,
+          "unemploymentGapPP": 0.2829901680679221,
+          "inflationGapPP": 0.010926222749774173,
+          "industryGapPercent": -0.5147066217536134,
+          "legacyGDPGapPercent": -8.071453392955751
+        },
+        {
+          "after": 31,
+          "gdpGapPercent": -0.3166495691141247,
+          "unemploymentGapPP": 0.2922956605715079,
+          "inflationGapPP": -0.008392678200119796,
+          "industryGapPercent": -0.5116116848450258,
+          "legacyGDPGapPercent": -7.0616743061004295
+        },
+        {
+          "after": 32,
+          "gdpGapPercent": -0.3154278543160749,
+          "unemploymentGapPP": 0.30041072460063845,
+          "inflationGapPP": -0.02659722821163335,
+          "industryGapPercent": -0.5051817673585757,
+          "legacyGDPGapPercent": -6.0799612639847345
+        },
+        {
+          "after": 33,
+          "gdpGapPercent": -0.31308717361020477,
+          "unemploymentGapPP": 0.30728862598235196,
+          "inflationGapPP": -0.04377782623020687,
+          "industryGapPercent": -0.49582665588533414,
+          "legacyGDPGapPercent": -5.101181529373877
+        },
+        {
+          "after": 34,
+          "gdpGapPercent": -0.30970848703302245,
+          "unemploymentGapPP": 0.3129085011795105,
+          "inflationGapPP": -0.05990607593849839,
+          "industryGapPercent": -0.48391857012295425,
+          "legacyGDPGapPercent": -4.077463696862315
+        },
+        {
+          "after": 35,
+          "gdpGapPercent": -0.3050458400991829,
+          "unemploymentGapPP": 0.31726957223740015,
+          "inflationGapPP": -0.07501657476877144,
+          "industryGapPercent": -0.4695867824624722,
+          "legacyGDPGapPercent": -3.0213790025610643
+        },
+        {
+          "after": 36,
+          "gdpGapPercent": -0.2987329286531448,
+          "unemploymentGapPP": 0.32036470691549823,
+          "inflationGapPP": -0.08914675827584873,
+          "industryGapPercent": -0.4528609681625606,
+          "legacyGDPGapPercent": -1.939050455800706
+        },
+        {
+          "after": 37,
+          "gdpGapPercent": -0.29150004290083853,
+          "unemploymentGapPP": 0.3221547221338277,
+          "inflationGapPP": -0.10228396147823338,
+          "industryGapPercent": -0.43448046955959496,
+          "legacyGDPGapPercent": -0.85957673814544
+        },
+        {
+          "after": 38,
+          "gdpGapPercent": -0.2835449596174211,
+          "unemploymentGapPP": 0.32263334950306444,
+          "inflationGapPP": -0.11444517940345511,
+          "industryGapPercent": -0.41480252914333215,
+          "legacyGDPGapPercent": 0.18905295169733272
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "resource": true,
+      "path": [
+        {
+          "after": 1,
+          "gdpGapPercent": 0,
+          "unemploymentGapPP": 0,
+          "inflationGapPP": 0.002468313017178758,
+          "industryGapPercent": 0,
+          "legacyGDPGapPercent": -8.732877025680697
+        },
+        {
+          "after": 2,
+          "gdpGapPercent": -0.004320121959833223,
+          "unemploymentGapPP": -0.000007301555527305936,
+          "inflationGapPP": 0.007234934168742768,
+          "industryGapPercent": -0.004380012964944058,
+          "legacyGDPGapPercent": -11.871706161433536
+        },
+        {
+          "after": 3,
+          "gdpGapPercent": -0.010468514168104903,
+          "unemploymentGapPP": 0.000304288266118391,
+          "inflationGapPP": 0.0344434357681056,
+          "industryGapPercent": -0.01083549984228771,
+          "legacyGDPGapPercent": -11.572584514210627
+        },
+        {
+          "after": 4,
+          "gdpGapPercent": -0.12830675581771978,
+          "unemploymentGapPP": 0.0012282060918185067,
+          "inflationGapPP": 0.07632811090338976,
+          "industryGapPercent": -0.5091902448461028,
+          "legacyGDPGapPercent": -13.788940509974623
+        },
+        {
+          "after": 5,
+          "gdpGapPercent": -0.2259230486594488,
+          "unemploymentGapPP": 0.0034326786146792188,
+          "inflationGapPP": 0.12500917513913468,
+          "industryGapPercent": -0.8426204694089834,
+          "legacyGDPGapPercent": -15.097367845451625
+        },
+        {
+          "after": 6,
+          "gdpGapPercent": -0.08643654436226722,
+          "unemploymentGapPP": 0.008752031164528162,
+          "inflationGapPP": 0.17621223885759818,
+          "industryGapPercent": -0.18979482552065052,
+          "legacyGDPGapPercent": -15.70856826515723
+        },
+        {
+          "after": 7,
+          "gdpGapPercent": -0.0883525323765566,
+          "unemploymentGapPP": 0.015838657492682984,
+          "inflationGapPP": 0.22737951810178902,
+          "industryGapPercent": -0.1341483513159769,
+          "legacyGDPGapPercent": -16.868833187637755
+        },
+        {
+          "after": 8,
+          "gdpGapPercent": -0.1095570791463163,
+          "unemploymentGapPP": 0.025065025957893283,
+          "inflationGapPP": 0.27697827573089917,
+          "industryGapPercent": -0.17375118928085742,
+          "legacyGDPGapPercent": -18.14509700770496
+        },
+        {
+          "after": 9,
+          "gdpGapPercent": -0.1299708553171408,
+          "unemploymentGapPP": 0.0363665996651612,
+          "inflationGapPP": 0.3242521809172727,
+          "industryGapPercent": -0.21341019553595686,
+          "legacyGDPGapPercent": -19.467542051583365
+        },
+        {
+          "after": 10,
+          "gdpGapPercent": -0.16737154466258675,
+          "unemploymentGapPP": 0.04951356348226277,
+          "inflationGapPP": 0.3686952389167164,
+          "industryGapPercent": -0.26896532472104884,
+          "legacyGDPGapPercent": -20.756648386169772
+        },
+        {
+          "after": 11,
+          "gdpGapPercent": -0.1789625151880858,
+          "unemploymentGapPP": 0.06548189316000119,
+          "inflationGapPP": 0.4103613214567092,
+          "industryGapPercent": -0.3001795541948571,
+          "legacyGDPGapPercent": -22.06161125818452
+        },
+        {
+          "after": 12,
+          "gdpGapPercent": -0.19867340925610044,
+          "unemploymentGapPP": 0.0827386438952864,
+          "inflationGapPP": 0.4492147315432904,
+          "industryGapPercent": -0.3376281342883036,
+          "legacyGDPGapPercent": -23.383478076352215
+        },
+        {
+          "after": 13,
+          "gdpGapPercent": -0.21975796328109753,
+          "unemploymentGapPP": 0.1009699045643746,
+          "inflationGapPP": 0.4829537995513222,
+          "industryGapPercent": -0.3751451358978586,
+          "legacyGDPGapPercent": -24.70280636758122
+        },
+        {
+          "after": 14,
+          "gdpGapPercent": -0.24056628853468265,
+          "unemploymentGapPP": 0.11999534680411372,
+          "inflationGapPP": 0.5118686521480509,
+          "industryGapPercent": -0.4108871379524426,
+          "legacyGDPGapPercent": -26.013472495668243
+        },
+        {
+          "after": 15,
+          "gdpGapPercent": -0.26138420856898215,
+          "unemploymentGapPP": 0.1396286649442935,
+          "inflationGapPP": 0.505669714776591,
+          "industryGapPercent": -0.44495796776704566,
+          "legacyGDPGapPercent": -22.476708873718177
+        },
+        {
+          "after": 16,
+          "gdpGapPercent": -0.2719290163891941,
+          "unemploymentGapPP": 0.1597237697328886,
+          "inflationGapPP": 0.48208448895905587,
+          "industryGapPercent": -0.46518888794344626,
+          "legacyGDPGapPercent": -21.209333322384015
+        },
+        {
+          "after": 17,
+          "gdpGapPercent": -0.2817139355571263,
+          "unemploymentGapPP": 0.17945568096574505,
+          "inflationGapPP": 0.44899412464836086,
+          "industryGapPercent": -0.4819536812112113,
+          "legacyGDPGapPercent": -19.97798678496343
+        },
+        {
+          "after": 18,
+          "gdpGapPercent": -0.2904892709667761,
+          "unemploymentGapPP": 0.19833686473107548,
+          "inflationGapPP": 0.4107488466601028,
+          "industryGapPercent": -0.49539435928327435,
+          "legacyGDPGapPercent": -18.767068142678546
+        },
+        {
+          "after": 19,
+          "gdpGapPercent": -0.31424396331081184,
+          "unemploymentGapPP": 0.21606643855128738,
+          "inflationGapPP": 0.3698451716344975,
+          "industryGapPercent": -0.5206478321388208,
+          "legacyGDPGapPercent": -17.91032662201242
+        },
+        {
+          "after": 20,
+          "gdpGapPercent": -0.8514364415874609,
+          "unemploymentGapPP": 0.233603410224692,
+          "inflationGapPP": 0.32357620978078483,
+          "industryGapPercent": -1.0222109172929317,
+          "legacyGDPGapPercent": -17.25997877784885
+        },
+        {
+          "after": 21,
+          "gdpGapPercent": -0.7097415947292851,
+          "unemploymentGapPP": 0.28763261664582984,
+          "inflationGapPP": 0.27697674349802526,
+          "industryGapPercent": -0.8970692629924337,
+          "legacyGDPGapPercent": -23.379478914520803
+        },
+        {
+          "after": 22,
+          "gdpGapPercent": -0.5024050779541933,
+          "unemploymentGapPP": 0.3483527020470305,
+          "inflationGapPP": 0.23161318725390956,
+          "industryGapPercent": -0.7005921194095044,
+          "legacyGDPGapPercent": -17.200310010505614
+        },
+        {
+          "after": 23,
+          "gdpGapPercent": -0.48910776118851196,
+          "unemploymentGapPP": 0.39552414973674743,
+          "inflationGapPP": 0.18642693635261276,
+          "industryGapPercent": -0.6823780214111119,
+          "legacyGDPGapPercent": -16.743772486809505
+        },
+        {
+          "after": 24,
+          "gdpGapPercent": -0.4771194076033658,
+          "unemploymentGapPP": 0.4317868214242395,
+          "inflationGapPP": 0.14157466590888346,
+          "industryGapPercent": -0.6668610827796129,
+          "legacyGDPGapPercent": -16.26907186838237
+        },
+        {
+          "after": 25,
+          "gdpGapPercent": -0.4655390319041164,
+          "unemploymentGapPP": 0.45876079962284777,
+          "inflationGapPP": 0.09723259976973653,
+          "industryGapPercent": -0.6508598495306162,
+          "legacyGDPGapPercent": -15.781258828532218
+        },
+        {
+          "after": 26,
+          "gdpGapPercent": -0.45411132056358827,
+          "unemploymentGapPP": 0.4779489286723333,
+          "inflationGapPP": 0.05359854230080341,
+          "industryGapPercent": -0.6342741305240374,
+          "legacyGDPGapPercent": -15.281265474618799
+        },
+        {
+          "after": 27,
+          "gdpGapPercent": -0.4427072903079643,
+          "unemploymentGapPP": 0.49068965337507464,
+          "inflationGapPP": 0.02119923662630141,
+          "industryGapPercent": -0.6171346692485757,
+          "legacyGDPGapPercent": -14.769296930863984
+        },
+        {
+          "after": 28,
+          "gdpGapPercent": -0.4312425460025415,
+          "unemploymentGapPP": 0.49814557775899004,
+          "inflationGapPP": -0.009438004400930122,
+          "industryGapPercent": -0.5995035049572772,
+          "legacyGDPGapPercent": -14.2542313477802
+        },
+        {
+          "after": 29,
+          "gdpGapPercent": -0.4196080090469678,
+          "unemploymentGapPP": 0.5013085152293719,
+          "inflationGapPP": -0.03838113254299724,
+          "industryGapPercent": -0.5813945684776001,
+          "legacyGDPGapPercent": -13.7247385059448
+        },
+        {
+          "after": 30,
+          "gdpGapPercent": -0.40771102918304436,
+          "unemploymentGapPP": 0.5010096532615513,
+          "inflationGapPP": -0.06569307969866989,
+          "industryGapPercent": -0.5628260663331996,
+          "legacyGDPGapPercent": -13.182996465049246
+        },
+        {
+          "after": 31,
+          "gdpGapPercent": -0.395476587914112,
+          "unemploymentGapPP": 0.49793461175537956,
+          "inflationGapPP": -0.0913125715366725,
+          "industryGapPercent": -0.5438198622975454,
+          "legacyGDPGapPercent": -12.62838170423003
+        },
+        {
+          "after": 32,
+          "gdpGapPercent": -0.38284424010646134,
+          "unemploymentGapPP": 0.49264080138039645,
+          "inflationGapPP": -0.11117931228797895,
+          "industryGapPercent": -0.5243999127673371,
+          "legacyGDPGapPercent": -12.059426730882993
+        },
+        {
+          "after": 33,
+          "gdpGapPercent": -0.3697052708572013,
+          "unemploymentGapPP": 0.48557505600925666,
+          "inflationGapPP": -0.1293093951133084,
+          "industryGapPercent": -0.5045442312179849,
+          "legacyGDPGapPercent": -11.475681637427392
+        },
+        {
+          "after": 34,
+          "gdpGapPercent": -0.3561478104020299,
+          "unemploymentGapPP": 0.47708572795147575,
+          "inflationGapPP": -0.1466658564803769,
+          "industryGapPercent": -0.4843697811622083,
+          "legacyGDPGapPercent": -10.859140732447026
+        },
+        {
+          "after": 35,
+          "gdpGapPercent": -0.3421337376819156,
+          "unemploymentGapPP": 0.46744883256100067,
+          "inflationGapPP": -0.16221718798276008,
+          "industryGapPercent": -0.46390204153387016,
+          "legacyGDPGapPercent": -10.256774222451803
+        },
+        {
+          "after": 36,
+          "gdpGapPercent": -0.3276277564965624,
+          "unemploymentGapPP": 0.4568776280336593,
+          "inflationGapPP": -0.17600782524799286,
+          "industryGapPercent": -0.4431546529179764,
+          "legacyGDPGapPercent": -9.627099780991088
+        },
+        {
+          "after": 37,
+          "gdpGapPercent": -0.3126416470363047,
+          "unemploymentGapPP": 0.44553301262296685,
+          "inflationGapPP": -0.18819335305645435,
+          "industryGapPercent": -0.4221687658166884,
+          "legacyGDPGapPercent": -8.97610941615098
+        },
+        {
+          "after": 38,
+          "gdpGapPercent": -0.2971908752917862,
+          "unemploymentGapPP": 0.4335357473508097,
+          "inflationGapPP": -0.19899421213166502,
+          "industryGapPercent": -0.40098273940696316,
+          "legacyGDPGapPercent": -8.308551481145843
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "resource": false,
+      "path": [
+        {
+          "after": 1,
+          "gdpGapPercent": 0,
+          "unemploymentGapPP": 0,
+          "inflationGapPP": 0.0020861048219078526,
+          "industryGapPercent": 0,
+          "legacyGDPGapPercent": -10.80121874708434
+        },
+        {
+          "after": 2,
+          "gdpGapPercent": -0.19050187095472904,
+          "unemploymentGapPP": -0.00000681953744496866,
+          "inflationGapPP": 0.00444273482214097,
+          "industryGapPercent": -0.7112503611090504,
+          "legacyGDPGapPercent": -12.50350933300648
+        },
+        {
+          "after": 3,
+          "gdpGapPercent": -0.735970132988939,
+          "unemploymentGapPP": 0.008855829081433342,
+          "inflationGapPP": 0.025394408701662208,
+          "industryGapPercent": -2.7576826242462604,
+          "legacyGDPGapPercent": -13.600692486070331
+        },
+        {
+          "after": 4,
+          "gdpGapPercent": -1.0047688918081832,
+          "unemploymentGapPP": 0.02607098489250248,
+          "inflationGapPP": 0.05739539358513568,
+          "industryGapPercent": -3.765461610679044,
+          "legacyGDPGapPercent": -15.637696228827892
+        },
+        {
+          "after": 5,
+          "gdpGapPercent": -1.0950469397689067,
+          "unemploymentGapPP": 0.04871029522610648,
+          "inflationGapPP": 0.09456202661373148,
+          "industryGapPercent": -4.188466410676172,
+          "legacyGDPGapPercent": -17.213359071124145
+        },
+        {
+          "after": 6,
+          "gdpGapPercent": -1.0990367559432501,
+          "unemploymentGapPP": 0.07519151604743435,
+          "inflationGapPP": 0.1333727692251152,
+          "industryGapPercent": -4.295358735379329,
+          "legacyGDPGapPercent": -18.642577921858184
+        },
+        {
+          "after": 7,
+          "gdpGapPercent": -2.143282832379667,
+          "unemploymentGapPP": 0.10452184923582841,
+          "inflationGapPP": 0.1809140577756052,
+          "industryGapPercent": -4.243707663044749,
+          "legacyGDPGapPercent": -20.01334043154842
+        },
+        {
+          "after": 8,
+          "gdpGapPercent": -2.2536639095105837,
+          "unemploymentGapPP": 0.19319843263182435,
+          "inflationGapPP": 0.21132629002282854,
+          "industryGapPercent": -4.116201246182483,
+          "legacyGDPGapPercent": -21.35164830695676
+        },
+        {
+          "after": 9,
+          "gdpGapPercent": -2.2391900507248708,
+          "unemploymentGapPP": 0.36069011538832996,
+          "inflationGapPP": 0.23173944133987323,
+          "industryGapPercent": -4.057016302214079,
+          "legacyGDPGapPercent": -22.65119011925625
+        },
+        {
+          "after": 10,
+          "gdpGapPercent": -2.2636652273486546,
+          "unemploymentGapPP": 0.5863192385507929,
+          "inflationGapPP": 0.24536658134972633,
+          "industryGapPercent": -4.074580479741741,
+          "legacyGDPGapPercent": -23.891552394725235
+        },
+        {
+          "after": 11,
+          "gdpGapPercent": -2.3140377683735225,
+          "unemploymentGapPP": 0.8337577389857067,
+          "inflationGapPP": 0.2504352019178313,
+          "industryGapPercent": -4.137380557077098,
+          "legacyGDPGapPercent": -25.063752343372236
+        },
+        {
+          "after": 12,
+          "gdpGapPercent": -2.380624616907956,
+          "unemploymentGapPP": 1.0890130519931027,
+          "inflationGapPP": 0.24689887308970704,
+          "industryGapPercent": -4.226276474573387,
+          "legacyGDPGapPercent": -26.17556521198585
+        },
+        {
+          "after": 13,
+          "gdpGapPercent": -2.4577564468854285,
+          "unemploymentGapPP": 1.3399163981351343,
+          "inflationGapPP": 0.23246030854804367,
+          "industryGapPercent": -4.329909443247104,
+          "legacyGDPGapPercent": -27.259511451731335
+        },
+        {
+          "after": 14,
+          "gdpGapPercent": -2.5419021032870193,
+          "unemploymentGapPP": 1.5803222926345288,
+          "inflationGapPP": 0.20892095397906374,
+          "industryGapPercent": -4.441399120549749,
+          "legacyGDPGapPercent": -28.51513400583061
+        },
+        {
+          "after": 15,
+          "gdpGapPercent": -1.9184965484673189,
+          "unemploymentGapPP": 1.8077274978060895,
+          "inflationGapPP": 0.15072044080022273,
+          "industryGapPercent": -2.6095187727641744,
+          "legacyGDPGapPercent": -24.686509726720494
+        },
+        {
+          "after": 16,
+          "gdpGapPercent": -1.8503141399934364,
+          "unemploymentGapPP": 1.988342222200389,
+          "inflationGapPP": 0.07380889541523938,
+          "industryGapPercent": -2.524940297611944,
+          "legacyGDPGapPercent": -23.24504162096359
+        },
+        {
+          "after": 17,
+          "gdpGapPercent": -1.7815447487655622,
+          "unemploymentGapPP": 2.126335164838588,
+          "inflationGapPP": -0.015194407642105112,
+          "industryGapPercent": -2.4273590547154167,
+          "legacyGDPGapPercent": -21.729158723949272
+        },
+        {
+          "after": 18,
+          "gdpGapPercent": -1.710582888136114,
+          "unemploymentGapPP": 2.226512578798955,
+          "inflationGapPP": -0.11175707511006383,
+          "industryGapPercent": -2.3178703656223987,
+          "legacyGDPGapPercent": -20.165840774695166
+        },
+        {
+          "after": 19,
+          "gdpGapPercent": -1.6374905143098917,
+          "unemploymentGapPP": 2.2936530456562068,
+          "inflationGapPP": -0.2220169934524563,
+          "industryGapPercent": -2.198422022114499,
+          "legacyGDPGapPercent": -18.54894781284925
+        },
+        {
+          "after": 20,
+          "gdpGapPercent": -1.554064581039749,
+          "unemploymentGapPP": 2.3322888131073753,
+          "inflationGapPP": -0.31927395389319546,
+          "industryGapPercent": -2.0656175097620744,
+          "legacyGDPGapPercent": -16.88960748308378
+        },
+        {
+          "after": 21,
+          "gdpGapPercent": -1.4736472057715444,
+          "unemploymentGapPP": 2.345780308220556,
+          "inflationGapPP": -0.41001116857415365,
+          "industryGapPercent": -1.9293565221746745,
+          "legacyGDPGapPercent": -15.642682138191377
+        },
+        {
+          "after": 22,
+          "gdpGapPercent": -1.3926950347027178,
+          "unemploymentGapPP": 2.3377623240818597,
+          "inflationGapPP": -0.496668303490333,
+          "industryGapPercent": -1.7888601387704872,
+          "legacyGDPGapPercent": -14.410905685094178
+        },
+        {
+          "after": 23,
+          "gdpGapPercent": -1.309894737451478,
+          "unemploymentGapPP": 2.3115195298008198,
+          "inflationGapPP": -0.576472478355794,
+          "industryGapPercent": -1.644246758082557,
+          "legacyGDPGapPercent": -18.794493760931495
+        },
+        {
+          "after": 24,
+          "gdpGapPercent": -1.2245031007777962,
+          "unemploymentGapPP": 2.269833280405586,
+          "inflationGapPP": -0.6482152317108358,
+          "industryGapPercent": -1.4955223060959866,
+          "legacyGDPGapPercent": -13.100952818929578
+        },
+        {
+          "after": 25,
+          "gdpGapPercent": -1.1364703075771199,
+          "unemploymentGapPP": 2.2149737830507554,
+          "inflationGapPP": -0.7110811831344765,
+          "industryGapPercent": -1.3432577538084023,
+          "legacyGDPGapPercent": -12.480770352875513
+        },
+        {
+          "after": 26,
+          "gdpGapPercent": -1.0468863285170604,
+          "unemploymentGapPP": 2.1487758459861723,
+          "inflationGapPP": -0.7651215450063198,
+          "industryGapPercent": -1.1892045147927188,
+          "legacyGDPGapPercent": -11.753951858457834
+        },
+        {
+          "after": 27,
+          "gdpGapPercent": -0.956474701293597,
+          "unemploymentGapPP": 2.07281070140628,
+          "inflationGapPP": -0.8028529143580654,
+          "industryGapPercent": -1.034703793649483,
+          "legacyGDPGapPercent": -21.832673845815652
+        },
+        {
+          "after": 28,
+          "gdpGapPercent": -0.8738738879013663,
+          "unemploymentGapPP": 1.9884413280433009,
+          "inflationGapPP": -0.832168547845491,
+          "industryGapPercent": -0.8858249286645581,
+          "legacyGDPGapPercent": -19.084501043623803
+        },
+        {
+          "after": 29,
+          "gdpGapPercent": -0.7878648467622873,
+          "unemploymentGapPP": 1.8975714240913941,
+          "inflationGapPP": -0.8532012205478834,
+          "industryGapPercent": -0.7361035795098947,
+          "legacyGDPGapPercent": -16.367153431775506
+        },
+        {
+          "after": 30,
+          "gdpGapPercent": -0.7029953964008961,
+          "unemploymentGapPP": 1.8013466590822809,
+          "inflationGapPP": -0.8665951378878489,
+          "industryGapPercent": -0.5888227379036048,
+          "legacyGDPGapPercent": -13.791378669279053
+        },
+        {
+          "after": 31,
+          "gdpGapPercent": -0.6197523850293485,
+          "unemploymentGapPP": 1.700641466220599,
+          "inflationGapPP": -0.8728795516772303,
+          "industryGapPercent": -0.4446626759836536,
+          "legacyGDPGapPercent": -14.514969974718205
+        },
+        {
+          "after": 32,
+          "gdpGapPercent": -0.5385837210129862,
+          "unemploymentGapPP": 1.5964009542730917,
+          "inflationGapPP": -0.8726217201138198,
+          "industryGapPercent": -0.3041967519788247,
+          "legacyGDPGapPercent": -13.80302333123784
+        },
+        {
+          "after": 33,
+          "gdpGapPercent": -0.46012339717583783,
+          "unemploymentGapPP": 1.4895254097273876,
+          "inflationGapPP": -0.8661324402599702,
+          "industryGapPercent": -0.1680355935696043,
+          "legacyGDPGapPercent": -14.29157357495171
+        },
+        {
+          "after": 34,
+          "gdpGapPercent": -0.38476021814644046,
+          "unemploymentGapPP": 1.3808797641439048,
+          "inflationGapPP": -0.8538645274503764,
+          "industryGapPercent": -0.03655841189320608,
+          "legacyGDPGapPercent": -19.091734142019455
+        },
+        {
+          "after": 35,
+          "gdpGapPercent": -0.3131200616216967,
+          "unemploymentGapPP": 1.2712956798875181,
+          "inflationGapPP": -0.8365486520700793,
+          "industryGapPercent": 0.08978026026669195,
+          "legacyGDPGapPercent": -20.55050553964276
+        },
+        {
+          "after": 36,
+          "gdpGapPercent": -0.24586794639607223,
+          "unemploymentGapPP": 1.1615973908988941,
+          "inflationGapPP": -0.8150925908357642,
+          "industryGapPercent": 0.21057158669925968,
+          "legacyGDPGapPercent": -23.70105605195516
+        },
+        {
+          "after": 37,
+          "gdpGapPercent": -0.17752827285903994,
+          "unemploymentGapPP": 1.0526225140385375,
+          "inflationGapPP": -0.7898038383913342,
+          "industryGapPercent": 0.3292564258100761,
+          "legacyGDPGapPercent": -27.73789186896828
+        },
+        {
+          "after": 38,
+          "gdpGapPercent": -0.11447982638698173,
+          "unemploymentGapPP": 0.9446988839770913,
+          "inflationGapPP": -0.7604874177043142,
+          "industryGapPercent": 0.4420104209103881,
+          "legacyGDPGapPercent": -32.920504539875175
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "resource": true,
+      "path": [
+        {
+          "after": 1,
+          "gdpGapPercent": 0,
+          "unemploymentGapPP": 0,
+          "inflationGapPP": 0.0021513072633094765,
+          "industryGapPercent": 0,
+          "legacyGDPGapPercent": -10.747673106958855
+        },
+        {
+          "after": 2,
+          "gdpGapPercent": -0.1376301735864116,
+          "unemploymentGapPP": -0.0000065252443217644895,
+          "inflationGapPP": 0.004706495567630142,
+          "industryGapPercent": -0.7007162306746473,
+          "legacyGDPGapPercent": -12.363995149796992
+        },
+        {
+          "after": 3,
+          "gdpGapPercent": -0.5334608704241961,
+          "unemploymentGapPP": 0.008730223983199892,
+          "inflationGapPP": 0.025610245920559827,
+          "industryGapPercent": -2.7287862345138136,
+          "legacyGDPGapPercent": -13.49125377062923
+        },
+        {
+          "after": 4,
+          "gdpGapPercent": -0.7262922415281259,
+          "unemploymentGapPP": 0.0255857232570591,
+          "inflationGapPP": 0.05753425136338919,
+          "industryGapPercent": -3.71745527228865,
+          "legacyGDPGapPercent": -15.666498936777396
+        },
+        {
+          "after": 5,
+          "gdpGapPercent": -0.7881914934305678,
+          "unemploymentGapPP": 0.04736203588900878,
+          "inflationGapPP": 0.09477020285215687,
+          "industryGapPercent": -4.120694985783802,
+          "legacyGDPGapPercent": -17.309199004741615
+        },
+        {
+          "after": 6,
+          "gdpGapPercent": -0.7867364100721086,
+          "unemploymentGapPP": 0.07232959411038742,
+          "inflationGapPP": 0.13390453885733233,
+          "industryGapPercent": -4.206820901946595,
+          "legacyGDPGapPercent": -18.788831302951202
+        },
+        {
+          "after": 7,
+          "gdpGapPercent": -3.5175098702700303,
+          "unemploymentGapPP": 0.09943309030764347,
+          "inflationGapPP": 0.18210632425867956,
+          "industryGapPercent": -4.133263738535186,
+          "legacyGDPGapPercent": -20.218484041972783
+        },
+        {
+          "after": 8,
+          "gdpGapPercent": -3.9156296733155793,
+          "unemploymentGapPP": 0.17441085020589675,
+          "inflationGapPP": 0.20246605258840145,
+          "industryGapPercent": -3.9802401375765406,
+          "legacyGDPGapPercent": -21.635321198060243
+        },
+        {
+          "after": 9,
+          "gdpGapPercent": -3.703778294312754,
+          "unemploymentGapPP": 0.3914596037684728,
+          "inflationGapPP": 0.2008523974443177,
+          "industryGapPercent": -3.8567683941100994,
+          "legacyGDPGapPercent": -23.04626402273524
+        },
+        {
+          "after": 10,
+          "gdpGapPercent": -3.6217018663627476,
+          "unemploymentGapPP": 0.7566149284927146,
+          "inflationGapPP": 0.18715190709173157,
+          "industryGapPercent": -3.815994249810073,
+          "legacyGDPGapPercent": -24.432917776570427
+        },
+        {
+          "after": 11,
+          "gdpGapPercent": -3.6101549712859837,
+          "unemploymentGapPP": 1.1974717074414105,
+          "inflationGapPP": 0.16129081551525815,
+          "industryGapPercent": -3.835325328986494,
+          "legacyGDPGapPercent": -25.780434712075984
+        },
+        {
+          "after": 12,
+          "gdpGapPercent": -3.63813062511974,
+          "unemploymentGapPP": 1.6576569752202772,
+          "inflationGapPP": 0.12229302951072274,
+          "industryGapPercent": -3.89093935033461,
+          "legacyGDPGapPercent": -27.07551145150431
+        },
+        {
+          "after": 13,
+          "gdpGapPercent": -3.69798011336242,
+          "unemploymentGapPP": 2.101180280783476,
+          "inflationGapPP": 0.06833271206736491,
+          "industryGapPercent": -3.9757857084523063,
+          "legacyGDPGapPercent": -28.307378634875068
+        },
+        {
+          "after": 14,
+          "gdpGapPercent": -3.77262681854581,
+          "unemploymentGapPP": 2.5111878490172597,
+          "inflationGapPP": 0.001426632268097805,
+          "industryGapPercent": -4.073248784038741,
+          "legacyGDPGapPercent": -29.569187208167058
+        },
+        {
+          "after": 15,
+          "gdpGapPercent": -3.1441015952663354,
+          "unemploymentGapPP": 2.882799082094543,
+          "inflationGapPP": -0.1039651334492131,
+          "industryGapPercent": -2.2839400613416605,
+          "legacyGDPGapPercent": -25.70468204043359
+        },
+        {
+          "after": 16,
+          "gdpGapPercent": -3.0194021865161402,
+          "unemploymentGapPP": 3.1916949235361365,
+          "inflationGapPP": -0.2299867197749883,
+          "industryGapPercent": -2.3160452958456923,
+          "legacyGDPGapPercent": -24.258623765720888
+        },
+        {
+          "after": 17,
+          "gdpGapPercent": -2.89776992241374,
+          "unemploymentGapPP": 3.4360262964693202,
+          "inflationGapPP": -0.369980145828519,
+          "industryGapPercent": -2.329520769995519,
+          "legacyGDPGapPercent": -22.830953368179706
+        },
+        {
+          "after": 18,
+          "gdpGapPercent": -2.778604900842885,
+          "unemploymentGapPP": 3.6183338284427204,
+          "inflationGapPP": -0.5190722231580347,
+          "industryGapPercent": -2.3263558273754037,
+          "legacyGDPGapPercent": -21.413999254395687
+        },
+        {
+          "after": 19,
+          "gdpGapPercent": -2.661355364890039,
+          "unemploymentGapPP": 3.743574178226993,
+          "inflationGapPP": -0.6829398755105576,
+          "industryGapPercent": -2.308460494759279,
+          "legacyGDPGapPercent": -20.199026154341702
+        },
+        {
+          "after": 20,
+          "gdpGapPercent": -2.5347765232965447,
+          "unemploymentGapPP": 3.8178381489359925,
+          "inflationGapPP": -0.8236035010895204,
+          "industryGapPercent": -2.268427019660868,
+          "legacyGDPGapPercent": -19.24216467500245
+        },
+        {
+          "after": 21,
+          "gdpGapPercent": -2.41507865134557,
+          "unemploymentGapPP": 3.8468872785614963,
+          "inflationGapPP": -0.9460105556447829,
+          "industryGapPercent": -2.221813202704259,
+          "legacyGDPGapPercent": -24.402211832546094
+        },
+        {
+          "after": 22,
+          "gdpGapPercent": -2.2980025892336053,
+          "unemploymentGapPP": 3.837232506299925,
+          "inflationGapPP": -1.058789460599474,
+          "industryGapPercent": -2.166719418439922,
+          "legacyGDPGapPercent": -18.616769247485408
+        },
+        {
+          "after": 23,
+          "gdpGapPercent": -2.181188884547136,
+          "unemploymentGapPP": 3.7950892160417258,
+          "inflationGapPP": -1.1608684700419314,
+          "industryGapPercent": -2.1026191199018163,
+          "legacyGDPGapPercent": -17.715538685528564
+        },
+        {
+          "after": 24,
+          "gdpGapPercent": -2.0645709099167298,
+          "unemploymentGapPP": 3.7259462180871274,
+          "inflationGapPP": -1.250417088782796,
+          "industryGapPercent": -2.03073262673803,
+          "legacyGDPGapPercent": -16.712643593505994
+        },
+        {
+          "after": 25,
+          "gdpGapPercent": -1.9481099492990706,
+          "unemploymentGapPP": 3.6345613859502297,
+          "inflationGapPP": -1.3269605903197812,
+          "industryGapPercent": -1.952149141962134,
+          "legacyGDPGapPercent": -15.633061488021838
+        },
+        {
+          "after": 26,
+          "gdpGapPercent": -1.8317467816291289,
+          "unemploymentGapPP": 3.5249984128735807,
+          "inflationGapPP": -1.3900426733348015,
+          "industryGapPercent": -1.8678113028795629,
+          "legacyGDPGapPercent": -14.47625603145245
+        },
+        {
+          "after": 27,
+          "gdpGapPercent": -1.7153444986056199,
+          "unemploymentGapPP": 3.400681012534424,
+          "inflationGapPP": -1.4313076391390123,
+          "industryGapPercent": -1.7783916020536084,
+          "legacyGDPGapPercent": -13.240011457729706
+        },
+        {
+          "after": 28,
+          "gdpGapPercent": -1.6022697424017185,
+          "unemploymentGapPP": 3.2644535645849135,
+          "inflationGapPP": -1.4605229021407151,
+          "industryGapPercent": -1.6874884713362848,
+          "legacyGDPGapPercent": -12.112692440014216
+        },
+        {
+          "after": 29,
+          "gdpGapPercent": -1.4878685291141447,
+          "unemploymentGapPP": 3.118969638211488,
+          "inflationGapPP": -1.4779789627944684,
+          "industryGapPercent": -1.59180963502763,
+          "legacyGDPGapPercent": -11.238736218635736
+        },
+        {
+          "after": 30,
+          "gdpGapPercent": -1.3728242008019143,
+          "unemploymentGapPP": 2.9661827257239652,
+          "inflationGapPP": -1.4838647989620868,
+          "industryGapPercent": -1.4921044632481562,
+          "legacyGDPGapPercent": -10.330641276749475
+        },
+        {
+          "after": 31,
+          "gdpGapPercent": -1.2570261266126481,
+          "unemploymentGapPP": 2.8075993810608875,
+          "inflationGapPP": -1.4789946436376544,
+          "industryGapPercent": -1.3886707219589178,
+          "legacyGDPGapPercent": -20.799242420813158
+        },
+        {
+          "after": 32,
+          "gdpGapPercent": -1.1404110917715427,
+          "unemploymentGapPP": 2.6443632797441667,
+          "inflationGapPP": -1.4643331307111485,
+          "industryGapPercent": -1.2818028434598228,
+          "legacyGDPGapPercent": -18.148236966224076
+        },
+        {
+          "after": 33,
+          "gdpGapPercent": -1.023083114072254,
+          "unemploymentGapPP": 2.4773277473367,
+          "inflationGapPP": -1.4404572500647639,
+          "industryGapPercent": -1.1719317688434039,
+          "legacyGDPGapPercent": -16.423751036488333
+        },
+        {
+          "after": 34,
+          "gdpGapPercent": -0.9049264843988492,
+          "unemploymentGapPP": 2.3071288706175475,
+          "inflationGapPP": -1.4081111561801363,
+          "industryGapPercent": -1.0592287893221197,
+          "legacyGDPGapPercent": -16.48041568208206
+        },
+        {
+          "after": 35,
+          "gdpGapPercent": -0.786222413545079,
+          "unemploymentGapPP": 2.134262418317535,
+          "inflationGapPP": -1.3681465115713776,
+          "industryGapPercent": -0.9442993428534829,
+          "legacyGDPGapPercent": -19.474040564391803
+        },
+        {
+          "after": 36,
+          "gdpGapPercent": -0.6677472572662824,
+          "unemploymentGapPP": 1.9590751491093794,
+          "inflationGapPP": -1.3216647389463043,
+          "industryGapPercent": -0.828341543108202,
+          "legacyGDPGapPercent": -22.67682917044911
+        },
+        {
+          "after": 37,
+          "gdpGapPercent": -0.5476679487348202,
+          "unemploymentGapPP": 1.781878421854655,
+          "inflationGapPP": -1.2690694352338827,
+          "industryGapPercent": -0.7100389589798084,
+          "legacyGDPGapPercent": -27.572391414963892
+        },
+        {
+          "after": 38,
+          "gdpGapPercent": -0.42846775542030313,
+          "unemploymentGapPP": 1.6027540279406551,
+          "inflationGapPP": -1.210782958862211,
+          "industryGapPercent": -0.5917327851842624,
+          "legacyGDPGapPercent": -32.71090350056096
+        }
+      ]
+    }
+  ],
+  "sensitivities": [
+    {
+      "multiplier": 0.9,
+      "duration": 3,
+      "minimumGDPGapPercent": -0.03836425607319782,
+      "maximumUnemploymentGapPP": 0.023036764240845997,
+      "finalGDPGapPercent": -0.017005687339122222
+    },
+    {
+      "multiplier": 0.9,
+      "duration": 14,
+      "minimumGDPGapPercent": -0.16572634464924185,
+      "maximumUnemploymentGapPP": 0.09918381401038445,
+      "finalGDPGapPercent": -0.06184868348519945
+    },
+    {
+      "multiplier": 0.9,
+      "duration": 36,
+      "minimumGDPGapPercent": -0.206377956494197,
+      "maximumUnemploymentGapPP": 0.17901516891973657,
+      "finalGDPGapPercent": -0.05699318462802916
+    },
+    {
+      "multiplier": 0.8,
+      "duration": 3,
+      "minimumGDPGapPercent": -0.46026275325175003,
+      "maximumUnemploymentGapPP": 0.062035300624597056,
+      "finalGDPGapPercent": -0.0483836903117596
+    },
+    {
+      "multiplier": 0.8,
+      "duration": 14,
+      "minimumGDPGapPercent": -1.0090170278827748,
+      "maximumUnemploymentGapPP": 0.9253262370204407,
+      "finalGDPGapPercent": -0.38281151211945197
+    },
+    {
+      "multiplier": 0.8,
+      "duration": 36,
+      "minimumGDPGapPercent": -1.088117851103898,
+      "maximumUnemploymentGapPP": 1.0096920708199022,
+      "finalGDPGapPercent": 0.15526025682168765
+    },
+    {
+      "multiplier": 0.6,
+      "duration": 3,
+      "minimumGDPGapPercent": -7.063235337861007,
+      "maximumUnemploymentGapPP": 5.23398223777105,
+      "finalGDPGapPercent": -1.7406678608266057
+    },
+    {
+      "multiplier": 0.6,
+      "duration": 14,
+      "minimumGDPGapPercent": -16.419450799379153,
+      "maximumUnemploymentGapPP": 16.177321334890003,
+      "finalGDPGapPercent": -1.5988424331387696
+    },
+    {
+      "multiplier": 0.6,
+      "duration": 36,
+      "minimumGDPGapPercent": -44.20016002625711,
+      "maximumUnemploymentGapPP": 38.5606839399809,
+      "finalGDPGapPercent": -23.41854926087351
+    }
+  ],
+  "empiricalCertification": false,
+  "interpretation": "Paired counterfactuals under the same policies, no elections. Magnitudes are scenario results, not estimated treatment effects. The IMF 2021 euro-area results are an external plausibility reference, not a target imposed on GDP."
+}

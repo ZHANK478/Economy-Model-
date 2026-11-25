@@ -2,6 +2,7 @@
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const fiscalKeys=['vat','incomeTax','corporateTax','governmentConsumption','publicInvestment','transfers','healthcare','education'];
 import {reviewPoliticalPolicy,advancePoliticalSystem,politicalMetrics} from './political-system.js';
+import {regimeMetrics} from './regime-dynamics.js';
 export function initializePolitics(s){
   const p=s.policy;
   s.politics={judicialIndependence:p.protectedJudges?.65:.20,mediaFreedom:p.freeMedia?.70:.20,
@@ -29,12 +30,12 @@ export function advancePolitics(s,prev,events,flow={},world=s.world){
   for(const [key,target] of Object.entries(targets))a[key]+=step*(target-a[key]);
   const detection=Number(p.publicDisclosure)*a.mediaFreedom*s.institutions.soeAuditCapacity
     *a.judicialIndependence*s.institutions.courtCapacity;
-  const corruptionTarget=clamp(.35-.22*detection-.12*a.civilService,0,.5);
+  const corruptionTarget=s.economy?.revision>=22?(s.rentSeeking?.last.conditions?.risk??0):clamp(.35-.22*detection-.12*a.civilService,0,.5);
   a.corruption+=step*(corruptionTarget-a.corruption);
   if(a.enabled){advancePoliticalSystem(s,prev,events,flow,world);return;}
   const incomeChange=Math.log(Math.max(.1,s.metrics.realIncomeIndex)/Math.max(.1,prev.metrics.realIncomeIndex));
   const supportTarget=clamp(.58+incomeChange*4-.008*(s.metrics.unemployment-9)
-    -.004*Math.max(0,s.metrics.inflationYoY-10)-.35*a.corruption
+    -.004*Math.max(0,s.metrics.inflationYoY-10)-.35*(s.economy?.revision>=22?s.rentSeeking.perceivedRisk:a.corruption)
     +.08*(s.services?.healthCoverage??1)-.12*(s.government.defaultActive?1:0),.1,.9);
   a.publicSupport+=.03*(supportTarget-a.publicSupport);
   if(s.month>=a.nextElection){
@@ -51,5 +52,5 @@ export function politicsMetrics(s){const a=s.politics;
     electoralIntegrity:a.electoralIntegrity*100,legislativeConstraint:a.legislativeConstraint*100,civilFreedom:a.civilFreedom*100,
     corruptionRisk:a.corruption*100,publicSupport:a.publicSupport*100,parliamentSupport:a.parliamentSupport*100,
     electoralDemocracyProxy:(a.electoralIntegrity*a.civilFreedom*a.mediaFreedom)**(1/3)*100,
-    executiveConstraintProxy:Math.sqrt(a.legislativeConstraint*a.judicialIndependence)*100,...politicalMetrics(s)};
+    executiveConstraintProxy:Math.sqrt(a.legislativeConstraint*a.judicialIndependence)*100,...politicalMetrics(s),...regimeMetrics(s)};
 }

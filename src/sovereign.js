@@ -1,3 +1,4 @@
+import {nonbankDebt} from './bond-market.js';
 const sum=a=>a.reduce((s,x)=>s+x,0);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function refinancingRisk(s) {
@@ -31,17 +32,19 @@ export function restructureDebt(s,flow,events,{haircut=.30,extension=60,voluntar
   haircut=clamp(haircut,0,.70);extension=Math.max(12,Math.min(120,Math.round(extension)));
   if(!s.government.domesticBonds.length&&!s.government.externalBonds.length)return null;
   const g=s.government,oldDomestic=sum(g.domesticBonds.map(b=>b.principal)),oldForeign=sum(g.externalBonds.map(b=>b.principal));
+  const nonbank=nonbankDebt(s);
   const alreadyInDefault=g.defaultActive;
   let oldPV=0,newPV=0;
   for(const [bonds,fx] of [[g.domesticBonds,1],[g.externalBonds,s.exchangeRate]])for(const b of bonds){
     const months=Math.max(1,b.maturity-s.month),discount=Math.max(.01,b.rate+(flow.sovereignSpread??.025));
     const pv=(principal,coupon,n)=>{const r=Math.pow(1+discount,1/12)-1;return principal*coupon/12*(1-Math.pow(1+r,-n))/r+principal*Math.pow(1+r,-n);};
     oldPV+=pv(b.principal,b.rate,months)*fx;
+    if(b.householdHoldings)b.householdHoldings=b.householdHoldings.map(v=>v*(1-haircut));
     b.principal*=1-haircut;b.maturity=s.month+extension;b.inDefault=false;b.overdue=0;
     newPV+=pv(b.principal,b.rate,extension)*fx;
   }
   flow.domesticHaircut+=oldDomestic*haircut;flow.externalHaircut+=oldForeign*haircut;
-  s.bank.equity-=oldDomestic*haircut;
+  s.bank.equity-=(oldDomestic-nonbank)*haircut;
   if(voluntary&&!alreadyInDefault&&oldPV-newPV<=1e-6){events.push('Обмен долга без ухудшения приведённой стоимости: не считается дефолтом.');return {kind:'refinance',haircut,extension,faceLossLC:0,npvLossLC:0,effectiveMonth:s.month};}
   openDefaultEpisode(s,voluntary?'distressed-exchange':'payment-default',events);
   g.arrears=0;g.defaultActive=false;g.excludedUntil=s.month+s.parameters.marketExclusionMonths;

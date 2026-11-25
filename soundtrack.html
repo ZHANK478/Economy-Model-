@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mandatewright</title>
+  <style>
+    body { margin: 0; color: #ded7b8; background: #1d231f; font: 16px/1.5 Georgia, serif; }
+    main { max-width: 710px; margin: auto; padding: 32px 20px 64px; }
+    h1, h2 { color: #e8d49a; font-weight: normal; }
+    h1 { margin: 18px 0 4px; }
+    h2 { margin: 26px 0 0; }
+    a { color: #e8d49a; }
+    header { position: sticky; top: 0; background: #1d231f; border-bottom: 1px solid #756e51; padding: 8px 0; }
+    header p { margin: 4px 0; }
+    audio { width: 100%; margin: 6px 0; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #756e5166; }
+    li p { margin: 0; }
+    li small { color: #cbc4a9; }
+    button { flex: none; width: 36px; height: 36px; cursor: pointer; font-size: 16px; background: #2f342b; color: #e8d49a; border: 1px solid #756e51; border-radius: 50%; }
+    button[aria-pressed="true"] { background: #e8d49a; color: #1d231f; }
+    footer { margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a id="back" href="./"></a>
+    <h1 id="heading"></h1>
+    <header>
+      <p id="playing" role="status"></p>
+      <audio controls preload="none" aria-labelledby="playing"></audio>
+    </header>
+    <div id="tracks"></div>
+    <footer><a id="licenses" href="./docs/SOUNDTRACK-LICENSES.txt"></a></footer>
+  </main>
+  <script type="module" src="./src/soundtrack-page.js"></script>
+</body>
+</html>

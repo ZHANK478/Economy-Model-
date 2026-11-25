@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "retrievedDate": "2026-10-30",
+  "scope": "Mechanism evidence and descriptive reference points, not a fitted national microsimulation",
+  "observations": [
+    {
+      "source": "https://www.bls.gov/news.release/cesan.nr0.htm",
+      "publicationDate": "2026-10-29",
+      "year": 2025,
+      "population": "US consumer units",
+      "foodExpenditureShare": 0.13,
+      "housingExpenditureShare": 0.339,
+      "limitation": "CE expenditure scope differs from national-accounts consumption; missing survey months in 2025 noted by BLS."
+    },
+    {
+      "source": "https://www.bls.gov/careeroutlook/2025/data-on-display/education-pays.htm",
+      "year": 2024,
+      "population": "US workers age 25+, earnings for full-time wage/salary workers",
+      "highSchool": {
+        "weeklyMedianEarningsUSD": 930,
+        "unemploymentRate": 0.042
+      },
+      "bachelor": {
+        "weeklyMedianEarningsUSD": 1543,
+        "unemploymentRate": 0.025
+      },
+      "limitation": "Descriptive association, not a causal schooling return."
+    }
+  ],
+  "mechanismSources": [
+    "https://www.aeaweb.org/articles?id=10.1257/jep.21.1.141",
+    "https://www.nber.org/papers/w12984",
+    "https://www.nber.org/papers/w21199",
+    "https://www.nber.org/papers/w24587"
+  ],
+  "parameterStatus": {
+    "initialBaskets": "Synthetic scenario assumptions, preserved independently of agriculture GDP calibration.",
+    "foodChainProcessingServiceSplit": "Assumption .65/.35; raw share fitted only within feasible bounds.",
+    "engelAndSubstitution": "Assumptions, sensitivity tested, not estimated universal elasticities.",
+    "schoolingPremiumAndSorting": "Assumptions motivated by supply-demand-institutions evidence; national microdata calibration remains outstanding."
+  }
+}

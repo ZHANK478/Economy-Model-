@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "revision": 22,
+  "date": "2026-10-31T03:17:17.373Z",
+  "sourceSHA256": "685ce88a6664cd4613853c72b05877a3e569e55183fdb42b43e3a711e4ae1aa9",
+  "months": 1080,
+  "maxRelativeAudit": 1.5222688904272975e-14,
+  "results": [
+    {
+      "country": "poor",
+      "institutions": "initial",
+      "months": 180,
+      "openingGDP": 416.6666666666667,
+      "finalGDP": 457.7530967974884,
+      "minGDP": 392.1091533574018,
+      "paidRents": 12.558203530311335,
+      "recovered": 4.1780783484465065,
+      "newDurables": 1661.125979704982,
+      "repair": 634.1160763141338,
+      "usedTransfersOutsideGDP": 151.7198296397589,
+      "consumerDebt": [
+        0,
+        0,
+        6.947768199657781,
+        10.02520555405145,
+        0.1674953370801053,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sizes": {
+        "json": 48033401,
+        "gzip": 12809678
+      }
+    },
+    {
+      "country": "poor",
+      "institutions": "weakened",
+      "months": 180,
+      "openingGDP": 416.6666666666667,
+      "finalGDP": 461.4385778985935,
+      "minGDP": 394.03104361267964,
+      "paidRents": 43.0968557197797,
+      "recovered": 0.6639451909838415,
+      "newDurables": 1843.2909467836153,
+      "repair": 669.6920251287843,
+      "usedTransfersOutsideGDP": 166.70817502089804,
+      "consumerDebt": [
+        0,
+        0,
+        0,
+        14.318677393839705,
+        1.6897786090226572,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sizes": {
+        "json": 47776388,
+        "gzip": 12819552
+      }
+    },
+    {
+      "country": "middle",
+      "institutions": "initial",
+      "months": 180,
+      "openingGDP": 5000,
+      "finalGDP": 7424.50161919335,
+      "minGDP": 4679.287015431392,
+      "paidRents": 322.23416414257537,
+      "recovered": 140.76484486419056,
+      "newDurables": 71151.406558132,
+      "repair": 19438.758039138902,
+      "usedTransfersOutsideGDP": 2514.326190880436,
+      "consumerDebt": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        239.27929425483794
+      ],
+      "sizes": {
+        "json": 50557831,
+        "gzip": 13201966
+      }
+    },
+    {
+      "country": "middle",
+      "institutions": "weakened",
+      "months": 180,
+      "openingGDP": 5000,
+      "finalGDP": 6992.078828326299,
+      "minGDP": 4696.561548903619,
+      "paidRents": 1188.7302155654686,
+      "recovered": 32.02077665154362,
+      "newDurables": 72474.16281325939,
+      "repair": 19996.36160390853,
+      "usedTransfersOutsideGDP": 2781.649388363743,
+      "consumerDebt": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        576.1257482042062
+      ],
+      "sizes": {
+        "json": 49852756,
+        "gzip": 13631727
+      }
+    },
+    {
+      "country": "rich",
+      "institutions": "initial",
+      "months": 180,
+      "openingGDP": 20833.333333333332,
+      "finalGDP": 21429.606676105763,
+      "minGDP": 19205.66942353859,
+      "paidRents": 1070.5227836594618,
+      "recovered": 417.18708755615637,
+      "newDurables": 171250.22017380825,
+      "repair": 53663.83469529157,
+      "usedTransfersOutsideGDP": 16756.947105030053,
+      "consumerDebt": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sizes": {
+        "json": 50378018,
+        "gzip": 13223628
+      }
+    },
+    {
+      "country": "rich",
+      "institutions": "weakened",
+      "months": 180,
+      "openingGDP": 20833.333333333332,
+      "finalGDP": 20658.35320892986,
+      "minGDP": 19273.2732834489,
+      "paidRents": 3049.9122484690597,
+      "recovered": 134.88636083433587,
+      "newDurables": 170271.74768423443,
+      "repair": 54855.14845842012,
+      "usedTransfersOutsideGDP": 19330.137587818735,
+      "consumerDebt": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sizes": {
+        "json": 45243142,
+        "gzip": 12272709
+      }
+    }
+  ],
+  "limitations": [
+    "Fictional starts; not an identified causal estimate of corruption or national durable ownership.",
+    "Starting durable stock and age profile are imputed; early GDP changes depend on this assumption.",
+    "Same seed, fixed initial policy except the declared institutional switches; effects combine enforcement and other existing institutional channels.",
+    "Used private transfers are outside GDP; new purchases and repairs enter consumption once.",
+    "No target growth, corruption quota or forced household adoption of technology."
+  ]
+}

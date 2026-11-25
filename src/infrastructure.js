@@ -1,3 +1,6 @@
+import {operatorTransfersActive,settleOperatorTransfer,networkTransferMessage} from './network-transfers.js';
+import {foundationActive} from './economic-foundation.js';
+import {localGovernmentActive,infrastructureDeliveryFactor} from './local-government.js';
 // Physical stocks and commercial project appraisal, with a consolidated operator per sector.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const sum=a=>a.reduce((x,v)=>x+v,0);
@@ -11,15 +14,16 @@ export function initializeInfrastructure(s){
 }
 export function synchronizeInfrastructure(s){
   s.infrastructure=sum(s.networks.map(n=>n.public+n.municipal+n.private+n.concession));
-  s.firms.forEach((f,i)=>{f.infrastructureCapital=sum(s.networks.filter(n=>n.sector===i).map(n=>n.private+n.concession));});
+  s.firms.forEach((f,i)=>{f.infrastructureCapital=operatorTransfersActive(s)?0:sum(s.networks.filter(n=>n.sector===i).map(n=>n.private+n.concession));});
 }
 export function scheduleNetwork(s,{network,kind,points}){
   if(!NETWORKS.some(n=>n.id===network)||!['networkSale','networkPurchase','networkMunicipalize'].includes(kind)||!Number.isFinite(points)||points<=0||points>100)throw new Error('Некорректная операция с инфраструктурой');
   const action={id:s.nextActionId++,network,kind,points,decisionMonth:s.month,effectiveMonth:s.month+1};s.pendingActions.push(action);return action;
 }
-export function executeNetworkTransfers(s,flow,events,{transfer,fundGovernment}){
+export function executeNetworkTransfers(s,flow,events,{transfer,fundGovernment,grantLoan}){
   const results=[],price=s.metrics.investmentPrice??s.consumerPriceIndex/100;
   for(const action of s.pendingActions.filter(a=>a.network)){
+    if(operatorTransfersActive(s)){const result=settleOperatorTransfer(s,action,flow,{transfer,fundGovernment,grantLoan});results.push(result);events.push(networkTransferMessage(result));continue;}
     const n=s.networks.find(n=>n.id===action.network),f=s.firms[n.sector],total=n.public+n.municipal+n.private+n.concession;
     const before={public:n.public,municipal:n.municipal,private:n.private,concession:n.concession};
     let amount=0,cost=0,reason=null;
@@ -51,8 +55,8 @@ export function prepareInfrastructure(s,prev,events){
     const publicCoverage=clamp(n.maintenanceCoverage,0,1),privateCoverage=clamp(n.privateMaintenanceCoverage,0,1);
     const publicRate=k.annualInfrastructureDepreciation*(1-.75*publicCoverage);
     const privateRate=k.annualInfrastructureDepreciation*(1-.75*privateCoverage);
-    for(const owner of ['public','municipal'])n[owner]*=Math.pow(1-publicRate,1/12);
-    for(const owner of ['private','concession']){const old=n[owner];n[owner]*=Math.pow(1-privateRate,1/12);s.firms[n.sector].infrastructureDepreciation+=old-n[owner];}
+    for(const owner of ['public','municipal']){const coverage=localGovernmentActive(s)?n[owner==='municipal'?'municipalMaintenanceCoverage':'centralMaintenanceCoverage']??publicCoverage:publicCoverage;const rate=k.annualInfrastructureDepreciation*(1-.75*coverage);n[owner]*=Math.pow(1-rate,1/12);}
+    for(const owner of ['private','concession']){const old=n[owner];n[owner]*=Math.pow(1-privateRate,1/12);if(!operatorTransfersActive(s))s.firms[n.sector].infrastructureDepreciation+=old-n[owner];}
     const congestion=clamp(prev.metrics.realGDPMonthly/s.base.monthlyGDP/Math.max(.1,prev.metrics.infrastructure/100),.5,3);
     const commercialFee=clamp(.65+.35*congestion+k.infrastructureCompetitionEffect*Math.max(0,1-s.institutions.competition),.4,2.5);
     const feeTarget=s.policy.infrastructurePricing==='capped'?Math.min(commercialFee,s.policy.infrastructureFeeCap/100):commercialFee;
@@ -104,15 +108,21 @@ export function settleInfrastructure(s,flow,{transfer,fundGovernment},events,pri
     const publicNeed=(n.public+n.municipal)*s.parameters.infrastructureMaintenanceRate/12;
     const realPaid=(flow.infrastructureMaintenance??0)/price*(n.public+n.municipal)/totalPublic;
     n.maintenanceCoverage=publicNeed>0?clamp(realPaid/publicNeed,0,1):1;
+    if(localGovernmentActive(s)){
+      n.centralMaintenanceCoverage=clamp(n.maintenanceCoverage*infrastructureDeliveryFactor(s,n.id,'public'),0,1);
+      n.municipalMaintenanceCoverage=clamp(n.maintenanceCoverage*infrastructureDeliveryFactor(s,n.id,'municipal'),0,1);
+      n.maintenanceCoverage=(n.centralMaintenanceCoverage*n.public+n.municipalMaintenanceCoverage*n.municipal)/Math.max(n.public+n.municipal,1e-9);
+    }
     const f=s.firms[n.sector],privateNeed=(n.private+n.concession)*s.parameters.infrastructureMaintenanceRate/12*price;
     // Maintenance purchases are an identified part of already settled domestic inputs.
-    const privatePaid=Math.min(privateNeed,Math.max(0,f.maintenanceInputs??0)*n.weight);
+    const privatePaid=foundationActive(s)?Math.min(privateNeed,n.operator.cash):Math.min(privateNeed,Math.max(0,f.maintenanceInputs??0)*n.weight);
+    if(foundationActive(s)){transfer(n.operator,f,privatePaid);n.operator.lastMaintenance=privatePaid;}
     n.privateMaintenanceCoverage=privateNeed>0?clamp(privatePaid/privateNeed,0,1):1;
     for(const c of n.contracts){
       const contracted=c.remaining*c.promisedAnnual/12*price;
       const earned=(flow.infrastructureFees??0)*n.weight*c.remaining/Math.max(n.private+n.concession,1);
       const claim=Math.max(0,contracted*c.guarantee-earned);
-      if(claim>0){fundGovernment(s,claim,flow);const paid=Math.min(claim,Math.max(0,s.government.cash));transfer(s.government,f,paid);f.concessionSupport+=paid;flow.concessionGuarantees+=paid;n.guaranteeClaim+=claim;}
+      if(claim>0){fundGovernment(s,claim,flow);const paid=Math.min(claim,Math.max(0,s.government.cash));transfer(s.government,operatorTransfersActive(s)?n.operator:f,paid);if(!operatorTransfersActive(s))f.concessionSupport+=paid;flow.concessionGuarantees+=paid;n.guaranteeClaim+=claim;}
     }
     if(n.maintenanceCoverage<.4&&s.month%12===0)events.push(`${n.name}: недостаточное обслуживание государственного фонда.`);
   }
@@ -121,7 +131,7 @@ export function settleInfrastructure(s,flow,{transfer,fundGovernment},events,pri
 export function infrastructureMetrics(s){
   const total=Math.max(s.infrastructure,1),directPublic=sum(s.networks.map(n=>n.public+n.municipal));
   const commercial=sum(s.networks.map(n=>n.private+n.concession));
-  const privateStock=sum(s.networks.map(n=>(n.private+n.concession)*(1-s.firms[n.sector].ownership.state-s.firms[n.sector].ownership.municipal)));
+  const privateStock=sum(s.networks.map(n=>(n.private+n.concession)*(operatorTransfersActive(s)?1:1-s.firms[n.sector].ownership.state-s.firms[n.sector].ownership.municipal)));
   return {privateInfrastructureShare:privateStock/total*100,corporateInfrastructureShare:commercial/total*100,
     publicInfrastructureStock:total-privateStock,privateInfrastructureStock:privateStock,
     infrastructureMaintenanceCoverage:sum(s.networks.map(n=>n.maintenanceCoverage*(n.public+n.municipal)))/Math.max(directPublic,1)*100,

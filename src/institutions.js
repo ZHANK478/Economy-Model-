@@ -2,6 +2,7 @@
 // concentration or corruption indices. See docs/INSTITUTIONS.md for assumptions.
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const total=a=>a.reduce((v,x)=>v+x,0);
+import {regimeContractFactor,regimeEntryFactor} from './regime-dynamics.js';
 export const INSTITUTION_REFERENCE_BUDGETS={antitrustBudget:.05,courtBudget:.08,soeAuditBudget:.025};
 
 export function initializeInstitutions(s) {
@@ -14,9 +15,9 @@ export function initializeInstitutions(s) {
 // improve today's outcomes: new services are paid later in the monthly ledger.
 export function advanceInstitutionOutcomes(s) {
   const i=s.institutions,p=s.policy,k=s.parameters;
-  i.registrationDays=p.registrationProcedures*(2+.65/Math.max(i.antitrustCapacity,.05));
+  i.registrationDays=p.registrationProcedures*(2+.65/Math.max(i.antitrustCapacity,.05))*regimeEntryFactor(s);
   i.contractDelayDays=180*.65/Math.max(i.courtCapacity,.05)*(1+i.ownershipRisk);
-  i.contractReliability=clamp(i.courtCapacity*(1-i.ownershipRisk)*(.65+.35*s.politics.judicialIndependence),0,.98);
+  i.contractReliability=clamp(i.courtCapacity*(1-i.ownershipRisk)*(.65+.35*s.politics.judicialIndependence)*regimeContractFactor(s),0,.98);
   const entryBarrier=Math.log(18/Math.max(i.registrationDays,1));
   const target=clamp(.60+k.entryCompetitionElasticity*entryBarrier
     +k.antitrustEffectiveness*(i.antitrustCapacity-.65)
@@ -43,8 +44,12 @@ export function governanceTarget(s,f) {
   const publicGovernance=.65+s.parameters.publicAccountabilityEffect*(ruleExecution-1);
   const common=.10*(i.competition-.60)+.10*(i.contractReliability-.65);
   const publicShare=f.ownership.state+(f.ownership.municipal??0),cooperative=f.ownership.cooperative??0;
-  const cooperativeGovernance=.65+.08*Number(p.workerRepresentation)*i.contractReliability;
-  return clamp(publicShare*publicGovernance+cooperative*cooperativeGovernance+(1-publicShare-cooperative)*.65+common,.05,.98);
+  // Employee participation is a governance arrangement, not an intrinsic
+  // cooperative-owner productivity bonus. Magnitude remains a sensitivity assumption.
+  const participation=.08*Number(p.workerRepresentation)*i.contractReliability;
+  const cooperativeGovernance=.65+(s.economy?.revision>=2?0:participation);
+  const sharedParticipation=s.economy?.revision>=2?participation:0;
+  return clamp(publicShare*publicGovernance+cooperative*cooperativeGovernance+(1-publicShare-cooperative)*.65+common+sharedParticipation,.05,.98);
 }
 
 // GDP includes purchases once. This function makes NO cash transfers: the

@@ -1,23 +1,35 @@
+import {syncFirmOwnership} from './firm-markets.js';
+import {recordOwnerTrade} from './wealth-owners.js';
+import {corporateDebt} from './corporate-bonds.js';
+import {sectorCompanies,syncEnterpriseOwnership} from './enterprise-market.js';
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const sum=a=>a.reduce((v,x)=>v+x,0);
 export function enterpriseValue(s,f) {
   const price=s.metrics.investmentPrice??s.consumerPriceIndex/100;
   // Transparent net-asset valuation, not a claimed observed stock-market price.
-  return Math.max(1,(f.capital+(f.infrastructureCapital??0))*price+f.inventory*f.price+f.cash-f.loanLC-f.loanFX*s.exchangeRate);
+  return Math.max(1,(f.capital+(f.id==='agriculture'?(s.agriculture?.privateStock??0):0)+(f.knowledgeCapital??0)+(f.infrastructureCapital??0))*price+f.inventory*f.price+f.cash-f.loanLC-f.loanFX*s.exchangeRate-corporateDebt(s,f));
 }
-export function scheduleOwnership(s,{sector,kind,points,compensation=1}) {
+export function scheduleOwnership(s,{sector,kind,points,compensation=1,enterpriseId}) {
   if(!Number.isInteger(sector)||sector<0||sector>=s.firms.length||!['purchase','privatize','foreignSale','cooperatize','municipalize','nationalize','recapitalize'].includes(kind)||!Number.isFinite(points)||points<=0||points>100||!Number.isFinite(compensation)||compensation<0||compensation>1)throw new Error('Некорректная операция собственности');
-  const action={id:s.nextActionId++,sector,kind,points,compensation,decisionMonth:s.month,effectiveMonth:s.month+1};
+  if(enterpriseId!==undefined&&!sectorCompanies(s,sector).some(c=>c.id===enterpriseId))throw new Error('Предприятие не найдено');
+  const action={...(enterpriseId?{enterpriseId}:{}),id:s.nextActionId++,sector,kind,points,compensation,decisionMonth:s.month,effectiveMonth:s.month+1};
   s.pendingActions.push(action);return action;
 }
 export function executeOwnership(s,flow,events,{fundGovernment,transfer,foreignPayment}) {
   const results=[];
-  for(const action of s.pendingActions.filter(a=>a.kind!=='restructure'&&!a.network)){
-    const f=s.firms[action.sector],o=f.ownership,before={...o},value=enterpriseValue(s,f),wanted=action.points/100;
+  const actions=s.pendingActions.filter(a=>a.kind!=='restructure'&&!a.network).flatMap(a=>!a.enterpriseId&&sectorCompanies(s,a.sector).length?sectorCompanies(s,a.sector).map(c=>({...a,enterpriseId:c.id})):[a]);
+  for(const action of actions){
+    const f=action.enterpriseId?sectorCompanies(s,action.sector).find(c=>c.id===action.enterpriseId):s.firms[action.sector],o=f.ownership,before={...o},domesticBefore=[...f.domesticOwners],value=enterpriseValue(s,f),wanted=action.points/100;
     let fraction=0,cost=0;
+    if(action.enterpriseId&&!f.active){results.push({...action,before,after:{...o},actualPoints:0,cost:0,valuation:value,rejected:true,reason:'insolvency-estate'});continue;}
     const courtBlocks=action.kind==='nationalize'&&action.compensation<1&&s.policy.judicialReview&&s.politics.judicialIndependence>.5;
     const coopBlocks=action.kind==='cooperatize'&&!s.policy.cooperativeEntry;
     if(courtBlocks||coopBlocks){results.push({...action,before,after:{...o},actualPoints:0,cost:0,valuation:value,rejected:true,reason:courtBlocks?'judicial-review':'cooperative-entry'});events.push(courtBlocks?`${f.name}: суд остановил изъятие без полной компенсации.`:`${f.name}: передача кооперативу невозможна при запрете этой формы.`);continue;}
+    if(action.kind==='municipalize'&&s.territorialGovernment?.localProperty===false){
+      results.push({...action,before,after:{...o},actualPoints:0,cost:0,valuation:value,rejected:true,reason:'local-property-centralized'});
+      events.push(`${f.name}: законом отменена муниципальная собственность.`);
+      continue;
+    }
     if(action.kind==='municipalize'){
       fraction=Math.min(wanted,o.state);o.state-=fraction;o.municipal+=fraction;
     }else if(action.kind==='foreignSale'){
@@ -69,9 +81,12 @@ export function executeOwnership(s,flow,events,{fundGovernment,transfer,foreignP
       if(compensation<1){s.institutions.ownershipRisk=clamp(s.institutions.ownershipRisk+fraction*(1-compensation),0,1);events.push(`${f.name}: изъятие с неполной компенсацией повысило риск прав собственности.`);}
     }
     for(const key of ['state','domestic','foreign','municipal','cooperative'])o[key]=Math.max(0,o[key]);
-    f.reorganization=clamp(f.reorganization+Math.abs(o.state-before.state)*s.parameters.ownershipDisruption,0,.15);
+    f.reorganization=clamp((f.reorganization??0)+(s.economy?.revision>=2?.5*['state','domestic','foreign','municipal','cooperative'].reduce((v,key)=>v+Math.abs(o[key]-before[key]),0):Math.abs(o.state-before.state))*s.parameters.ownershipDisruption,0,.15);
+    if(action.enterpriseId&&action.kind==='recapitalize'&&cost>0)f.active=true;
+    recordOwnerTrade(s,f,domesticBefore,action.kind,value,action.compensation);
     const actual={...action,before,after:{...o},actualPoints:fraction*100,cost,valuation:value};results.push(actual);
     events.push(`${f.name}: ${action.kind}, передано ${actual.actualPoints.toFixed(1)} п.п.; стоимость ${cost.toFixed(0)} млн.`);
   }
+  syncEnterpriseOwnership(s);if(s.economy?.revision>=21)for(const sector of [3,4])syncFirmOwnership(s,sector);
   return results;
 }

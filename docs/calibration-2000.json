@@ -1,0 +1,240 @@
+{
+  "retrieved": "2026-10-15",
+  "targetYear": 2000,
+  "observations": {
+    "gdpPerCapita": {
+      "indicator": "NY.GDP.PCAP.CD",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NY.GDP.PCAP.CD?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 396.670730249751,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 7524.0271380091,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 22340.5939516217,
+          "year": 2000
+        }
+      }
+    },
+    "agricultureEmployment": {
+      "indicator": "SL.AGR.EMPL.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SL.AGR.EMPL.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 67.5956893034896,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 17.5244317345134,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 3.92859020647262,
+          "year": 2000
+        }
+      }
+    },
+    "industryEmployment": {
+      "indicator": "SL.IND.EMPL.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SL.IND.EMPL.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 13.0892190327164,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 25.3492095908114,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 26.3850401291446,
+          "year": 2000
+        }
+      }
+    },
+    "servicesEmployment": {
+      "indicator": "SL.SRV.EMPL.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SL.SRV.EMPL.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 19.3150811251213,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 57.1263586746752,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 69.6863818634834,
+          "year": 2000
+        }
+      }
+    },
+    "agricultureValueAdded": {
+      "indicator": "NV.AGR.TOTL.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NV.AGR.TOTL.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 22.7181480755923,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 3.1592651345406,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 1.98449655121117,
+          "year": 2000
+        }
+      }
+    },
+    "lifeExpectancy": {
+      "indicator": "SP.DYN.LE00.IN",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SP.DYN.LE00.IN?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 62.049,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 72.562,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 79.0560975609756,
+          "year": 2000
+        }
+      }
+    },
+    "fertility": {
+      "indicator": "SP.DYN.TFRT.IN",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SP.DYN.TFRT.IN?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 3.279,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 2.714,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 1.89,
+          "year": 2000
+        }
+      }
+    },
+    "privateCredit": {
+      "indicator": "FS.AST.PRVT.GD.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/FS.AST.PRVT.GD.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 21.7793890133235,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 14.3477809518427,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 77.3883861486517,
+          "year": 2001
+        }
+      }
+    },
+    "childShare14": {
+      "indicator": "SP.POP.0014.TO.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SP.POP.0014.TO.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 37.3226802030851,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 34.3200781274208,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 18.926146788424,
+          "year": 2000
+        }
+      }
+    },
+    "elderlyShare": {
+      "indicator": "SP.POP.65UP.TO.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/SP.POP.65UP.TO.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 3.46140181652951,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 5.01410425565983,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 16.0086458283083,
+          "year": 2000
+        }
+      }
+    },
+    "exportsGDP": {
+      "indicator": "NE.EXP.GNFS.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NE.EXP.GNFS.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 12.3442012279919,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 24.2311734681303,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 29.7580489893129,
+          "year": 2000
+        }
+      }
+    },
+    "importsGDP": {
+      "indicator": "NE.IMP.GNFS.ZS",
+      "source": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NE.IMP.GNFS.ZS?date=1998:2002&format=json&per_page=100",
+      "observations": {
+        "BGD": {
+          "value": 16.9775131339119,
+          "year": 2000
+        },
+        "MEX": {
+          "value": 25.6792357191195,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 28.0279980425069,
+          "year": 2000
+        }
+      }
+    },
+    "schooling": {
+      "source": "https://barrolee.github.io/BarroLeeDataSet/BLData/BL_v3_MF1564.csv",
+      "definition": "Completed schooling, both sexes, ages 15-64, Barro-Lee v3, yr_sch",
+      "observations": {
+        "MEX": {
+          "value": 7.96,
+          "year": 2000
+        },
+        "BGD": {
+          "value": 4.767,
+          "year": 2000
+        },
+        "FRA": {
+          "value": 10.225,
+          "year": 2000
+        }
+      }
+    }
+  }
+}

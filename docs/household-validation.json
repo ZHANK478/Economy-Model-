@@ -1,0 +1,120 @@
+{
+  "revision": 21,
+  "date": "2026-10-31T01:48:02.875Z",
+  "results": [
+    {
+      "country": "poor",
+      "months": 24,
+      "current": {
+        "foodExpenditureShare": 0.34640614471173714,
+        "incomeGini": 50.66443899685643,
+        "wealthGini": 82.08529888703056,
+        "realGDPPerCapita": 479.65147051972264,
+        "unemployment": 33.17366824599537,
+        "auditError": 2.3021584638627246e-12
+      },
+      "legacy18": {
+        "foodExpenditureShare": 0.4474946140762147,
+        "incomeGini": 31.27439048984601,
+        "wealthGini": 71.29207287078142,
+        "realGDPPerCapita": 523.54918631847,
+        "unemployment": 14.399492415976646,
+        "auditError": 2.7995383788947947e-12
+      },
+      "foodCalibration": {
+        "targetAgricultureShare": 0.227181480755923,
+        "actualAgricultureShare": 0.19129297310283447
+      },
+      "foodPriceResponse": {
+        "initialPhysicalShare": 0.5777626827849509,
+        "dearerRawFoodPhysicalShare": 0.567998013584362
+      },
+      "skillSupplyResponse": {
+        "beforePremium": 0.08330478837959618,
+        "oneExtraYearAllGroupsPremium": 0.04801680219367318
+      },
+      "taxSensitivity": {
+        "controlGini": 51.02969679943741,
+        "zeroIncomeTaxGini": 51.24657213161859
+      }
+    },
+    {
+      "country": "middle",
+      "months": 24,
+      "current": {
+        "foodExpenditureShare": 0.24042023110924607,
+        "incomeGini": 34.30049523754127,
+        "wealthGini": 76.72918772757023,
+        "realGDPPerCapita": 5696.512986022058,
+        "unemployment": 16.86616019179744,
+        "auditError": 2.5011104298755527e-11
+      },
+      "legacy18": {
+        "foodExpenditureShare": 0.04673210592605377,
+        "incomeGini": 31.436562057080558,
+        "wealthGini": 71.1060226440215,
+        "realGDPPerCapita": 6030.339312986263,
+        "unemployment": 7.371522173496747,
+        "auditError": 3.1377567211166024e-11
+      },
+      "foodCalibration": {
+        "targetAgricultureShare": 0.031592651345406,
+        "actualAgricultureShare": 0.03159265134391618
+      },
+      "foodPriceResponse": {
+        "initialPhysicalShare": 0.3806998787335991,
+        "dearerRawFoodPhysicalShare": 0.37681259279941837
+      },
+      "skillSupplyResponse": {
+        "beforePremium": 0.0727952787768498,
+        "oneExtraYearAllGroupsPremium": 0.03752253154735057
+      },
+      "taxSensitivity": {
+        "controlGini": 34.879057794113244,
+        "zeroIncomeTaxGini": 35.14830359552927
+      }
+    },
+    {
+      "country": "rich",
+      "months": 24,
+      "current": {
+        "foodExpenditureShare": 0.09822828676377568,
+        "incomeGini": 26.293721758402118,
+        "wealthGini": 71.8773739468314,
+        "realGDPPerCapita": 27298.282719156174,
+        "unemployment": 2.925109040588847,
+        "auditError": 1.8025048120762222e-10
+      },
+      "legacy18": {
+        "foodExpenditureShare": 0.0012893757455103108,
+        "incomeGini": 31.629434852050164,
+        "wealthGini": 71.00055333169072,
+        "realGDPPerCapita": 27690.433953476804,
+        "unemployment": 4.705323469849465,
+        "auditError": 1.0913936421275139e-10
+      },
+      "foodCalibration": {
+        "targetAgricultureShare": 0.0198449655121117,
+        "actualAgricultureShare": 0.020011686640645687
+      },
+      "foodPriceResponse": {
+        "initialPhysicalShare": 0.1215852983551122,
+        "dearerRawFoodPhysicalShare": 0.12158529835486354
+      },
+      "skillSupplyResponse": {
+        "beforePremium": 0.07133312790474511,
+        "oneExtraYearAllGroupsPremium": 0.036045141718822116
+      },
+      "taxSensitivity": {
+        "controlGini": 26.2413618377913,
+        "zeroIncomeTaxGini": 26.251883838084883
+      }
+    }
+  ],
+  "limitations": [
+    "Matched initial policy and seed, no political or defense systems; current and legacy calibrations differ because the old food-fitting bug is removed.",
+    "No target GDP growth or Gini level; these diagnostics do not certify country realism.",
+    "Food price response is an isolated basket calculation; the complete economy also changes incomes, prices and supplies.",
+    "Tax experiment changes only income tax and progressivity for one month; it is not a general verdict on liberal policy."
+  ]
+}

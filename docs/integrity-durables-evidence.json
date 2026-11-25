@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "revision": 22,
+  "date": "2026-10-31",
+  "status": "Directional mechanism evidence; coefficients remain assumptions",
+  "sources": [
+    {
+      "url": "https://www.nber.org/papers/w11753",
+      "use": "Experimental Indonesian audit and missing-expenditure result; not a universal coefficient"
+    },
+    {
+      "url": "https://www.nber.org/papers/w22443",
+      "use": "Brazilian audits and subsequent legal consequences; actual versus detected corruption"
+    },
+    {
+      "url": "https://www.nber.org/papers/w12274",
+      "use": "Licensing, informal agents and access to permits; not GDP elasticity"
+    },
+    {
+      "url": "https://www.bea.gov/help/glossary/consumer-durable-goods",
+      "use": "New consumer durables are consumption purchases, not additional productive investment"
+    },
+    {
+      "url": "https://www.nber.org/papers/w3907",
+      "use": "Liquidity and intertemporal durable demand"
+    },
+    {
+      "url": "https://www.nber.org/papers/w7149",
+      "use": "Used durable trade and transaction costs"
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/",
+      "use": "Repair diagnoses, failure modes and conditional observed lifetimes; selection limits"
+    },
+    {
+      "url": "https://www.imf.org/-/media/files/data/2019/2019-fsi-guide.pdf",
+      "use": "Nonreceived interest and distributable bank income; not universal legal debt cancellation"
+    }
+  ],
+  "notImplemented": [
+    "Full tender bidding and fictitious materials accounting",
+    "Individual brands, exact device counts, mortgages and car market",
+    "National household asset-survey calibration",
+    "Full IFRS9 valuation and judicial priority of all creditors"
+  ]
+}

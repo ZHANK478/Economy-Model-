@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "revision": 22,
+  "sourceSHA256": "685ce88a6664cd4613853c72b05877a3e569e55183fdb42b43e3a711e4ae1aa9",
+  "tests": {
+    "count": 474,
+    "passed": 474,
+    "command": "node --test --test-concurrency=3 tests/*.test.js"
+  },
+  "monthlyStates": 3408,
+  "roundTrips": 30,
+  "exactContinuations": 30,
+  "replays": 15,
+  "maxRelativeAudit": 4.9895814448113084e-14,
+  "browserQA": "Existing revision-21 save advanced to revision 22; consumption disclosure and durable stock details verified. Production deployment is checked separately by Sites.",
+  "limitations": [
+    "First implementation of all eight roadmap stages, not country microdata calibration.",
+    "Initial consumer stock, quality, lifetimes and enforcement coefficients are disclosed assumptions.",
+    "Historical reports for previous revisions do not describe current equations."
+  ]
+}

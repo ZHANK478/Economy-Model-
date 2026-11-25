@@ -9,7 +9,15 @@
     "start": "python -m http.server 8000",
     "validate": "node scripts/validate.mjs",
     "validate:extensions": "node scripts/validate-extensions.mjs",
-    "validate:politics": "node scripts/validate-politics.mjs"
+    "validate:politics": "node scripts/validate-politics.mjs",
+    "validate:regimes": "node scripts/validate-regimes.mjs",
+    "validate:supply": "node scripts/validate-supply-chains.mjs",
+    "validate:open": "node scripts/validate-open-economy.mjs",
+    "validate:current": "node scripts/validate-current.mjs",
+    "validate:households": "node scripts/validate-households.mjs",
+    "validate:owners-settlements": "node scripts/validate-owners-settlements.mjs",
+    "validate:firms-capital-talent": "node scripts/validate-firms-capital-talent.mjs",
+    "validate:integrity-durables": "node scripts/validate-integrity-durables.mjs"
   },
   "engines": {
     "node": ">=20"

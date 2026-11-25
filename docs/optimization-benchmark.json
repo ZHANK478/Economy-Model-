@@ -1,0 +1,207 @@
+{
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "method": "Two isolated runs per version, alternating order; 180 monthly turns per country, identical seed/shocks, politics/defense off. Hashing/export/import outside the turn timer. Server Node measurements, not phone/browser latency or memory measurements.",
+  "summary": [
+    {
+      "country": "poor",
+      "beforeMs": 9108.238457500001,
+      "afterMs": 6425.2336104999995,
+      "reductionPercent": 29.456901677741364,
+      "speedup": 1.4175731202388477,
+      "stateHash": "fb29d256831293d01069c65a49d476e4f7eb7ce011f9513daf6b57a615a14171",
+      "exportBytes": 95489478
+    },
+    {
+      "country": "middle",
+      "beforeMs": 9539.574531999999,
+      "afterMs": 6234.764179499999,
+      "reductionPercent": 34.64316297770081,
+      "speedup": 1.530061804641508,
+      "stateHash": "62b0fc5a3c2c10e78a3f8c86be2f17f7da259a7c42f44d573af2a7a699c7bd2a",
+      "exportBytes": 98752738
+    },
+    {
+      "country": "rich",
+      "beforeMs": 8814.340711500003,
+      "afterMs": 5953.312404500006,
+      "reductionPercent": 32.45878960938321,
+      "speedup": 1.4805775528993566,
+      "stateHash": "403555533e7823eb0f0d3ccfa0f6eff2efc5ce92b561bddab5e8815fae75fe4e",
+      "exportBytes": 99128686
+    }
+  ],
+  "runs": [
+    {
+      "trial": 1,
+      "kind": "baseline",
+      "rows": [
+        {
+          "country": "poor",
+          "months": 180,
+          "totalMs": 9119.791983000005,
+          "medianTurnMs": 51.26235500000075,
+          "p95TurnMs": 67.25173199999972,
+          "maxTurnMs": 85.08559599999998,
+          "exportMs": 502.19829500000014,
+          "importMs": 844.4013520000008,
+          "exportBytes": 95489478,
+          "stateHash": "fb29d256831293d01069c65a49d476e4f7eb7ce011f9513daf6b57a615a14171"
+        },
+        {
+          "country": "middle",
+          "months": 180,
+          "totalMs": 9678.434779999998,
+          "medianTurnMs": 56.290429000000586,
+          "p95TurnMs": 70.27029600000242,
+          "maxTurnMs": 77.59657499999958,
+          "exportMs": 516.062414,
+          "importMs": 847.4850360000019,
+          "exportBytes": 98752738,
+          "stateHash": "62b0fc5a3c2c10e78a3f8c86be2f17f7da259a7c42f44d573af2a7a699c7bd2a"
+        },
+        {
+          "country": "rich",
+          "months": 180,
+          "totalMs": 8855.204054999998,
+          "medianTurnMs": 53.19412800000282,
+          "p95TurnMs": 65.10545800000182,
+          "maxTurnMs": 82.51397899999938,
+          "exportMs": 528.7830590000012,
+          "importMs": 878.2006100000035,
+          "exportBytes": 99128686,
+          "stateHash": "403555533e7823eb0f0d3ccfa0f6eff2efc5ce92b561bddab5e8815fae75fe4e"
+        }
+      ]
+    },
+    {
+      "trial": 1,
+      "kind": "current",
+      "rows": [
+        {
+          "country": "poor",
+          "months": 180,
+          "totalMs": 6379.307933999995,
+          "medianTurnMs": 35.80614800000012,
+          "p95TurnMs": 44.202891000000136,
+          "maxTurnMs": 74.64588599999999,
+          "exportMs": 475.5570740000003,
+          "importMs": 822.1911319999999,
+          "exportBytes": 95489478,
+          "stateHash": "fb29d256831293d01069c65a49d476e4f7eb7ce011f9513daf6b57a615a14171"
+        },
+        {
+          "country": "middle",
+          "months": 180,
+          "totalMs": 6187.353589000002,
+          "medianTurnMs": 35.645408999998835,
+          "p95TurnMs": 42.70978400000058,
+          "maxTurnMs": 57.68333299999904,
+          "exportMs": 504.9853400000011,
+          "importMs": 908.8081880000009,
+          "exportBytes": 98752738,
+          "stateHash": "62b0fc5a3c2c10e78a3f8c86be2f17f7da259a7c42f44d573af2a7a699c7bd2a"
+        },
+        {
+          "country": "rich",
+          "months": 180,
+          "totalMs": 5905.126077000015,
+          "medianTurnMs": 33.317275000001246,
+          "p95TurnMs": 43.37292199999865,
+          "maxTurnMs": 55.57984900000156,
+          "exportMs": 522.2655149999991,
+          "importMs": 815.0228349999998,
+          "exportBytes": 99128686,
+          "stateHash": "403555533e7823eb0f0d3ccfa0f6eff2efc5ce92b561bddab5e8815fae75fe4e"
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "kind": "current",
+      "rows": [
+        {
+          "country": "poor",
+          "months": 180,
+          "totalMs": 6471.159287000003,
+          "medianTurnMs": 36.058670000000006,
+          "p95TurnMs": 46.2178899999999,
+          "maxTurnMs": 76.056885,
+          "exportMs": 489.0180819999996,
+          "importMs": 857.8221380000005,
+          "exportBytes": 95489478,
+          "stateHash": "fb29d256831293d01069c65a49d476e4f7eb7ce011f9513daf6b57a615a14171"
+        },
+        {
+          "country": "middle",
+          "months": 180,
+          "totalMs": 6282.174769999996,
+          "medianTurnMs": 35.25867599999947,
+          "p95TurnMs": 42.94434999999976,
+          "maxTurnMs": 50.516333999999915,
+          "exportMs": 502.31301500000154,
+          "importMs": 931.5077390000006,
+          "exportBytes": 98752738,
+          "stateHash": "62b0fc5a3c2c10e78a3f8c86be2f17f7da259a7c42f44d573af2a7a699c7bd2a"
+        },
+        {
+          "country": "rich",
+          "months": 180,
+          "totalMs": 6001.498731999996,
+          "medianTurnMs": 34.729567999998835,
+          "p95TurnMs": 41.98555099999794,
+          "maxTurnMs": 66.2869869999995,
+          "exportMs": 481.8581200000008,
+          "importMs": 790.0402890000005,
+          "exportBytes": 99128686,
+          "stateHash": "403555533e7823eb0f0d3ccfa0f6eff2efc5ce92b561bddab5e8815fae75fe4e"
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "kind": "baseline",
+      "rows": [
+        {
+          "country": "poor",
+          "months": 180,
+          "totalMs": 9096.684931999998,
+          "medianTurnMs": 52.8965619999999,
+          "p95TurnMs": 65.69813599999998,
+          "maxTurnMs": 79.35404400000002,
+          "exportMs": 509.9452459999993,
+          "importMs": 847.1361070000003,
+          "exportBytes": 95489478,
+          "stateHash": "fb29d256831293d01069c65a49d476e4f7eb7ce011f9513daf6b57a615a14171"
+        },
+        {
+          "country": "middle",
+          "months": 180,
+          "totalMs": 9400.714283999998,
+          "medianTurnMs": 54.689995000000636,
+          "p95TurnMs": 70.37641000000076,
+          "maxTurnMs": 74.13851000000068,
+          "exportMs": 501.3453679999984,
+          "importMs": 880.0119029999987,
+          "exportBytes": 98752738,
+          "stateHash": "62b0fc5a3c2c10e78a3f8c86be2f17f7da259a7c42f44d573af2a7a699c7bd2a"
+        },
+        {
+          "country": "rich",
+          "months": 180,
+          "totalMs": 8773.477368000007,
+          "medianTurnMs": 52.284435999998095,
+          "p95TurnMs": 62.3050089999997,
+          "maxTurnMs": 78.4377659999991,
+          "exportMs": 503.0853109999989,
+          "importMs": 839.4299039999969,
+          "exportBytes": 99128686,
+          "stateHash": "403555533e7823eb0f0d3ccfa0f6eff2efc5ce92b561bddab5e8815fae75fe4e"
+        }
+      ]
+    }
+  ]
+}

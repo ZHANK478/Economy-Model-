@@ -1,0 +1,65 @@
+{
+  "indicator": "FM.LBL.BMNY.GD.ZS",
+  "url": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/FM.LBL.BMNY.GD.ZS?date=2000&format=json",
+  "retrieved": "2026-10-25",
+  "data": [
+    {
+      "page": 1,
+      "pages": 1,
+      "per_page": 50,
+      "total": 3,
+      "sourceid": "2",
+      "lastupdated": "2026-10-08"
+    },
+    [
+      {
+        "indicator": {
+          "id": "FM.LBL.BMNY.GD.ZS",
+          "value": "Broad money (% of GDP)"
+        },
+        "country": {
+          "id": "BD",
+          "value": "Bangladesh"
+        },
+        "countryiso3code": "BGD",
+        "date": "2000",
+        "value": 30.5539892604712,
+        "unit": "",
+        "obs_status": "",
+        "decimal": 1
+      },
+      {
+        "indicator": {
+          "id": "FM.LBL.BMNY.GD.ZS",
+          "value": "Broad money (% of GDP)"
+        },
+        "country": {
+          "id": "FR",
+          "value": "France"
+        },
+        "countryiso3code": "FRA",
+        "date": "2000",
+        "value": null,
+        "unit": "",
+        "obs_status": "",
+        "decimal": 1
+      },
+      {
+        "indicator": {
+          "id": "FM.LBL.BMNY.GD.ZS",
+          "value": "Broad money (% of GDP)"
+        },
+        "country": {
+          "id": "MX",
+          "value": "Mexico"
+        },
+        "countryiso3code": "MEX",
+        "date": "2000",
+        "value": 21.357251506457,
+        "unit": "",
+        "obs_status": "",
+        "decimal": 1
+      }
+    ]
+  ]
+}

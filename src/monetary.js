@@ -1,9 +1,12 @@
+import {euroAdopted} from './foreign-programme.js';
+import {ecbRate} from './euro-observations.js';
+
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const fixedExchange=s=>['currencyBoard','dollarized'].includes(s.policy.monetaryRegime);
 export const hasDiscretionaryCB=s=>['discretion','rule'].includes(s.policy.monetaryRegime);
 export function initializeMonetary(s){
   const regime=s.policy.monetaryRegime;
-  const rate=regime==='discretion'?s.policy.rate:regime==='rule'?s.parameters.neutralRealRate*100+s.policy.inflationTarget+1.5*(8-s.policy.inflationTarget)-4
+  const rate=regime==='discretion'?s.policy.rate:regime==='rule'?s.parameters.neutralRealRate*100+s.policy.inflationTarget+1.5*((s.initialAccounts?s.initialMacro.inflationAnnual*100:8)-s.policy.inflationTarget)-(s.initialAccounts?0:4)
     :fixedExchange(s)?s.world.globalRate:s.world.globalRate+6;
   s.monetary={effectiveRate:clamp(rate,0,40),peg:s.exchangeRate,previousRegime:regime};
 }
@@ -12,6 +15,11 @@ export function advanceMonetary(s,prev,w,events){
   if(regime!==prev.policy.monetaryRegime){
     s.monetary.peg=prev.exchangeRate;
     events.push('Изменён денежный режим. Существующие номинальные договоры сохраняются; их ставка пересматривается с задержкой.');
+  }
+  if(euroAdopted(s)){
+    s.monetary.effectiveRate=ecbRate(s);
+    s.monetary.previousRegime=regime;
+    return;
   }
   const independent=s.politics.enabled&&s.politics.constitution.independentCB;
   if(regime==='discretion'&&!independent)s.monetary.effectiveRate=s.policy.rate;

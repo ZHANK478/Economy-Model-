@@ -1,0 +1,862 @@
+{
+  "consumptionGDP": {
+    "indicator": "NE.CON.PRVT.ZS",
+    "url": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NE.CON.PRVT.ZS?date=1990:2000&format=json&per_page=1000",
+    "retrieved": "2026-10-25",
+    "observations": [
+      {
+        "country": "BGD",
+        "year": 2000,
+        "value": 75.0081004560836
+      },
+      {
+        "country": "BGD",
+        "year": 1999,
+        "value": 76.2326634048507
+      },
+      {
+        "country": "BGD",
+        "year": 1998,
+        "value": 76.2386093679149
+      },
+      {
+        "country": "BGD",
+        "year": 1997,
+        "value": 77.9569929010812
+      },
+      {
+        "country": "BGD",
+        "year": 1996,
+        "value": 78.8521134250216
+      },
+      {
+        "country": "BGD",
+        "year": 1995,
+        "value": 82.2433238502068
+      },
+      {
+        "country": "BGD",
+        "year": 1994,
+        "value": 82.0129894265772
+      },
+      {
+        "country": "BGD",
+        "year": 1993,
+        "value": 82.746877697313
+      },
+      {
+        "country": "BGD",
+        "year": 1992,
+        "value": 81.684367438001
+      },
+      {
+        "country": "BGD",
+        "year": 1991,
+        "value": 81.2904893597465
+      },
+      {
+        "country": "BGD",
+        "year": 1990,
+        "value": 80.0404603729271
+      },
+      {
+        "country": "FRA",
+        "year": 2000,
+        "value": 53.8448988688494
+      },
+      {
+        "country": "FRA",
+        "year": 1999,
+        "value": 53.6505661048147
+      },
+      {
+        "country": "FRA",
+        "year": 1998,
+        "value": 53.9064482258867
+      },
+      {
+        "country": "FRA",
+        "year": 1997,
+        "value": 53.949330572522
+      },
+      {
+        "country": "FRA",
+        "year": 1996,
+        "value": 54.9029462289381
+      },
+      {
+        "country": "FRA",
+        "year": 1995,
+        "value": 54.4015401518402
+      },
+      {
+        "country": "FRA",
+        "year": 1994,
+        "value": 54.7222566081515
+      },
+      {
+        "country": "FRA",
+        "year": 1993,
+        "value": 55.0616713248915
+      },
+      {
+        "country": "FRA",
+        "year": 1992,
+        "value": 54.63735114134
+      },
+      {
+        "country": "FRA",
+        "year": 1991,
+        "value": 54.5320838947465
+      },
+      {
+        "country": "FRA",
+        "year": 1990,
+        "value": 54.6653137604471
+      },
+      {
+        "country": "MEX",
+        "year": 2000,
+        "value": 69.0091905191634
+      },
+      {
+        "country": "MEX",
+        "year": 1999,
+        "value": 67.7529245410577
+      },
+      {
+        "country": "MEX",
+        "year": 1998,
+        "value": 68.0694924670417
+      },
+      {
+        "country": "MEX",
+        "year": 1997,
+        "value": 68.881640067563
+      },
+      {
+        "country": "MEX",
+        "year": 1996,
+        "value": 68.8478316341531
+      },
+      {
+        "country": "MEX",
+        "year": 1995,
+        "value": 68.7999871001072
+      },
+      {
+        "country": "MEX",
+        "year": 1994,
+        "value": 70.239625626689
+      },
+      {
+        "country": "MEX",
+        "year": 1993,
+        "value": 71.0740449142034
+      },
+      {
+        "country": "MEX",
+        "year": 1992,
+        "value": 71.9009031538031
+      },
+      {
+        "country": "MEX",
+        "year": 1991,
+        "value": 70.7962728484782
+      },
+      {
+        "country": "MEX",
+        "year": 1990,
+        "value": 69.9667925567093
+      }
+    ]
+  },
+  "governmentConsumptionGDP": {
+    "indicator": "NE.CON.GOVT.ZS",
+    "url": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NE.CON.GOVT.ZS?date=1990:2000&format=json&per_page=1000",
+    "retrieved": "2026-10-25",
+    "observations": [
+      {
+        "country": "BGD",
+        "year": 2000,
+        "value": 4.97312138319291
+      },
+      {
+        "country": "BGD",
+        "year": 1999,
+        "value": 5.03961520253427
+      },
+      {
+        "country": "BGD",
+        "year": 1998,
+        "value": 5.12567978040796
+      },
+      {
+        "country": "BGD",
+        "year": 1997,
+        "value": 4.90298208959861
+      },
+      {
+        "country": "BGD",
+        "year": 1996,
+        "value": 4.72749921814699
+      },
+      {
+        "country": "BGD",
+        "year": 1995,
+        "value": 4.62988612520877
+      },
+      {
+        "country": "BGD",
+        "year": 1994,
+        "value": 4.88315945317799
+      },
+      {
+        "country": "BGD",
+        "year": 1993,
+        "value": 4.95383869591304
+      },
+      {
+        "country": "BGD",
+        "year": 1992,
+        "value": 4.45122187024089
+      },
+      {
+        "country": "BGD",
+        "year": 1991,
+        "value": 4.13633163394744
+      },
+      {
+        "country": "BGD",
+        "year": 1990,
+        "value": 4.05325016763114
+      },
+      {
+        "country": "FRA",
+        "year": 2000,
+        "value": 22.5671731170038
+      },
+      {
+        "country": "FRA",
+        "year": 1999,
+        "value": 22.8751429955818
+      },
+      {
+        "country": "FRA",
+        "year": 1998,
+        "value": 22.882743269493
+      },
+      {
+        "country": "FRA",
+        "year": 1997,
+        "value": 23.6993641470231
+      },
+      {
+        "country": "FRA",
+        "year": 1996,
+        "value": 23.7415432258114
+      },
+      {
+        "country": "FRA",
+        "year": 1995,
+        "value": 23.46371205066
+      },
+      {
+        "country": "FRA",
+        "year": 1994,
+        "value": 23.5003585798804
+      },
+      {
+        "country": "FRA",
+        "year": 1993,
+        "value": 23.736291662973
+      },
+      {
+        "country": "FRA",
+        "year": 1992,
+        "value": 22.6294945838815
+      },
+      {
+        "country": "FRA",
+        "year": 1991,
+        "value": 22.0121754693475
+      },
+      {
+        "country": "FRA",
+        "year": 1990,
+        "value": 21.5268989251465
+      },
+      {
+        "country": "MEX",
+        "year": 2000,
+        "value": 9.03701601445798
+      },
+      {
+        "country": "MEX",
+        "year": 1999,
+        "value": 8.68918618690726
+      },
+      {
+        "country": "MEX",
+        "year": 1998,
+        "value": 8.03111070015044
+      },
+      {
+        "country": "MEX",
+        "year": 1997,
+        "value": 7.85051211515208
+      },
+      {
+        "country": "MEX",
+        "year": 1996,
+        "value": 7.66513804599418
+      },
+      {
+        "country": "MEX",
+        "year": 1995,
+        "value": 8.04099372436735
+      },
+      {
+        "country": "MEX",
+        "year": 1994,
+        "value": 8.97501349673226
+      },
+      {
+        "country": "MEX",
+        "year": 1993,
+        "value": 8.57734983797047
+      },
+      {
+        "country": "MEX",
+        "year": 1992,
+        "value": 9.94287452110455
+      },
+      {
+        "country": "MEX",
+        "year": 1991,
+        "value": 9.11590346275984
+      },
+      {
+        "country": "MEX",
+        "year": 1990,
+        "value": 8.430745096664
+      }
+    ]
+  },
+  "investmentGDP": {
+    "indicator": "NE.GDI.TOTL.ZS",
+    "url": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NE.GDI.TOTL.ZS?date=1990:2000&format=json&per_page=1000",
+    "retrieved": "2026-10-25",
+    "observations": [
+      {
+        "country": "BGD",
+        "year": 2000,
+        "value": 23.8085625731369
+      },
+      {
+        "country": "BGD",
+        "year": 1999,
+        "value": 22.7213703034657
+      },
+      {
+        "country": "BGD",
+        "year": 1998,
+        "value": 22.1214128239602
+      },
+      {
+        "country": "BGD",
+        "year": 1997,
+        "value": 21.8162145054057
+      },
+      {
+        "country": "BGD",
+        "year": 1996,
+        "value": 20.7299506037379
+      },
+      {
+        "country": "BGD",
+        "year": 1995,
+        "value": 19.1197958221399
+      },
+      {
+        "country": "BGD",
+        "year": 1994,
+        "value": 18.402556188374
+      },
+      {
+        "country": "BGD",
+        "year": 1993,
+        "value": 17.9468320109013
+      },
+      {
+        "country": "BGD",
+        "year": 1992,
+        "value": 17.3050292766937
+      },
+      {
+        "country": "BGD",
+        "year": 1991,
+        "value": 16.8959474633294
+      },
+      {
+        "country": "BGD",
+        "year": 1990,
+        "value": 16.4586755151535
+      },
+      {
+        "country": "FRA",
+        "year": 2000,
+        "value": 21.8578770673408
+      },
+      {
+        "country": "FRA",
+        "year": 1999,
+        "value": 20.7309977149378
+      },
+      {
+        "country": "FRA",
+        "year": 1998,
+        "value": 20.1267071009099
+      },
+      {
+        "country": "FRA",
+        "year": 1997,
+        "value": 18.8941086598021
+      },
+      {
+        "country": "FRA",
+        "year": 1996,
+        "value": 19.2219851950366
+      },
+      {
+        "country": "FRA",
+        "year": 1995,
+        "value": 20.1870996465323
+      },
+      {
+        "country": "FRA",
+        "year": 1994,
+        "value": 20.0277093753549
+      },
+      {
+        "country": "FRA",
+        "year": 1993,
+        "value": 19.2950345538123
+      },
+      {
+        "country": "FRA",
+        "year": 1992,
+        "value": 21.8057009887396
+      },
+      {
+        "country": "FRA",
+        "year": 1991,
+        "value": 23.5809030570734
+      },
+      {
+        "country": "FRA",
+        "year": 1990,
+        "value": 24.4166717434176
+      },
+      {
+        "country": "MEX",
+        "year": 2000,
+        "value": 22.2649246086997
+      },
+      {
+        "country": "MEX",
+        "year": 1999,
+        "value": 22.2434377526015
+      },
+      {
+        "country": "MEX",
+        "year": 1998,
+        "value": 22.8039516150861
+      },
+      {
+        "country": "MEX",
+        "year": 1997,
+        "value": 21.1460171251619
+      },
+      {
+        "country": "MEX",
+        "year": 1996,
+        "value": 19.7376269610509
+      },
+      {
+        "country": "MEX",
+        "year": 1995,
+        "value": 19.311543363515
+      },
+      {
+        "country": "MEX",
+        "year": 1994,
+        "value": 24.3372579448117
+      },
+      {
+        "country": "MEX",
+        "year": 1993,
+        "value": 22.6240306711262
+      },
+      {
+        "country": "MEX",
+        "year": 1992,
+        "value": 23.3205990261669
+      },
+      {
+        "country": "MEX",
+        "year": 1991,
+        "value": 23.4262767281749
+      },
+      {
+        "country": "MEX",
+        "year": 1990,
+        "value": 23.270603544648
+      }
+    ]
+  },
+  "growth": {
+    "indicator": "NY.GDP.MKTP.KD.ZG",
+    "url": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/NY.GDP.MKTP.KD.ZG?date=1990:2000&format=json&per_page=1000",
+    "retrieved": "2026-10-25",
+    "observations": [
+      {
+        "country": "BGD",
+        "year": 2000,
+        "value": 5.29329471892532
+      },
+      {
+        "country": "BGD",
+        "year": 1999,
+        "value": 4.67015636882111
+      },
+      {
+        "country": "BGD",
+        "year": 1998,
+        "value": 5.1770268731498
+      },
+      {
+        "country": "BGD",
+        "year": 1997,
+        "value": 4.4898964976265
+      },
+      {
+        "country": "BGD",
+        "year": 1996,
+        "value": 4.52291921684423
+      },
+      {
+        "country": "BGD",
+        "year": 1995,
+        "value": 5.12127789724337
+      },
+      {
+        "country": "BGD",
+        "year": 1994,
+        "value": 3.89012644116818
+      },
+      {
+        "country": "BGD",
+        "year": 1993,
+        "value": 4.71156172453999
+      },
+      {
+        "country": "BGD",
+        "year": 1992,
+        "value": 5.44268554966725
+      },
+      {
+        "country": "BGD",
+        "year": 1991,
+        "value": 3.48522781598027
+      },
+      {
+        "country": "BGD",
+        "year": 1990,
+        "value": 5.62225816160344
+      },
+      {
+        "country": "FRA",
+        "year": 2000,
+        "value": 4.14099996402915
+      },
+      {
+        "country": "FRA",
+        "year": 1999,
+        "value": 3.39930808809441
+      },
+      {
+        "country": "FRA",
+        "year": 1998,
+        "value": 3.45259434279616
+      },
+      {
+        "country": "FRA",
+        "year": 1997,
+        "value": 2.5270616339357
+      },
+      {
+        "country": "FRA",
+        "year": 1996,
+        "value": 1.39707987198881
+      },
+      {
+        "country": "FRA",
+        "year": 1995,
+        "value": 2.30479278392259
+      },
+      {
+        "country": "FRA",
+        "year": 1994,
+        "value": 2.38366086110145
+      },
+      {
+        "country": "FRA",
+        "year": 1993,
+        "value": -0.35899781051468
+      },
+      {
+        "country": "FRA",
+        "year": 1992,
+        "value": 1.5160611169627
+      },
+      {
+        "country": "FRA",
+        "year": 1991,
+        "value": 1.23666248297356
+      },
+      {
+        "country": "FRA",
+        "year": 1990,
+        "value": 2.82962715326478
+      },
+      {
+        "country": "MEX",
+        "year": 2000,
+        "value": 5.02928399378261
+      },
+      {
+        "country": "MEX",
+        "year": 1999,
+        "value": 2.75503039300564
+      },
+      {
+        "country": "MEX",
+        "year": 1998,
+        "value": 6.18507893082885
+      },
+      {
+        "country": "MEX",
+        "year": 1997,
+        "value": 7.19887615284711
+      },
+      {
+        "country": "MEX",
+        "year": 1996,
+        "value": 6.21829715869302
+      },
+      {
+        "country": "MEX",
+        "year": 1995,
+        "value": -5.91029962358286
+      },
+      {
+        "country": "MEX",
+        "year": 1994,
+        "value": 4.39412788764169
+      },
+      {
+        "country": "MEX",
+        "year": 1993,
+        "value": 2.86699945461075
+      },
+      {
+        "country": "MEX",
+        "year": 1992,
+        "value": 3.56861354412243
+      },
+      {
+        "country": "MEX",
+        "year": 1991,
+        "value": 3.97590497138043
+      },
+      {
+        "country": "MEX",
+        "year": 1990,
+        "value": 5.25004329944582
+      }
+    ]
+  },
+  "remittancesGDP": {
+    "indicator": "BX.TRF.PWKR.DT.GD.ZS",
+    "url": "https://api.worldbank.org/v2/country/BGD;MEX;FRA/indicator/BX.TRF.PWKR.DT.GD.ZS?date=1990:2000&format=json&per_page=1000",
+    "retrieved": "2026-10-25",
+    "observations": [
+      {
+        "country": "BGD",
+        "year": 2000,
+        "value": 3.68659677566545
+      },
+      {
+        "country": "BGD",
+        "year": 1999,
+        "value": 3.52403766089633
+      },
+      {
+        "country": "BGD",
+        "year": 1998,
+        "value": 3.2125653790456
+      },
+      {
+        "country": "BGD",
+        "year": 1997,
+        "value": 3.1641028158335
+      },
+      {
+        "country": "BGD",
+        "year": 1996,
+        "value": 2.89557515603607
+      },
+      {
+        "country": "BGD",
+        "year": 1995,
+        "value": 3.16729631986545
+      },
+      {
+        "country": "BGD",
+        "year": 1994,
+        "value": 3.40813403881952
+      },
+      {
+        "country": "BGD",
+        "year": 1993,
+        "value": 3.03732522639564
+      },
+      {
+        "country": "BGD",
+        "year": 1992,
+        "value": 2.87540936210898
+      },
+      {
+        "country": "BGD",
+        "year": 1991,
+        "value": 2.48523337346491
+      },
+      {
+        "country": "BGD",
+        "year": 1990,
+        "value": 2.46489398309466
+      },
+      {
+        "country": "FRA",
+        "year": 2000,
+        "value": 0.651713325235688
+      },
+      {
+        "country": "FRA",
+        "year": 1999,
+        "value": 0.635297037033581
+      },
+      {
+        "country": "FRA",
+        "year": 1998,
+        "value": 0.669451002331571
+      },
+      {
+        "country": "FRA",
+        "year": 1997,
+        "value": 0.672080824712051
+      },
+      {
+        "country": "FRA",
+        "year": 1996,
+        "value": 0.271119692548108
+      },
+      {
+        "country": "FRA",
+        "year": 1995,
+        "value": 0.277974457779336
+      },
+      {
+        "country": "FRA",
+        "year": 1994,
+        "value": 0.285311613462142
+      },
+      {
+        "country": "FRA",
+        "year": 1993,
+        "value": 0.382835844259933
+      },
+      {
+        "country": "FRA",
+        "year": 1992,
+        "value": 0.37512781305561
+      },
+      {
+        "country": "FRA",
+        "year": 1991,
+        "value": 0.366930345581405
+      },
+      {
+        "country": "FRA",
+        "year": 1990,
+        "value": 0.320817463533919
+      },
+      {
+        "country": "MEX",
+        "year": 2000,
+        "value": 1.01403249008326
+      },
+      {
+        "country": "MEX",
+        "year": 1999,
+        "value": 1.05324862192883
+      },
+      {
+        "country": "MEX",
+        "year": 1998,
+        "value": 1.16622414897123
+      },
+      {
+        "country": "MEX",
+        "year": 1997,
+        "value": 1.05947176895571
+      },
+      {
+        "country": "MEX",
+        "year": 1996,
+        "value": 1.14518315744959
+      },
+      {
+        "country": "MEX",
+        "year": 1995,
+        "value": 1.14902911194404
+      },
+      {
+        "country": "MEX",
+        "year": 1994,
+        "value": 0.744523837433014
+      },
+      {
+        "country": "MEX",
+        "year": 1993,
+        "value": 0.750527061359959
+      },
+      {
+        "country": "MEX",
+        "year": 1992,
+        "value": 1.01884075312704
+      },
+      {
+        "country": "MEX",
+        "year": 1991,
+        "value": 0.967619380213456
+      },
+      {
+        "country": "MEX",
+        "year": 1990,
+        "value": 1.18582063650748
+      }
+    ]
+  }
+}

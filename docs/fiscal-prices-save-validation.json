@@ -1,0 +1,109 @@
+{
+  "recordedDefaultMonth": 193,
+  "cases": [
+    {
+      "revision": 22,
+      "month": 193,
+      "defaultActive": true,
+      "arrears": 2.057533800745086,
+      "fundBeforeUSD": 539.3980218955986,
+      "fundAfterUSD": 560.553536727547,
+      "centralReservesBeforeUSD": 989.7119165738427,
+      "fundWithdrawalLC": 1.2115498158700326,
+      "fundDepositLC": 6.462871618849353,
+      "payments": [
+        {
+          "dueUSD": 6.505055215214525,
+          "paidUSD": 6.505055215214525,
+          "reason": null,
+          "before": {
+            "cashLC": 51.5463273244551,
+            "reservesUSD": 917.7064453643818,
+            "bankReservesLC": 529.7329351184051
+          },
+          "reservesUsedUSD": 0,
+          "settlementCreditLC": 0
+        },
+        {
+          "dueUSD": 6.353711982930407,
+          "paidUSD": 0,
+          "reason": "budget-cash",
+          "before": {
+            "cashLC": 0,
+            "reservesUSD": 917.7064453643818,
+            "bankReservesLC": 529.7329351184051
+          },
+          "reservesUsedUSD": 0,
+          "settlementCreditLC": 0
+        }
+      ],
+      "audit": {
+        "population": 8.881784197001252e-15,
+        "centralBank": 0,
+        "bankBalance": 2.3874235921539366e-12,
+        "nominalGDP": 0,
+        "realGDP": -5.684341886080802e-14,
+        "goods": 3.1918997591329177e-15,
+        "governmentCash": 1.509903313490213e-14,
+        "externalNFA": 1.7053025658242404e-12,
+        "governmentDebt": -4.263256414560601e-13,
+        "pensionFund": 7.815970093361102e-14,
+        "investmentFund": 3.552713678800501e-15,
+        "bankBooks": 0,
+        "interbankNet": -3.0411229090532288e-12
+      }
+    },
+    {
+      "revision": 23,
+      "month": 193,
+      "defaultActive": false,
+      "arrears": 0,
+      "fundBeforeUSD": 539.3980218955986,
+      "fundAfterUSD": 309.36526309010753,
+      "centralReservesBeforeUSD": 989.7119165738427,
+      "fundWithdrawalLC": 57.099817769053566,
+      "fundDepositLC": 0,
+      "payments": [
+        {
+          "dueUSD": 6.505055215214525,
+          "paidUSD": 6.505055215214525,
+          "reason": null,
+          "before": {
+            "cashLC": 87.88455700290012,
+            "reservesUSD": 917.7064453643818,
+            "bankReservesLC": 529.7329351184051
+          },
+          "reservesUsedUSD": 0,
+          "settlementCreditLC": 0
+        },
+        {
+          "dueUSD": 6.353711982930407,
+          "paidUSD": 6.353711982930407,
+          "reason": null,
+          "before": {
+            "cashLC": 35.85784427285155,
+            "reservesUSD": 917.7064453643818,
+            "bankReservesLC": 529.7329351184051
+          },
+          "reservesUsedUSD": 0,
+          "settlementCreditLC": 0
+        }
+      ],
+      "audit": {
+        "population": 8.881784197001252e-15,
+        "centralBank": -5.684341886080802e-14,
+        "bankBalance": 3.524291969370097e-12,
+        "nominalGDP": -1.4210854715202004e-14,
+        "realGDP": 5.684341886080802e-14,
+        "goods": 1.4210854715202004e-14,
+        "governmentCash": 0,
+        "externalNFA": 3.353761712787673e-12,
+        "governmentDebt": -3.552713678800501e-14,
+        "pensionFund": -2.842170943040401e-14,
+        "investmentFund": 3.552713678800501e-15,
+        "bankBooks": 0,
+        "interbankNet": -4.2303938130316965e-12
+      }
+    }
+  ]
+}

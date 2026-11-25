@@ -1,3 +1,5 @@
+import {worldDecisionEffects} from './world-decisions.js';
+import {localGovernmentActive} from './local-government.js';
 // Cohort-component accounting. Population is in millions; bins are months of age,
 // by sex, with an open 100+ tail. Schedules are synthetic, not estimated country data.
 const LAST=1200;
@@ -24,7 +26,7 @@ export function periodLifeExpectancy(d,parameters,month=0) {
   for(const sex of ['male','female']) {
     let survival=1,years=0;
     for(let age=0;age<100;age++) {
-      const hazard=annualMortalityHazard(age+.5,sex)*d.mortalityFactor*Math.exp(-parameters.mortalityImprovement*month/12);
+      const hazard=annualMortalityHazard(age+.5,sex)*d.mortalityFactor*Math.exp(-parameters.mortalityImprovement*month/12)+(age>=18&&age<55?(d.warAdultHazard??0):0);
       const end=survival*Math.exp(-hazard);
       years+=(survival+end)/2;survival=end;
     }
@@ -48,26 +50,37 @@ export function createDemography(population,parameters) {
   d.births=expectedBirths(d);d.pregnancies=Array(parameters.pregnancyDelay).fill(d.births);
   return d;
 }
+export function matchInitialLifeExpectancy(d,parameters,target){
+ let lo=.05,hi=8;
+ for(let i=0;i<60;i++){
+  d.mortalityFactor=(lo+hi)/2;
+  if(periodLifeExpectancy(d,parameters)>target)lo=d.mortalityFactor;else hi=d.mortalityFactor;
+ }
+ d.initialMortalityFactor=d.mortalityFactor;
+ d.deaths=['female','male'].reduce((v,sex)=>v+d[sex].reduce((t,n,a)=>t+n*(-Math.expm1(-annualMortalityHazard(a/12,sex)*d.mortalityFactor/12)),0),0);
+}
 export function advanceDemography(s,prev) {
   const d=s.demography,k=s.parameters,p=s.policy;
   const oldPopulation=prev.population;
   // Only realized last-month expenditure changes services. Changing a slider alone
   // cannot buy survival or deliver babies; effects have service and pregnancy lags.
   const fiscal=prev.lastReport.fiscal;
-  const realHealth=(fiscal.healthcare??s.base.monthlyGDP*.02)/(prev.consumerPriceIndex/100)/oldPopulation;
+  const realHealth=(fiscal.healthcare??s.base.monthlyGDP*.02)*(localGovernmentActive(prev)?prev.localGovernment.lastAllocation?.healthcare.deliveryFactor??1:1)/(prev.consumerPriceIndex/100)/oldPopulation;
   const realFamily=(fiscal.familyBenefits??s.base.monthlyGDP*.005)/(prev.consumerPriceIndex/100)/Math.max(prev.ageCohorts[0],.001);
   const income=Math.max(.2,prev.metrics.realIncomeIndex/100);
   const privateAccess=Math.max(0,(prev.services?.healthCoverage??1)-(prev.services?.publicHealthDelivered??1));
   d.healthAccess+=k.healthAdjustment*(clamp(realHealth/10+privateAccess,.15,3)-d.healthAccess);
   d.familySupport+=k.fertilityAdjustment*(clamp(realFamily/(25/2.8),0,5)-d.familySupport);
-  const mortalityTarget=clamp(Math.exp(-k.healthMortalityElasticity*Math.log(Math.max(.15,d.healthAccess))-.08*Math.log(income)),.55,1.8);
+  const realMonthlyIncome=s.economy?prev.metrics.realGDPMonthly/oldPopulation:0;
+  const mortalityTarget=s.economy?clamp(d.initialMortalityFactor*Math.exp(-k.healthMortalityElasticity*Math.log(Math.max(.05,d.healthAccess)/s.economy.initial.healthAccess)-.08*Math.log(Math.max(.2,realMonthlyIncome/(s.base.monthlyGDP/s.base.initialPopulation)))),.2,5):clamp(Math.exp(-k.healthMortalityElasticity*Math.log(Math.max(.15,d.healthAccess))-.08*Math.log(income)),.55,1.8);
   d.mortalityFactor+=k.healthAdjustment*(mortalityTarget-d.mortalityFactor);
-  const fertilityTarget=clamp(k.initialFertility*Math.exp(-k.fertilityTrend*s.month/12
+  const developmentFertility=s.economy?-.09*(s.education.meanYears-s.economy.initial.schooling)-.10*Math.log(Math.max(.2,realMonthlyIncome/(s.base.monthlyGDP/s.base.initialPopulation))):-k.fertilityTrend*s.month/12;
+  const fertilityTarget=clamp(k.initialFertility*Math.exp(developmentFertility
     +k.fertilityBenefitElasticity*Math.log(Math.max(.2,d.familySupport))+.06*Math.log(income)
     -.002*Math.max(0,prev.metrics.unemployment-9)-.10*(prev.skills-1)
     -k.fertilityHousingElasticity*Math.log(Math.max(.1,prev.services?.housingBurden??.25)/k.initialHousingBurden)
     +k.fertilityChildcareElasticity*Math.log((.5+(prev.services?.childcareAccess??.5)))
-    +k.fertilityWorkLifeElasticity*(Math.log(40/p.normalWorkweek)+Math.min(p.parentalLeaveMonths,12)/12-1/3)),.5,5);
+    +k.fertilityWorkLifeElasticity*(Math.log(40/p.normalWorkweek)+Math.min(p.parentalLeaveMonths,12)/12-1/3)),.5,Math.max(5,k.initialFertility));
   d.fertility+=k.fertilityAdjustment*(fertilityTarget-d.fertility);
   const conceived=expectedBirths(d);
   d.births=d.pregnancies.shift();d.pregnancies.push(conceived);
@@ -81,7 +94,16 @@ export function advanceDemography(s,prev) {
     }
     next[0]+=d.births*(sex==='male'?1.05/2.05:1/2.05);d[sex]=next;
   }
-  const migrationPressure=clamp(.004*Math.log(income)-.025*(prev.metrics.unemployment-9)/100,-.01,.01);
+  // Combat losses calculated last month enter cohorts once, with a one-month
+  // reporting lag. Recruitment is not sex-disaggregated, so adult losses are
+  // proportional across both sexes (an explicit approximation, not country data).
+  const adults=['female','male'].reduce((v,sex)=>v+sum(d[sex].slice(216,660)),0);
+  const killed=Math.min(adults,prev.defense?.pendingDeaths??0);
+  d.warAdultHazard=adults>0?killed/adults*12:0;d.warDeaths=killed;
+  if(killed>0)for(const sex of ['female','male'])for(let a=216;a<660;a++)d[sex][a]*=1-killed/adults;
+  deaths+=killed;
+  const relativeIncome=s.economy?realMonthlyIncome*12/(s.economy.previousWorldGDP/s.economy.regions.reduce((n,r)=>n+r.population,0)):income;
+  const migrationPressure=s.economy?clamp(s.economy.parameters.migrationIncomeResponse*Math.log(Math.max(.01,relativeIncome))-s.economy.parameters.migrationEmploymentResponse*(prev.metrics.unemployment-9)/100,-s.economy.parameters.migrationMaximum,s.economy.parameters.migrationMaximum):clamp(.004*Math.log(Math.max(.01,relativeIncome))-.025*(prev.metrics.unemployment-9)/100,-.01,.01);
   const desiredMigration=migrationPressure>0?migrationPressure*p.migrationOpenness/100:migrationPressure;
   d.migrationRate+=k.migrationAdjustment*(desiredMigration-d.migrationRate);
   const requested=oldPopulation*d.migrationRate/12;
@@ -89,6 +111,18 @@ export function advanceDemography(s,prev) {
   for(const sex of ['female','male']) for(let a=240;a<480;a++) {
     const amount=Math.max(-d[sex][a],requested/480);d[sex][a]+=amount;migrated+=amount;
   }
+  const arrivals=worldDecisionEffects(s).arrivals;
+  if(arrivals){
+    for(const sex of ['female','male'])for(let age=0;age<480;age++){
+      if(age<216)d[sex][age]+=arrivals*.30/432;
+      else d[sex][age]+=arrivals*.70/528;
+    }
+    migrated+=arrivals;
+  }
+  const remaining=['female','male'].reduce((v,sex)=>v+sum(d[sex]),0);
+  const refugees=Math.min(remaining,prev.defense?.pendingRefugees??0);
+  if(refugees>0){for(const sex of ['female','male'])for(let a=0;a<=LAST;a++)d[sex][a]*=1-refugees/remaining;migrated-=refugees;}
+  d.warRefugees=refugees;
   d.deaths=deaths;d.netMigration=migrated;
   s.ageCohorts=cohortTotals(d);s.population=sum(s.ageCohorts);s.workingAgeShare=s.ageCohorts[1]/s.population;
   d.populationResidual=s.population-(oldPopulation+d.births-deaths+migrated);

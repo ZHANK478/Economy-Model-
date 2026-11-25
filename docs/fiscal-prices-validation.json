@@ -1,0 +1,1081 @@
+{
+  "transitions": 2943,
+  "maxAuditRelative": 8.726185711829522e-13,
+  "results": [
+    {
+      "country": "poor",
+      "resource": false,
+      "revision": 22,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 500,
+          "unemployment": 3.27,
+          "inflation": 2.20825620937535,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 503.70631889017346,
+          "unemployment": 35.77908242843672,
+          "inflation": -10.884973383774932,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 67.34400066646562
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 579.1340087035529,
+          "unemployment": 9.907909122588588,
+          "inflation": -3.746998057900519,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 48.63245383275208
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 494.15135224248337,
+          "unemployment": 28.011539021218635,
+          "inflation": -7.534868725983612,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 36.546807211055054
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 507.2321369415996,
+          "unemployment": 26.275868933359682,
+          "inflation": -7.663097714235012,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 29.770361704934416
+        }
+      ]
+    },
+    {
+      "country": "poor",
+      "resource": false,
+      "revision": 23,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 500,
+          "unemployment": 3.27,
+          "inflation": 2.20825620937535,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 452.9481628588999,
+          "unemployment": 44.826087247195915,
+          "inflation": -9.475565782979544,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 73.92972009733573
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 552.2574396100008,
+          "unemployment": 18.992822736111147,
+          "inflation": -5.782508578647039,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 50.01215651979229
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 509.05046436219874,
+          "unemployment": 23.20039880550031,
+          "inflation": -5.942364239204034,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 37.67460447806618
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 496.12537760330696,
+          "unemployment": 26.9603299121826,
+          "inflation": -6.637843253974984,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 31.85615746963248
+        }
+      ]
+    },
+    {
+      "country": "poor",
+      "resource": true,
+      "revision": 22,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 500,
+          "unemployment": 3.27,
+          "inflation": 2.20825620937535,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 505.4113491948502,
+          "unemployment": 39.9068058529792,
+          "inflation": -12.344397528504313,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 64.60016377129958
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 593.1122439671026,
+          "unemployment": 10.965966169062424,
+          "inflation": -4.847924961140048,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 42.87510614085373
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 491.0667043336314,
+          "unemployment": 30.143064022382948,
+          "inflation": -8.360665879073903,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 31.3826622431752
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 495.96468710525704,
+          "unemployment": 32.341555916648105,
+          "inflation": -9.629318264382924,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 24.41922923067065
+        }
+      ]
+    },
+    {
+      "country": "poor",
+      "resource": true,
+      "revision": 23,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 500,
+          "unemployment": 3.27,
+          "inflation": 2.20825620937535,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 448.43910106486413,
+          "unemployment": 48.646247348389636,
+          "inflation": -10.53781747563326,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 71.70126064473097
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 542.6272653637842,
+          "unemployment": 25.275436242198456,
+          "inflation": -7.4952900695496645,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 44.80459591476572
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 512.037724229163,
+          "unemployment": 26.246397069018045,
+          "inflation": -7.393601659047178,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 30.88126308541719
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 494.47739694458994,
+          "unemployment": 28.917478462392786,
+          "inflation": -7.872267823678358,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 25.238413421769252
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "resource": false,
+      "revision": 22,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 6000,
+          "unemployment": 2.646,
+          "inflation": 9.49156149435402,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6241.646444926277,
+          "unemployment": 17.86719877207422,
+          "inflation": 1.0411497509832834,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 124.66598918270554
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6794.662091826355,
+          "unemployment": 8.68554933677138,
+          "inflation": 2.525934656609863,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 140.254904854984
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 7273.675656415656,
+          "unemployment": 7.05664801906809,
+          "inflation": 1.2979286146592717,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 152.0471779851305
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 7420.610682596295,
+          "unemployment": 6.588541596569552,
+          "inflation": 0.7073233219475172,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 155.3999900508041
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "resource": false,
+      "revision": 23,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 6000,
+          "unemployment": 2.646,
+          "inflation": 9.49156149435402,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 5909.7956037677295,
+          "unemployment": 25.05120503013397,
+          "inflation": 1.7230986281776772,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 130.47235478112034
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6793.282807994387,
+          "unemployment": 8.602775213899461,
+          "inflation": 2.4678688986057518,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 144.60205693963556
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 7281.895664064649,
+          "unemployment": 7.314147446882446,
+          "inflation": 1.249428780588091,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 157.47662077044401
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 7471.239830734388,
+          "unemployment": 6.4142111268820745,
+          "inflation": 0.5773717702326486,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 160.45827599057273
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "resource": true,
+      "revision": 22,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 6000,
+          "unemployment": 2.646,
+          "inflation": 9.49156149435402,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 6413.541920715958,
+          "unemployment": 21.626992829022452,
+          "inflation": -0.6310123521769295,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 115.79148871273111
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 6991.332857831577,
+          "unemployment": 12.147571742281881,
+          "inflation": 0.8723573849133137,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 121.11039052797297
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 7488.378477240827,
+          "unemployment": 9.017483209157518,
+          "inflation": 0.03627315706671297,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 122.77215469865045
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 7617.893136641289,
+          "unemployment": 8.536868042114577,
+          "inflation": -0.6289207744445746,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 121.46698427772564
+        }
+      ]
+    },
+    {
+      "country": "middle",
+      "resource": true,
+      "revision": 23,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 6000,
+          "unemployment": 2.646,
+          "inflation": 9.49156149435402,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 5980.83037630433,
+          "unemployment": 30.11495222629622,
+          "inflation": 0.17844026514428624,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 122.90781618775672
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 7098.755386405596,
+          "unemployment": 11.075181038443516,
+          "inflation": 1.0538244024451249,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 126.51810857563042
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 7612.344740963972,
+          "unemployment": 9.031091543911163,
+          "inflation": -0.04474594254675335,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 128.88143437736656
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 7814.062617419949,
+          "unemployment": 7.660386103358308,
+          "inflation": -0.730328365419286,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 127.13054962026322
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "resource": false,
+      "revision": 22,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 25000,
+          "unemployment": 10.218,
+          "inflation": 1.67061991153283,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 26659.15584504769,
+          "unemployment": 5.299218422753793,
+          "inflation": 1.6026625524293348,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 115.5444609107978
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 26099.67195799562,
+          "unemployment": 12.0723663971401,
+          "inflation": -1.5434465628399119,
+          "defaults": 0,
+          "fulfillment": 0.9999999999999998,
+          "cpi": 108.03262093864765
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 23383.898287774493,
+          "unemployment": 4.6641716567776275,
+          "inflation": 0.2151925431254087,
+          "defaults": 1,
+          "fulfillment": 1,
+          "cpi": 99.58092655538185
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 25328.359642968226,
+          "unemployment": 5.952966545069072,
+          "inflation": 0.4375328121792865,
+          "defaults": 1,
+          "fulfillment": 0.9947835131562822,
+          "cpi": 98.48489661270469
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "resource": false,
+      "revision": 23,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 25000,
+          "unemployment": 10.218,
+          "inflation": 1.67061991153283,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 26985.230199939768,
+          "unemployment": 4.552753610100357,
+          "inflation": 1.5300260424700118,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 114.28262091039116
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 25217.180647593832,
+          "unemployment": 16.60994626742285,
+          "inflation": -0.8415137859812072,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 112.0589115775545
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 25286.78563841778,
+          "unemployment": 9.054810358246513,
+          "inflation": -1.114501456723116,
+          "defaults": 1,
+          "fulfillment": 1,
+          "cpi": 104.35981071368387
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 25407.390895345816,
+          "unemployment": 7.7338239906513895,
+          "inflation": -0.3600175156647678,
+          "defaults": 1,
+          "fulfillment": 0.9942989207770124,
+          "cpi": 102.7343262500128
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "resource": true,
+      "revision": 22,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 25000,
+          "unemployment": 10.218,
+          "inflation": 1.67061991153283,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 25859.13581564749,
+          "unemployment": 8.03921812275632,
+          "inflation": 0.7646095606369752,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 113.81697320008386
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 25520.26709820363,
+          "unemployment": 24.21873419013639,
+          "inflation": -5.033498818498905,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 98.72779875255813
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 27772.24229485861,
+          "unemployment": 3.203629148393461,
+          "inflation": 0.46568695258943915,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 89.77677963991833
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 27234.903259356415,
+          "unemployment": 2.0563045891605958,
+          "inflation": 1.5662149083763177,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 92.62350743980082
+        }
+      ]
+    },
+    {
+      "country": "rich",
+      "resource": true,
+      "revision": 23,
+      "rows": [
+        {
+          "month": 0,
+          "gdpPerCapita": 25000,
+          "unemployment": 10.218,
+          "inflation": 1.67061991153283,
+          "defaults": 0,
+          "cpi": 100
+        },
+        {
+          "month": 60,
+          "gdpPerCapita": 26147.5687288149,
+          "unemployment": 6.456158095748088,
+          "inflation": 0.9027010946165204,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 112.84384265844405
+        },
+        {
+          "month": 120,
+          "gdpPerCapita": 24213.84747011326,
+          "unemployment": 29.758786657265258,
+          "inflation": -3.151978849391679,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 106.44043062272115
+        },
+        {
+          "month": 180,
+          "gdpPerCapita": 27241.363747933658,
+          "unemployment": 10.141717766253144,
+          "inflation": -1.2605658855764146,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 94.22279713267848
+        },
+        {
+          "month": 210,
+          "gdpPerCapita": 27874.491502808625,
+          "unemployment": 2.1063157050697168,
+          "inflation": 0.32648127945282823,
+          "defaults": 0,
+          "fulfillment": 1,
+          "cpi": 94.12592101472013
+        }
+      ]
+    }
+  ],
+  "shocks": [
+    {
+      "name": "no-change",
+      "month": 60,
+      "gdpPerCapita": 452.9481628588999,
+      "unemployment": 44.826087247195915,
+      "inflation": -9.475565782979544,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 73.92972009733573
+    },
+    {
+      "name": "spending-cut",
+      "month": 60,
+      "gdpPerCapita": 407.8067599013657,
+      "unemployment": 53.94078535305147,
+      "inflation": -11.745348260517563,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 64.81735912452439
+    },
+    {
+      "name": "spending-rise",
+      "month": 60,
+      "gdpPerCapita": 596.1281080371011,
+      "unemployment": 7.348313696582931,
+      "inflation": 0.051429985587359006,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 98.92066240977378
+    },
+    {
+      "name": "crop-failure",
+      "month": 60,
+      "gdpPerCapita": 489.7604010873931,
+      "unemployment": 39.52572992076473,
+      "inflation": -8.634525987355968,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 73.62877549315657
+    },
+    {
+      "name": "credit-stress",
+      "month": 60,
+      "gdpPerCapita": 452.01933993239606,
+      "unemployment": 44.93812683003572,
+      "inflation": -9.545710505217098,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 73.22364222596264
+    },
+    {
+      "name": "zero-rate",
+      "month": 60,
+      "gdpPerCapita": 473.1294817611549,
+      "unemployment": 40.29472203446822,
+      "inflation": -9.735113141291619,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 73.80239319759872
+    },
+    {
+      "name": "tariff",
+      "month": 60,
+      "gdpPerCapita": 426.537888369161,
+      "unemployment": 47.219757760067694,
+      "inflation": -8.659228490438908,
+      "defaults": 0,
+      "fulfillment": 1,
+      "cpi": 82.525330029717
+    }
+  ],
+  "historicalReplay": true,
+  "savedMetricMaxRelativeError": 4.561319376735367e-8,
+  "continuationReplayMaxRelativeError": 2.6351235168910103e-8,
+  "payment": [
+    {
+      "revision": 22,
+      "month": 194,
+      "gdpPerCapita": 287.03848708274614,
+      "unemployment": 63.37487359188617,
+      "inflation": -22.537930301434407,
+      "defaults": 1,
+      "fulfillment": 0.8788369279112391,
+      "cpi": 25.485074657008113,
+      "fundBeforeUSD": 560.553536727547,
+      "fundAfterUSD": 580.1847910273812,
+      "fiscal": {
+        "tax": 19.686283975745162,
+        "vat": 3.0688718750555477,
+        "tariff": 0.4496693753379916,
+        "incomeTax": 0,
+        "corporateTax": 0.21618897310332877,
+        "royalty": 15.721088736282102,
+        "purchases": 0,
+        "militaryPurchases": 0,
+        "militaryRequested": 2.8754385740533173,
+        "transfers": 0,
+        "familyBenefits": 0,
+        "healthcare": 0,
+        "education": 0,
+        "childcare": 0,
+        "infrastructureMaintenance": 0,
+        "concessionGuarantees": 0,
+        "institutionCost": 0,
+        "antitrust": 0,
+        "courts": 0,
+        "soeAudits": 0,
+        "politicalElections": 0,
+        "politicalSecurity": 0,
+        "politicalPatronage": 0,
+        "businessSupport": 0,
+        "interest": 6.942651964660883,
+        "bankRescue": 0,
+        "centralIncome": 0.4352928145586742,
+        "domesticIssued": 0,
+        "externalIssued": 0,
+        "domesticRedeemed": 27.574452223012795,
+        "externalRedeemed": 0,
+        "reserveSale": 17.79022777992982,
+        "fundWithdrawal": 1.4456479222469056,
+        "fundDeposit": 6.102241063577262,
+        "domesticHaircut": 0,
+        "externalHaircut": 0,
+        "interestCapitalized": 0,
+        "unfunded": 61.97206641646477,
+        "sovereignSpread": 0.21218809697520416,
+        "stateDividends": 0.6545195695123696,
+        "equityPurchases": 0,
+        "equitySales": 0,
+        "networkPurchases": 0,
+        "networkSales": 0,
+        "externalEquityRevaluation": 0,
+        "reserveConversion": 16.34420149301559,
+        "defaultProbability": 0.9774678371387915,
+        "marketClosed": false,
+        "foreignRate": 0.04,
+        "bankAccruedUnpaidInterest": 0.189190664961061,
+        "bankForeignInterestDueUSD": 0,
+        "bankForeignInterestPaidUSD": 0,
+        "bankForeignArrearsCreatedUSD": 0,
+        "financingRequests": [
+          {
+            "needed": 96.48917060413845,
+            "cashBefore": 34.51710418767368,
+            "shortage": 61.97206641646477,
+            "debt": 1577.0263696782183,
+            "gdpAnnual": 1254.7368323141748,
+            "debtCeilingHeadroom": 681.4999284872963,
+            "marketAccess": 0,
+            "bankHeadroom": 2715.7313401281017,
+            "bondWeight": 1,
+            "domesticIssued": 0,
+            "nonbankIssued": 0,
+            "foreignIssuedLC": 0,
+            "unfunded": 61.97206641646477
+          }
+        ],
+        "reserveRedemption": 0,
+        "treasuryPayments": [
+          {
+            "dueUSD": 6.737956902343717,
+            "paidUSD": 6.737956902343717,
+            "reason": null,
+            "before": {
+              "cashLC": 29.17271606386673,
+              "reservesUSD": 940.6993281344191,
+              "bankReservesLC": 553.295251612953
+            },
+            "reservesUsedUSD": 0,
+            "settlementCreditLC": 0
+          },
+          {
+            "dueUSD": 6.353711982930407,
+            "paidUSD": 0,
+            "reason": "budget-cash",
+            "before": {
+              "cashLC": 0,
+              "reservesUSD": 940.6993281344191,
+              "bankReservesLC": 553.295251612953
+            },
+            "reservesUsedUSD": 0,
+            "settlementCreditLC": 0
+          },
+          {
+            "dueUSD": 6.561172778596768,
+            "paidUSD": 0,
+            "reason": "budget-cash",
+            "before": {
+              "cashLC": 0,
+              "reservesUSD": 940.6993281344191,
+              "bankReservesLC": 553.295251612953
+            },
+            "reservesUsedUSD": 0,
+            "settlementCreditLC": 0
+          }
+        ],
+        "militaryWages": 0,
+        "socialContributions": 0.2304650159661928,
+        "pensions": 0,
+        "unemploymentBenefits": 0,
+        "housingAid": 0,
+        "defenseDomesticOrders": 0,
+        "defensePrivateOrders": 0,
+        "defenseImportedOrders": 0,
+        "research": 0,
+        "taxAdministration": 0,
+        "socialHousing": 0,
+        "retraining": 0,
+        "localAdministration": 0,
+        "agricultureProtection": 0,
+        "institutionRequested": {
+          "antitrust": 0.2091228053856958,
+          "courts": 0.2614035067321197,
+          "soeAudits": 0.2091228053856958
+        },
+        "localGovernment": {
+          "month": 194,
+          "healthcare": {
+            "central": 0,
+            "local": 0,
+            "areas": [
+              {
+                "area": "urban",
+                "amount": 0
+              },
+              {
+                "area": "industrial",
+                "amount": 0
+              },
+              {
+                "area": "rural",
+                "amount": 0
+              },
+              {
+                "area": "remote",
+                "amount": 0
+              }
+            ],
+            "deliveryFactor": 1.1481446166153912
+          },
+          "education": {
+            "central": 0,
+            "local": 0,
+            "areas": [
+              {
+                "area": "urban",
+                "amount": 0
+              },
+              {
+                "area": "industrial",
+                "amount": 0
+              },
+              {
+                "area": "rural",
+                "amount": 0
+              },
+              {
+                "area": "remote",
+                "amount": 0
+              }
+            ],
+            "deliveryFactor": 1.1477157447654318
+          },
+          "administration": 0
+        },
+        "infrastructureFees": 1.1830990240609032,
+        "integrityReceipts": 0,
+        "bankForeignArrearsRepaidUSD": 0
+      },
+      "arrears": 24.074119703877642
+    },
+    {
+      "revision": 23,
+      "month": 194,
+      "gdpPerCapita": 283.86386363372304,
+      "unemployment": 63.37487359188617,
+      "inflation": -21.993603804643424,
+      "defaults": 1,
+      "fulfillment": 0.7670273001393849,
+      "cpi": 25.664158451986584,
+      "fundBeforeUSD": 560.553536727547,
+      "fundAfterUSD": 299.2918463922255,
+      "fiscal": {
+        "tax": 19.45163880130815,
+        "vat": 2.7428147806477603,
+        "tariff": 0.46284335267770993,
+        "incomeTax": 0,
+        "corporateTax": 0.20800935754804237,
+        "royalty": 15.80415157353586,
+        "purchases": 5.15761503907259,
+        "militaryPurchases": 2.320095891541164,
+        "militaryRequested": 2.8754385740533173,
+        "transfers": 29.684786562910215,
+        "familyBenefits": 0.7358813784407754,
+        "healthcare": 0.40100725203141074,
+        "education": 0.8020145040628215,
+        "childcare": 0.07327473438973307,
+        "infrastructureMaintenance": 0,
+        "concessionGuarantees": 0,
+        "institutionCost": 1.230872078953972,
+        "antitrust": 0.1604029008125643,
+        "courts": 0.20050362601570537,
+        "soeAudits": 0.1604029008125643,
+        "politicalElections": 0.056052188050699205,
+        "politicalSecurity": 0.327751414614847,
+        "politicalPatronage": 0.10925047153828235,
+        "businessSupport": 0.2614035067321197,
+        "interest": 6.942651964660883,
+        "bankRescue": 0,
+        "centralIncome": 0.4352928145586742,
+        "domesticIssued": 0,
+        "externalIssued": 0,
+        "domesticRedeemed": 48.58512203810226,
+        "externalRedeemed": 12.914884761527176,
+        "reserveSale": 17.79022777992982,
+        "fundWithdrawal": 61.97206641646478,
+        "fundDeposit": 0,
+        "domesticHaircut": 0,
+        "externalHaircut": 0,
+        "interestCapitalized": 0,
+        "unfunded": 0,
+        "sovereignSpread": 0.21218809697520416,
+        "stateDividends": 0.6565865567949468,
+        "equityPurchases": 0,
+        "equitySales": 0,
+        "networkPurchases": 0,
+        "networkSales": 0,
+        "externalEquityRevaluation": 0,
+        "reserveConversion": 64.93558580466856,
+        "defaultProbability": 0.9774678371387915,
+        "marketClosed": false,
+        "foreignRate": 0.04,
+        "bankAccruedUnpaidInterest": 0.189190664961061,
+        "bankForeignInterestDueUSD": 0,
+        "bankForeignInterestPaidUSD": 0,
+        "bankForeignArrearsCreatedUSD": 0,
+        "treasuryFundFXUSD": 239.27229537492346,
+        "reserveRedemption": 0,
+        "treasuryPayments": [
+          {
+            "dueUSD": 6.737956902343717,
+            "paidUSD": 6.737956902343717,
+            "reason": null,
+            "before": {
+              "cashLC": 91.1447824803315,
+              "reservesUSD": 940.6993281344191,
+              "bankReservesLC": 553.295251612953
+            },
+            "reservesUsedUSD": 0,
+            "settlementCreditLC": 0
+          },
+          {
+            "dueUSD": 6.353711982930407,
+            "paidUSD": 6.353711982930407,
+            "reason": null,
+            "before": {
+              "cashLC": 40.96139660137531,
+              "reservesUSD": 940.6993281344191,
+              "bankReservesLC": 553.295251612953
+            },
+            "reservesUsedUSD": 0,
+            "settlementCreditLC": 0
+          },
+          {
+            "dueUSD": 6.561172778596768,
+            "paidUSD": 6.561172778596768,
+            "reason": null,
+            "before": {
+              "cashLC": 39.45427682238329,
+              "reservesUSD": 940.6993281344191,
+              "bankReservesLC": 553.295251612953
+            },
+            "reservesUsedUSD": 0,
+            "settlementCreditLC": 0
+          }
+        ],
+        "militaryWages": 0.4917142885709029,
+        "socialContributions": 0.23381973689877694,
+        "pensions": 29.47566375752452,
+        "unemploymentBenefits": 0,
+        "housingAid": 0.2091228053856958,
+        "defenseDomesticOrders": 1.646502151716589,
+        "defensePrivateOrders": 1.4579847018150573,
+        "defenseImportedOrders": 0.20728425540563605,
+        "research": 0.48120870243769287,
+        "taxAdministration": 0.14035253821099375,
+        "socialHousing": 0.1604029008125643,
+        "retraining": 0.04010072520314108,
+        "localAdministration": 0.14035253821099375,
+        "agricultureProtection": 0,
+        "institutionRequested": {
+          "antitrust": 0.2091228053856958,
+          "courts": 0.2614035067321197,
+          "soeAudits": 0.2091228053856958
+        },
+        "localGovernment": {
+          "month": 194,
+          "healthcare": {
+            "central": 0.3899828046297208,
+            "local": 0.011024447401689954,
+            "areas": [
+              {
+                "area": "urban",
+                "amount": 0.0022491954392192355
+              },
+              {
+                "area": "industrial",
+                "amount": 0.0014726874899649762
+              },
+              {
+                "area": "rural",
+                "amount": 0.004811767288085181
+              },
+              {
+                "area": "remote",
+                "amount": 0.0024907971844205603
+              }
+            ],
+            "deliveryFactor": 1.1482154661906891
+          },
+          "education": {
+            "central": 0.767938939366689,
+            "local": 0.03407556469613258,
+            "areas": [
+              {
+                "area": "urban",
+                "amount": 0.004879139930463582
+              },
+              {
+                "area": "industrial",
+                "amount": 0.003408222745544416
+              },
+              {
+                "area": "rural",
+                "amount": 0.018203436720087948
+              },
+              {
+                "area": "remote",
+                "amount": 0.007584765300036633
+              }
+            ],
+            "deliveryFactor": 1.1478266278671374
+          },
+          "administration": 0.14035253821099375
+        },
+        "infrastructureFees": 1.0570678926480432,
+        "integrityReceipts": 0.0002240409227237669,
+        "bankForeignArrearsRepaidUSD": 0
+      },
+      "arrears": 0
+    }
+  ],
+  "continuation": {
+    "month": 210,
+    "gdpPerCapita": 136.40623956922929,
+    "unemployment": 85.66072679739862,
+    "inflation": -26.822118644648196,
+    "defaults": 1,
+    "fulfillment": 0.43983355750010084,
+    "cpi": 17.081091334591527
+  },
+  "empiricalCertification": false
+}
