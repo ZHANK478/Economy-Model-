@@ -1,3 +1,5 @@
+import {playtestAnalytics} from './playtest-analytics.js';
+import {installAnalyticsDiagnostics} from './analytics-diagnostics.js';
 import {mountInterfaceSounds} from './interface-audio.js';
 import {savedLanguage, setGameLanguage} from './localization.js';
 
@@ -18,6 +20,7 @@ async function chooseGameLanguage() {
   picker.remove();
 }
 
+installAnalyticsDiagnostics(playtestAnalytics);
 mountInterfaceSounds();
 await chooseGameLanguage();
 await import('./app.js');

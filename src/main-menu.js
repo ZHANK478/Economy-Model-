@@ -11,7 +11,7 @@ const prototypeInfo = () => `<p>Mandatewright — прототип. Игра е�
 <p>${soundtrackLink(activeLanguage())}</p>
 <p><a href="./docs/THIRD-PARTY-NOTICES${activeLanguage()==='en'?'.en':''}.txt" target="_blank" rel="noopener">Источники и лицензии материалов</a></p>`;
 // Presentation only. Simulation and save handling remain in app.js.
-export function mountMainMenu({analytics,hasSave,onNew,onLoadSaves,onContinue,onLanguageChange}) {
+export function mountMainMenu({analytics,onCampaignStep,hasSave,onNew,onLoadSaves,onContinue,onLanguageChange}) {
  const root=document.createElement('section');root.id='main-menu';root.setAttribute('aria-label','Главное меню');
  root.innerHTML=`<div class="menu-map" aria-hidden="true">${deskAtlas(null,false,null,true)}</div><div class="menu-light" aria-hidden="true"></div><aside class="menu-content"><header><h1 lang="en">Mandatewright</h1></header><nav aria-label="Главное меню"><button data-menu="new">НОВАЯ ИГРА</button><button data-menu="load">ЗАГРУЗИТЬ</button><button data-menu="settings">НАСТРОЙКИ</button><button data-menu="about">ОБ ИГРЕ</button></nav><button type="button" class="menu-version" data-menu="development">Ранняя версия · ${PLAYTEST_BUILD}</button></aside><button class="menu-studio" data-menu="about" aria-label="Об игре"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9h11v22H8zM22 9h10v22H22z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 13h3v14h-3zm14 0h2v14h-2z"/></svg><span lang="en">Mandatewright</span></button><dialog class="menu-options" aria-labelledby="menu-options-title"><button data-close-button type="button" class="menu-options-close" autofocus aria-label="Закрыть">×</button><h2 id="menu-options-title">Настройки</h2><div class="menu-options-body"></div></dialog>`;
  document.body.append(root);
@@ -23,7 +23,7 @@ export function mountMainMenu({analytics,hasSave,onNew,onLoadSaves,onContinue,on
  const options=root.querySelector('dialog');
  const optionsBody=root.querySelector('.menu-options-body'),title=root.querySelector('#menu-options-title');
  function openPanel(heading,html){title.textContent=heading;optionsBody.innerHTML=html;if(!options.open)options.showModal();}
- const newGame=()=>showCountrySelection(root,onNew);
+ const newGame=()=>{onCampaignStep?.('begin');return showCountrySelection(root,onNew);};
  root.addEventListener('click',event=>{
   const toggle=event.target.closest('[data-analytics-toggle]');
   if(toggle){
@@ -44,7 +44,7 @@ export function mountMainMenu({analytics,hasSave,onNew,onLoadSaves,onContinue,on
   }
  });
  root.addEventListener('change',async event=>{
-  if(event.target.name==='campaign-party')analytics.mark('party');
+  if(event.target.name==='campaign-party'){analytics.mark('party');onCampaignStep?.('party');}
   if(event.target.id==='menu-motion')root.classList.toggle('still',event.target.checked);
   if(Object.hasOwn(event.target.dataset,'gameLanguage'))await onLanguageChange(event.target);
  });
