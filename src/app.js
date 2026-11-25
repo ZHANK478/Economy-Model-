@@ -863,11 +863,14 @@ function decisionResult(){
 
  const b=state.politics.bills.find(b=>b.id===resultBillId);
  if(b?.regimeReview?.accepted===false)return `<div class="ballot-result ballot-rejected"><div class="ballot-emblem" aria-hidden="true">×</div><h2 id="result-heading">Совет отклонил пакет</h2><p>${b.regimeReview.kind==='officers'?'Совет офицеров':'Руководящий совет партии'} не согласовал изменение своих ресурсов или полномочий.</p><p class="small">Поддержка ${n(b.regimeReview.support*100,0)} / 100 · необходимо ${n(b.regimeReview.required*100,0)}.</p></div>`;
- if(b?.status==='referendum')return `<div class="ballot-result"><h2 id="result-heading">Нужен референдум</h2></div><div>Парламент одобрил поправку. Осталось голосование граждан.</div><button class="primary wide" data-political-action="referendum" data-bill-id="${b.id}" ${decisionBudget(state).optionalRemaining<=0?'aria-disabled="true" data-blocked-reason="Нет свободных решений. Продолжите в следующем месяце."':''}>Провести референдум</button><button class="wide" data-action="result-close">Позже</button>`;
- const accepted=Boolean(resultExecutive)||Boolean(b&&['passed','enacted'].includes(b.status));
  const override=b?.vetoOverridden===true&&b.overrideVote?.passed===true;
  const vote=(override?b.overrideVote:null)??b?.finalVote??b?.articles.find(a=>a.vote&&!a.vote.passed)?.vote;
- return `<div class="ballot-result ${accepted?'ballot-accepted':'ballot-rejected'}"><div class="ballot-emblem" aria-hidden="true">${accepted?'✓':'×'}</div><h2 id="result-heading">${override?'Вето преодолено':accepted?'Принято':'Отклонено'}</h2>${b?.playerVote?`<p class="small">Ваша фракция: ${b.playerVote==='accept'?'за':b.playerVote==='reject'?'против':'воздержалась'}</p>`:''}${vote?`<div class="ballot-counts"><div><span>За:</span><b>${vote.yes}</b></div><div><span>Против:</span><b>${vote.no}</b></div></div>`:''}</div>`;
+ const threshold=vote?.total>0&&vote.required>Math.floor(vote.total/2)+1
+  ? `<p class="small ballot-threshold">Требуется минимум ${n(vote.required,0)} голосов из ${n(vote.total,0)} (≈${n(vote.required/vote.total*100,2)}%).</p>`
+  : '';
+ if(b?.status==='referendum')return `<div class="ballot-result"><h2 id="result-heading">Нужен референдум</h2></div><div>Парламент одобрил поправку. Осталось голосование граждан.</div>${threshold}<button class="primary wide" data-political-action="referendum" data-bill-id="${b.id}" ${decisionBudget(state).optionalRemaining<=0?'aria-disabled="true" data-blocked-reason="Нет свободных решений. Продолжите в следующем месяце."':''}>Провести референдум</button><button class="wide" data-action="result-close">Позже</button>`;
+ const accepted=Boolean(resultExecutive)||Boolean(b&&['passed','enacted'].includes(b.status));
+ return `<div class="ballot-result ${accepted?'ballot-accepted':'ballot-rejected'}"><div class="ballot-emblem" aria-hidden="true">${accepted?'✓':'×'}</div><h2 id="result-heading">${override?'Вето преодолено':accepted?'Принято':'Отклонено'}</h2>${b?.playerVote?`<p class="small">Ваша фракция: ${b.playerVote==='accept'?'за':b.playerVote==='reject'?'против':'воздержалась'}</p>`:''}${vote?`<div class="ballot-counts"><div><span>За:</span><b>${vote.yes}</b></div><div><span>Против:</span><b>${vote.no}</b></div></div>`:''}${threshold}</div>`;
 }
 function snapshotDecisions(){
  observedDecisionKeys=new Set((state.politics.bills??[]).filter(b=>b.decidedMonth!==undefined).map(b=>'bill:'+b.id+':'+b.decisionSequence));
