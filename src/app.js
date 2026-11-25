@@ -1,3 +1,4 @@
+import {analyticsField, createPlaytestAnalytics} from './playtest-analytics.js';
 import {pendingElectoralPact} from './electoral-pacts.js';
 import {ministerialBriefings} from './ministerial-briefings.js';
 import {ministryTitle} from './character-world.js';
@@ -118,6 +119,26 @@ let worldNewsOpen=false,campaignOpen=false,announcedCampaign=null,campaignFeedba
 let openCategory='decisions',resultBillId=null,resultExecutive=null,observedDecisionKeys=new Set(),trackedView=null,trackedCategory=null,trackedPolicy=null,trackedWindows=new Set(),sectionObserver=null;
 let usageStorage=null;try{usageStorage=globalThis.localStorage;}catch{}
 const usage=createUIObservation({storage:usageStorage});
+const analytics=createPlaytestAnalytics();
+let analyticsProgress;
+function readAnalyticsProgress(){
+ const politics=state.politics;
+ return {month:state.month,cabinets:politics.parliamentary?.history.length??0,
+   elections:politics.elections?.filter(e=>e.kind==='parliament'&&!e.initial).length??0};
+}
+function startAnalyticsCampaign(){
+ analyticsProgress=readAnalyticsProgress();
+ analytics.play(true);
+}
+function observeAnalyticsProgress(){
+ if(!analytics.available||!analyticsProgress)return;
+ const next=readAnalyticsProgress();
+ const previous=analyticsProgress;
+ analyticsProgress=next;
+ for(const milestone of [1,3,12])if(previous.month<milestone&&next.month>=milestone)analytics.mark('month'+milestone);
+ if(next.cabinets>previous.cabinets)analytics.mark(next.elections?'nextCabinet':'cabinet');
+ if(next.elections>previous.elections)analytics.mark('election');
+}
 const constitutionUI={section:null,patch:{}};
 const assetUI={sector:null,network:null,ownershipKind:'privatize',networkKind:'networkSale',points:10,networkPoints:10,compensation:100};
 let territorialRequestId=null,openedWorldDecision=null;
@@ -655,7 +676,7 @@ function settingsWindow(){
      <button type="button" data-action="save-game">Сохранить игру</button>
      <button type="button" data-action="load-game">Загрузить игру</button>
      ${languageField()}
-     ${musicField()}${interfaceSoundField()}
+     ${musicField()}${interfaceSoundField()}${analyticsField(analytics)}
      <button type="button" data-action="main-menu">Выйти в главное меню</button>
    </div>
    <p class="game-menu-status" role="status" id="save-status">${esc(saveStatus)}</p>
@@ -738,6 +759,7 @@ const CATEGORIES={
   army:{label:'Армия',default:'army',views:[['army','Армия']]}
 };
 function render({returnToMap=false}={}) {
+  observeAnalyticsProgress();
   if(document.getElementById('main-menu')?.hidden) music.setMood(campaignMusicMood(state));
   const views={army:()=>armyView(state,plannedPolicy(state),{n,esc,canAct:state.politics.executive.inOffice&&playerExecutive(state)&&decisionBudget(state).optionalRemaining>0}),country,overview,economy,fiscal,credit,external,households,ownership:ownershipView,institutions:institutionsView,compare:compareView,validation:validationView,method:methodology,policy:sidebar,electorate:electorateView,...extendedViews({state,n,pct,row,esc,queuedActions}),...politicalViews({state,n,pct,row,esc,date}),infrastructure:infrastructureView,constitution:()=>constitutionBoard(state,constitutionUI,{n,esc,date,canVote:decisionBudget(state).optionalRemaining>0,blockedReason:decisionBudget(state).remaining===0?'Все 3 решения месяца использованы.':'Последнее решение оставлено для предложения партии.'})};
   detectDecisionResult();
@@ -879,7 +901,7 @@ function snapshotDecisions(){
  if(state.politics.lastDecision)observedDecisionKeys.add('executive:'+JSON.stringify(state.politics.lastDecision));
 }
 function detectDecisionResult(){
- for(const b of state.politics.bills??[]){if(b.decidedMonth===undefined)continue;const key='bill:'+b.id+':'+b.decisionSequence;if(observedDecisionKeys.has(key))continue;observedDecisionKeys.add(key);if(b.cabinetAgreement)continue;if(resultNotice(b)===null){resultBillId=null;resultExecutive=null;proposalOpen=false;continue;}resultBillId=b.id;resultExecutive=null;proposalOpen=false;trendMetric=null;}
+ for(const b of state.politics.bills??[]){if(b.decidedMonth===undefined)continue;const key='bill:'+b.id+':'+b.decisionSequence;if(observedDecisionKeys.has(key))continue;observedDecisionKeys.add(key);if(b.cabinetAgreement)continue;if(b.finalVote||b.votes?.length)analytics.mark('vote');if(resultNotice(b)===null){resultBillId=null;resultExecutive=null;proposalOpen=false;continue;}resultBillId=b.id;resultExecutive=null;proposalOpen=false;trendMetric=null;}
  const d=state.politics.lastDecision;if(d?.kind==='executive'){const key='executive:'+JSON.stringify(d);if(!observedDecisionKeys.has(key)){observedDecisionKeys.add(key);resultExecutive=copy(d);resultBillId=null;proposalOpen=false;trendMetric=null;}}
 }
 function bindUsage(){
@@ -1151,6 +1173,11 @@ function closeCharacterCard(){
 app.addEventListener('click',async event=>{
   if(busy)return;
   const target=event.target.closest('button,a');if(!target)return;
+  analytics.interact();
+  if(target.dataset.policyTab==='Бюджет'||target.dataset.view==='fiscal')analytics.mark('budget');
+  if(target.dataset.category==='political'||target.dataset.view==='government')analytics.mark('parliament');
+  if(target.dataset.atlasWorld||target.dataset.atlasHome||target.dataset.atlasDossier||target.hasAttribute('data-map-toggle'))analytics.mark('map');
+  if(target.dataset.strategyNews)analytics.mark('newspaper');
   usage.event('click',target.dataset.campaignChoice!==undefined?'campaign:'+target.dataset.campaignChoice:target.dataset.graph?'graph:'+target.dataset.graph:target.dataset.view?'view:'+target.dataset.view:target.dataset.category?'category:'+target.dataset.category:target.dataset.action?'action:'+target.dataset.action:target.dataset.politicalAction?'political:'+target.dataset.politicalAction:target.dataset.policyTab?'policy:'+target.dataset.policyTab:target.dataset.chart?'chart:'+target.dataset.chart:'link_or_control');
   if(target.hasAttribute('data-atlas-summary')){
     atlasStatsExpanded=!atlasStatsExpanded;
@@ -1495,7 +1522,7 @@ app.addEventListener('click',async event=>{
     case 'restructure-queue':try{assertDecisionAvailable(state,{kind:'chooseLaw'});scheduleRestructuring(state,{haircut:Number(document.getElementById('debt-haircut').value)/100,extension:Number(document.getElementById('debt-extension').value)});votePendingOperation();usage.flush();comparison=null;render();toast(state.politics.enabled?'Голосование по обмену долга завершено.':'Обмен запланирован. Потеря приведённой стоимости будет считаться дефолтом.');}catch(e){toast(e.message);}break;
     case 'journal-export':download(`economy-decisions-${date(state.month,true)}.json`,JSON.stringify({format:'economy-decisions',version:VERSION,provenance:state.provenance,journal:state.journal,currentTurnPoliticalCommands:state.politics.turnCommands??[]},null,2));break;
     case 'replay':if(!busy){busy=true;render();await new Promise(r=>setTimeout(r,0));try{const replay=replayJournal(state);const errors=Object.entries(state.metrics).map(([k,v])=>Math.abs(v-replay.metrics[k])/Math.max(1,Math.abs(v)));toast(Math.max(...errors)<1e-10?'Журнал точно воспроизвёл текущие показатели.':'Журнал не воспроизвёл результат: проверьте версию и данные.');}catch(e){toast('Воспроизведение остановлено: '+e.message);}busy=false;render();}break;
-    case 'main-menu':mainMenu.show();break;
+    case 'main-menu':analyticsProgress=undefined;analytics.play(false);mainMenu.show();break;
     case 'new':if(trackedView)usage.close(trackedView);if(trackedCategory)usage.close(trackedCategory);if(trackedPolicy)usage.close(trackedPolicy);mainMenu.show();mainMenu.newGame();break;
     case 'checkpoint':
       checkpoint=copy(state);checkpointPress=copy(pressState);try{await storage.set(CHECKPOINT,JSON.stringify({format:'economy-model',version:VERSION,state:checkpoint,newspaper:checkpointPress}));toast('Точка сравнения сохранена.');}catch(e){toast('Точка сохранена только на время этой сессии. Скачайте файл.');}comparison=null;render();break;
@@ -1571,6 +1598,11 @@ async function changeInterfaceLanguage(select){
   }
 }
 app.addEventListener('change',event=>{
+  if(event.target.dataset?.analyticsConsent!==undefined){
+    event.target.checked=analytics.setConsent(event.target.checked);
+    return;
+  }
+  analytics.interact();
   if(event.target.dataset?.gameLanguage!==undefined)return changeInterfaceLanguage(event.target);
   if(busy)return;
   const e=event.target;
@@ -1678,6 +1710,7 @@ async function launchCampaign(options,leader){
   if(!guideComplete&&await readDevicePreference(GUIDE_COMPLETE)==='1')guideComplete=true;
   if(britain&&!guideComplete)setGuide('government');
   launchingCampaign=false;
+  startAnalyticsCampaign();
   usage.flush();document.getElementById('new-dialog').close();mainMenu.markReady();render();
 }
 document.querySelector('.dialog-close').addEventListener('click',()=>{usage.close('window:new');usage.flush();document.getElementById('new-dialog').close();bindUsage();});
@@ -1735,6 +1768,7 @@ async function loadCampaign(payload,fromFile=false){
   openCategory=state.politics.enabled?'decisions':'statistics';
   snapshotDecisions();
   usage.flush();
+  startAnalyticsCampaign();
   mainMenu.markReady();
   render();
   toast('Игра загружена.');
@@ -1758,6 +1792,7 @@ const saveMenu=mountSaveMenu({
   onSave:async name=>{
     const savedDate=date(state.month,true);
     await saves.save(name,savedDate,captureCampaign());
+    analytics.mark('save');
     updateSaveStatus('Сохранено · '+savedDate);
     settingsOpen=false;
     render();
@@ -1767,7 +1802,7 @@ const saveMenu=mountSaveMenu({
   onExport:exportCampaign,
   onImport:()=>document.getElementById('import-file').click()
 });
-const mainMenu=mountMainMenu({hasSave:hasExistingSave,onContinue:()=>render(),onLoadSaves:resume=>saveMenu.open({mode:'load',resume}),onLanguageChange:changeInterfaceLanguage,onNew:(country,leader,party)=>{
+const mainMenu=mountMainMenu({analytics,hasSave:hasExistingSave,onContinue:()=>{startAnalyticsCampaign();render();},onLoadSaves:resume=>saveMenu.open({mode:'load',resume}),onLanguageChange:changeInterfaceLanguage,onNew:(country,leader,party)=>{
   if(country==='uk-2000'){
     const [nameSeed]=crypto.getRandomValues(new Uint32Array(1));
     return launchCampaign(scenarioOptions(country,{party,nameSeed}),leader);
@@ -1778,5 +1813,17 @@ const mainMenu=mountMainMenu({hasSave:hasExistingSave,onContinue:()=>render(),on
   usage.open('window:new','Новая игра','window');
   document.getElementById('new-dialog').showModal();
 }});
+
+if(analytics.available){
+ analytics.interact();
+ setInterval(()=>analytics.tick(),60_000);
+ for(const type of ['pointerdown','keydown','wheel']){
+   document.addEventListener(type,()=>analytics.interact(),{passive:true});
+ }
+ document.addEventListener('visibilitychange',()=>analytics.visibility(document.visibilityState!=='hidden'));
+ globalThis.addEventListener('storage',event=>analytics.syncConsent(event));
+ globalThis.addEventListener('pagehide',()=>analytics.visibility(false));
+ globalThis.addEventListener('pageshow',()=>analytics.visibility(document.visibilityState!=='hidden'));
+}
 
 document.addEventListener?.('keydown',e=>{if((!atlasDossier&&!atlasCity&&!atlasForeign&&!atlasRegion)||e.key!=='Tab')return;const items=[...app.querySelectorAll('.atlas-dossier button, .atlas-dossier summary')].filter(button=>button.getClientRects().length>0);const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}});
