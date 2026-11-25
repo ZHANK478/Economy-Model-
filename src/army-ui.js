@@ -12,6 +12,7 @@ export function armyBudgetSummary(state,plannedPolicy=state.policy){
 function britishDefenseView(state,plannedPolicy,{n,esc,canAct}){
  const en=activeLanguage()==='en';
  const fleet=britishFleet(state);
+ const forces=state.defense;
  const pending=pendingWorldDecisions(state).filter(event=>event.defense);
  const budget=armyBudgetSummary(state,plannedPolicy);
  const berths=Array.from({length:fleet.groups},(_,index)=>{
@@ -41,6 +42,14 @@ function britishDefenseView(state,plannedPolicy,{n,esc,canAct}){
     <button type="button" data-action="army-budget">${en?'Defence budget':'Оборонный бюджет'} <span aria-hidden="true">→</span></button>
    </div>
   </div>
+  ${forces?.enabled?`<section class="fleet-deployments defence-forces" aria-labelledby="defence-forces-title">
+   <h3 id="defence-forces-title">${en?'Armed forces':'Вооружённые силы'}</h3>
+   <dl>
+    <div><dt>${en?'Active personnel':'Личный состав'}</dt><dd>${n(forces.active*1e6,0)}</dd></div>
+    <div><dt>${en?'Reserve':'Резерв'}</dt><dd>${n(forces.reserve*1e6,0)}</dd></div>
+    <div><dt>${en?'Readiness':'Боеготовность'}</dt><dd>${n(forces.readiness*100,0)}%</dd></div>
+   </dl>
+  </section>`:''}
   <section class="fleet-deployments"><h3>${en?'Commitments and requests':'Обязательства и запросы'}</h3>
   ${active||requests?`<ul>${requests}${active}</ul>`:`<p>${en?'No active missions or requests.':'Активных миссий и запросов нет.'}</p>`}</section>
   <details class="fleet-settings"><summary>${en?'Maintenance priorities':'Приоритеты содержания'}</summary>

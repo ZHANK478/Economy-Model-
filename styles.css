@@ -1817,6 +1817,9 @@ dialog.atlas-gdp-dialog { width: min(820px, calc(100vw - 28px)); }
 .fleet-deployments ul { margin: 0; padding: 0; list-style: none; }
 .fleet-deployments li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px 12px; padding-block: 8px; border-bottom: 1px solid var(--line, #748484); }
 .fleet-deployments li small { display: block; }
+.defence-forces { border-bottom: 1px solid var(--line, #748484); }
+.defence-forces dl { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; }
+.defence-forces dd { margin: 2px 0 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 .world-decision-actions button small { display: block; margin-top: 4px; font-weight: normal; }
 .defense-deadline { font-size: .82em; }
 @media (max-width: 520px) {
