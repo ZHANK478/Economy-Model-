@@ -1,3 +1,4 @@
+import {attachBritishMission, britishDefenseActive, britishDefenseEvents, iraqMission, missionOutcomeText, shippingPremium} from './british-defense.js';
 import {playerExecutive} from './parliamentary-state.js';
 
 const option=(ru,en,result,enResult,effects={})=>({ru,en,result,enResult,...effects});
@@ -8,8 +9,8 @@ export const WORLD_DECISIONS=[
   {id:'iraq',date:monthIndex(2003,3),window:1,title:'Запрос союзников по Ираку',en:'Allied request on Iraq',
     text:'Вашингтон просит Британию присоединиться к коалиции. Инспекторы ООН ещё работают. Кабинету предстоит ответить.',
     enText:'Washington asks Britain to join the coalition. UN inspectors are still at work. The cabinet must respond.',
-    fallback:'decline',motion:'join',options:{
-      join:option('Вынести участие на голосование','Put participation to a vote','Британия вступает в коалицию','Britain joins the coalition',{spending:.00065,months:36,signal:.80}),
+    defense:{partners:['USA'],subject:'IRQ',label:'Ирак',enLabel:'Iraq'},fallback:'decline',motion:'join',options:{
+      join:option('Вынести участие на голосование','Put participation to a vote','Британия вступает в коалицию','Britain joins the coalition',{spending:.00065,months:36,signal:.80,mission:iraqMission}),
       un:option('Добиваться продолжения инспекций ООН','Seek further UN inspections','Лондон добивается продолжения инспекций','London seeks further UN inspections',{signal:-.25}),
       decline:option('Отказаться от участия','Decline military participation','Британия остаётся вне коалиции','Britain stays out of the coalition',{signal:-.65}),
     }},
@@ -38,13 +39,18 @@ export const WORLD_DECISIONS=[
       standard:option('Сохранить действующие визовые правила','Keep existing visa rules','Лондон сохранил действующие визовые правила','London keeps its existing visa rules',{signal:-.60}),
     }},
 ];
-const eventsById=new Map(WORLD_DECISIONS.map(event=>[event.id,event]));
+const newDefenseIds=new Set(britishDefenseEvents.map(event=>event.id));
+const allEvents=[...WORLD_DECISIONS,...britishDefenseEvents].sort((a,b)=>a.date-b.date);
+const eventsById=new Map(allEvents.map(event=>[event.id,event]));
 export const worldDecisionById=id=>eventsById.get(id);
-const start=(s,event)=>event.date-12*((s.startYear??2000)-2000);
+export const worldDecisionStart=(s,event)=>event.date-12*((s.startYear??2000)-2000);
+const start=worldDecisionStart;
+const availableEvents=s=>allEvents.filter(event=>!newDefenseIds.has(event.id)||
+  britishDefenseActive(s)&&start(s,event)>=s.politics.britishDefenseStart);
 
 export function pendingWorldDecisions(s){
   if(s.scenario?.id!=='uk-2000'||s.politics?.historicalWorldStart===undefined)return [];
-  return WORLD_DECISIONS.filter(event=>{
+  return availableEvents(s).filter(event=>{
     const onset=start(s,event);
     return onset>=s.politics.historicalWorldStart&&onset<=s.month&&s.month<onset+event.window&&
       !s.politics.worldDecisions?.[event.id];
@@ -61,6 +67,7 @@ export function resolveWorldDecision(s,event,choice,{vote,positions,sponsor,expi
   const p=s.politics;
   (p.worldDecisions??={})[event.id]={choice,month:s.month,sponsor,expired,
     ...(vote?{vote:{yes:vote.yes,no:vote.no,abstain:vote.abstain,passed:vote.passed}}:{})};
+  attachBritishMission(s,event,choice,p.worldDecisions[event.id]);
   p.publicEvents.push({type:'worldDecision',id:event.id,month:s.month,region:null,effect:0,attention:.03,
     positions:positions??(sponsor?{[sponsor]:event.options[choice].signal}:{})});
 }
@@ -103,15 +110,15 @@ export function expireWorldDecisions(s,prev,rollCall){
 
 export function worldDecisionAnnouncements(s){
   if(s.scenario?.id!=='uk-2000'||s.politics?.historicalWorldStart===undefined)return [];
-  return WORLD_DECISIONS.flatMap(event=>{
+  return availableEvents(s).flatMap(event=>{
     const onset=start(s,event);
     if(onset<s.politics.historicalWorldStart||onset>s.month)return [];
-    return [{id:'agenda:'+event.id,start:onset,title:event.title,enTitle:event.en,text:event.text,enText:event.enText}];
+    return [{id:'agenda:'+event.id,decisionId:event.id,start:onset,title:event.title,enTitle:event.en,text:event.text,enText:event.enText}];
   });
 }
 
 export function worldDecisionNews(s){
-  return WORLD_DECISIONS.flatMap(event=>{
+  return availableEvents(s).flatMap(event=>{
     const result=s.politics?.worldDecisions?.[event.id];
     if(!result)return [];
     const selected=event.options[result.choice];
@@ -121,22 +128,40 @@ export function worldDecisionNews(s){
       result.expired?'Срок ответа истёк. Кабинет определился к концу срока.':selected.result+'.';
     const enText=vote?`The vote: ${vote.yes} in favour, ${vote.no} against and ${vote.abstain} abstentions.`:
       result.expired?'The cabinet settled its position when the response period ended.':selected.enResult+'.';
-    return [{id:'decision:'+event.id,start:result.month,
-      title:declined?'Палата общин отклонила участие в Ираке':selected.result,
-      enTitle:declined?'Commons rejects participation in Iraq':selected.enResult,
+    const articles=[{id:'decision:'+event.id,start:result.month,
+      title:declined?(event.id==='iraq'?'Палата общин отклонила участие в Ираке':'Палата общин отклонила предложение'):selected.result,
+      enTitle:declined?(event.id==='iraq'?'Commons rejects participation in Iraq':'Commons rejects the motion'):selected.enResult,
       text,enText,vote,expired:result.expired}];
+    const outcome=result.mission?.outcome;
+    if(outcome){
+      const [title,enTitle,text,enText]=missionOutcomeText(event,outcome.status);
+      articles.push({id:'mission:'+event.id,start:outcome.month,
+        title:event.defense.label+' · '+title,enTitle:event.defense.enLabel+' · '+enTitle,
+        text,enText});
+    }
+    return articles;
   });
 }
 
 export function worldDecisionEffects(s){
-  const result={spending:0,arrivals:0,premium:0};
+  const result={spending:0,arrivals:0,premium:0,freight:0};
   for(const [id,decision] of Object.entries(s.politics?.worldDecisions??{})){
     const choice=worldDecisionById(id)?.options[decision.choice];
     const age=s.month-decision.month-(choice?.delay??0);
+    const m=decision.mission;
+    if(m){
+      if(age>=1&&age<=m.months)result.spending+=m.spending;
+      continue;
+    }
     if(!choice||age<1||age>choice.months||!choice.months)continue;
     result.spending+=choice.spending??0;
     result.arrivals+=(choice.arrivals??0)/choice.months/1e6;
     result.premium+=choice.premium??0;
+  }
+  for(const event of availableEvents(s)) {
+    const onset=start(s,event);
+    if(s.politics?.historicalWorldStart!==undefined&&onset>=s.politics.historicalWorldStart)
+      result.freight+=shippingPremium(s,event,onset);
   }
   return result;
 }

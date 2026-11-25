@@ -1,3 +1,4 @@
+import {britishDefenseActive} from './british-defense.js';
 import {createGameplayObservation} from './analytics-gameplay.js';
 import {decisionFailureReason, storageFailureReason} from './analytics-diagnostics.js';
 import {analyticsField, analyticsToggleLabel, playtestAnalytics as analytics} from './playtest-analytics.js';
@@ -61,7 +62,7 @@ import {startChoices,startFamilies} from './start-ui.js';
 import {parliamentary,playerExecutive} from './parliamentary-state.js';
 import {cabinetSeats} from './parliamentary.js';
 import {pressEnabled,pressTitle} from './press-market.js';
-import {pressDialog,updatePress,defaultPressPaper,unreadPressCount,readPressPaper,latestPressHeadline,electionNewspaper} from './press-ui.js';
+import {worldDecisionActions,worldDecisionArticle,pressDialog,updatePress,defaultPressPaper,unreadPressCount,readPressPaper,latestPressHeadline,electionNewspaper} from './press-ui.js';
 import {nextTerritorialRequest,territorialRequestFunding,territorialRequestQuote,territorialRequests} from './territorial-requests.js';
 import {availableTerritorialProgrammeCash,TERRITORIAL_PROGRAMS} from './territorial-programs.js';
 import {resultNotice,policyNumber} from './presidential-decisions.js';
@@ -181,6 +182,8 @@ function enableTerritorialGovernment(state){
   if(!territorialFiscalReformed(state))executePolitical(state,{kind:'reformTerritorialFiscal'});
 }
 function enableBritishScenario(state){
+  if(state.scenario?.id==='uk-2000'&&state.politics.enabled&&state.politics.executive.inOffice&&!britishDefenseActive(state))
+    executePolitical(state,{kind:'enableBritishDefense'});
   if(state.scenario?.id==='uk-2000'&&state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.constituencyProfileRevision)
     executePolitical(state,{kind:'enableConstituencyProfiles'});
   if(state.scenario?.id==='uk-2000'&&state.politics.enabled&&state.politics.executive.inOffice&&!state.politics.electoralPactRevision)
@@ -628,7 +631,7 @@ function missionControl(budget,stopped,waiting){
  if(state.politics.executive.role==='primeMinister')metrics=metrics.filter(x=>x[0]!=='presidentialVoteShare').map(x=>x[0]==='governmentPartyRating'?[x[0],'Ваша партия',x[2],x[3]]:x);
  if(parliamentary(state))metrics.push(['cabinetSeats','Опора кабинета',cabinetSeats(state)+' / '+state.politics.totalSeats,'']);
  const own=state.politics.parties?.find(p=>p.id===state.politics.executive.playerParty);
- return `<section class="mission-control game-hud"><div class="hud-date"><strong>${date(state.month)}</strong><small>${parliamentary(state)?(state.politics.parliamentary.phase==='forming'?'Переговоры':playerExecutive(state)?'Правительство':'Оппозиция'):state.politics.executive.role==='primeMinister'?'Премьер':'Президент'} · ${esc(state.politics.executive.role==='president'?(state.politics.executive.presidentName??own?.candidateName??'Президент'):(own?partyDisplayName(own):'Государство'))}</small><small id="save-hud" role="status">${esc(saveStatus)}</small></div><div class="hud-metrics">${metrics.map(([key,label,value,unit])=>`<article class="hud-metric" aria-label="${key==='budgetBalance'?'Баланс бюджета за месяц':key==='presidentialVoteShare'?'Рейтинг президента':key==='governmentPartyRating'?'Парламентский рейтинг':label}"><div><span>${label}</span>${key==='cabinetSeats'||key==='presidentialVoteShare'&&!hasPresident?'':graphButton(key)}</div><strong>${value}<small>${value==='—'?'':unit}</small></strong>${key==='cabinetSeats'?'':value==='—'?'<span class="change neutral">—</span>':monthlyChange(key)}</article>`).join('')}</div><button class="settings-toggle" data-action="settings-open" aria-label="Меню игры">⚙</button></section><div class="turn-dock"><button type="button" class="army-shortcut" data-category="army" aria-expanded="${strategyPanelOpen&&openCategory==='army'}">${atlasIcon('army')} Армия</button><span class="decision-counter">${budget.used} / ${budget.limit||3}</span><button class="month-button" aria-label="Следующий месяц" data-action="step" ${busy||stopped?'disabled':''}>${busy?'Расчёт…':stopped?'Завершено':'Конец месяца'}<span aria-hidden="true">→</span></button></div>`;
+ return `<section class="mission-control game-hud"><div class="hud-date"><strong>${date(state.month)}</strong><small>${parliamentary(state)?(state.politics.parliamentary.phase==='forming'?'Переговоры':playerExecutive(state)?'Правительство':'Оппозиция'):state.politics.executive.role==='primeMinister'?'Премьер':'Президент'} · ${esc(state.politics.executive.role==='president'?(state.politics.executive.presidentName??own?.candidateName??'Президент'):(own?partyDisplayName(own):'Государство'))}</small><small id="save-hud" role="status">${esc(saveStatus)}</small></div><div class="hud-metrics">${metrics.map(([key,label,value,unit])=>`<article class="hud-metric" aria-label="${key==='budgetBalance'?'Баланс бюджета за месяц':key==='presidentialVoteShare'?'Рейтинг президента':key==='governmentPartyRating'?'Парламентский рейтинг':label}"><div><span>${label}</span>${key==='cabinetSeats'||key==='presidentialVoteShare'&&!hasPresident?'':graphButton(key)}</div><strong>${value}<small>${value==='—'?'':unit}</small></strong>${key==='cabinetSeats'?'':value==='—'?'<span class="change neutral">—</span>':monthlyChange(key)}</article>`).join('')}</div><button class="settings-toggle" data-action="settings-open" aria-label="Меню игры">⚙</button></section><div class="turn-dock"><button type="button" class="army-shortcut" data-category="army" aria-expanded="${strategyPanelOpen&&openCategory==='army'}">${atlasIcon('army')} ${britishDefenseActive(state)?(activeLanguage()==='en'?'Defence':'Оборона'):'Армия'}</button><span class="decision-counter">${budget.used} / ${budget.limit||3}</span><button class="month-button" aria-label="Следующий месяц" data-action="step" ${busy||stopped?'disabled':''}>${busy?'Расчёт…':stopped?'Завершено':'Конец месяца'}<span aria-hidden="true">→</span></button></div>`;
 }
 let selectedPaper=null,selectedIssue=null;
 function closeNewspaper(){worldNewsOpen=false;}
@@ -642,27 +645,19 @@ function closeWorldDecision(key){
   usage.flush();
 }
 function worldDecisionDialog(event,{result=false}={}){
-  const english=activeLanguage()==='en',executive=playerExecutive(state);
-  const ownVote=(vote,ru,en,choice)=>`<button type="button" data-world-decision="${esc(event.id)}" data-world-answer="${choice}" data-world-ballot="${vote}">${english?en:ru}</button>`;
-  let actions='';
-  if(!result){
-    if(executive){
-      actions=Object.entries(event.options).map(([id,option])=>`<button type="button" data-world-decision="${esc(event.id)}" data-world-answer="${id}" ${id===event.motion?'data-world-ballot="accept"':''}>${esc(english?option.en:option.ru)}</button>`).join('');
-    }else if(event.motion){
-      actions=ownVote('accept','Фракция — за','Instruct your party to vote for','motion')+
-        ownVote('reject','Фракция — против','Instruct your party to vote against','motion')+
-        ownVote('abstain','Фракция воздержится','Instruct your party to abstain','motion');
-    }
-  }
+  const english=activeLanguage()==='en';
+  const actions=result?'':worldDecisionActions(state,event,{esc,date});
+  const month=event.start??state.month;
+  const paper=pressTitle('press-dispatch');
   const title=english?(event.enTitle??event.en):event.title;
   const description=english?event.enText:event.text;
   return `<dialog id="world-decision-dialog" data-decision-key="${esc(event.id)}" class="newspaper-popup territorial-request-dialog" aria-labelledby="world-decision-heading">
     <article class="newspaper-sheet">
       <button type="button" data-close-button data-world-decision-close="${esc(event.id)}" aria-label="Закрыть событие">×</button>
+      <header class="newspaper-masthead"><strong>${esc(paper?.name??'The Dispatch')}</strong><div><span>${english?'World desk':'Международный отдел'}</span><time>${date(month,true)}</time></div></header>
       <h2 id="world-decision-heading" tabindex="-1" autofocus>${esc(title)}</h2>
-      <p>${esc(description)}</p>
-      ${!result&&!executive?`<p>${english?event.motion?'The cabinet is putting the motion to Parliament. You control your own party’s vote.':'The cabinet will decide.':event.motion?'Кабинет выносит предложение в парламент. Вы определяете голос своей фракции.':'Решение принимает кабинет.'}</p>`:''}
-      ${actions?`<div class="world-decision-actions">${actions}</div>`:''}
+      ${worldDecisionArticle(description,esc)}
+      ${actions}
     </article>
   </dialog>`;
 }
@@ -1384,6 +1379,7 @@ app.addEventListener('click',async event=>{
   }
   if(target.dataset.briefingAction){answerMinisterialBriefing(target.dataset.briefingId,target.dataset.briefingAction);return;}
   if(target.dataset.worldChoiceOpen){
+    worldNewsOpen=false;
     openedWorldDecision=target.dataset.worldChoiceOpen;
     render();return;
   }
@@ -1396,6 +1392,8 @@ app.addEventListener('click',async event=>{
       executePolitical(state,{kind:'answerWorldDecision',eventId:target.dataset.worldDecision,
         choice:target.dataset.worldAnswer,vote:target.dataset.worldBallot});
       closeWorldDecision(target.dataset.worldDecision);
+      updatePress(state,pressState);
+      if(worldNewsOpen)selectedIssue='decision:'+target.dataset.worldDecision;
       render();
     }catch(error){toast(error.message);}
     return;

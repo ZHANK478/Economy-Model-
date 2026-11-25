@@ -1,3 +1,6 @@
+import {britishDefenseActive,britishFleet} from './british-defense.js';
+import {pendingWorldDecisions,worldDecisionById} from './world-decisions.js';
+import {activeLanguage} from './localization.js';
 import {defenseStatus} from './defense.js';
 import {POLICY_CHOICES,POLICY_FIELDS} from './config.js';
 import {defenseEconomyActive,DEFENSE_ECONOMY_KEYS} from './defense-economy.js';
@@ -6,7 +9,48 @@ export function armyBudgetSummary(state,plannedPolicy=state.policy){
  const paid=state.month>0?(state.lastReport.fiscal?.militaryPurchases??0):null,total=state.metrics.governmentSpending;
  return {rate,nextMonth,paid,spendingShare:paid!==null&&total>0?paid/total*100:null};
 }
+function britishDefenseView(state,plannedPolicy,{n,esc,canAct}){
+ const en=activeLanguage()==='en';
+ const fleet=britishFleet(state);
+ const pending=pendingWorldDecisions(state).filter(event=>event.defense);
+ const budget=armyBudgetSummary(state,plannedPolicy);
+ const berths=Array.from({length:fleet.groups},(_,index)=>{
+   const status=index<fleet.used?'assigned':index<fleet.ready?'available':'maintenance';
+   return `<span class="fleet-berth ${status}"></span>`;
+ }).join('');
+ const active=fleet.missions.map(entry=>{
+   const event=worldDecisionById(entry.id);
+   const title=en?event.defense.enLabel:event.defense.label;
+   const months=Math.max(0,entry.start+entry.months-state.month);
+   const stateText=entry.kind==='fleet'?`${entry.allocation}/${entry.demand} ${en?'groups':'групп'}`:
+     (en?'Joint commitment':'Совместная миссия');
+   return `<li><div><strong>${esc(title)}</strong><small>${stateText} · ${n(months,0)} ${en?'mo. left':'мес. осталось'}</small></div></li>`;
+ }).join('');
+ const priority=POLICY_CHOICES.find(([key])=>key==='defensePriority');
+ const options=priority[3].map(([value,label])=>`<option value="${value}" ${plannedPolicy.defensePriority===value?'selected':''}>${esc(label)}</option>`).join('');
+ const requests=pending.map(event=>`<li><div><strong>${esc(en?event.en:event.title)}</strong></div><button type="button" data-world-choice-open="${event.id}">${en?'Read the article':'Читать в газете'} <span aria-hidden="true">→</span></button></li>`).join('');
+ return `<section class="army-panel fleet-desk" aria-labelledby="fleet-title">
+  <header class="fleet-hero"><div><p>${en?'Defence':'Оборона'}</p><h2 id="fleet-title">${en?'Royal Navy':'Королевский флот'}</h2></div></header>
+  <div class="fleet-overview">
+   <div class="fleet-strength">
+    <div class="fleet-strength-heading"><span>${en?'Available fleet groups':'Доступные группы флота'}</span><strong>${fleet.available}<small> / ${fleet.groups}</small></strong></div>
+    <div class="fleet-berths" aria-hidden="true">${berths}</div>
+    <div class="fleet-key"><span class="available">${en?'Available':'Свободны'}</span><span class="assigned">${en?'Assigned':'Выделены'}</span><span class="maintenance">${en?'Unavailable':'Недоступны'}</span></div>
+   </div>
+   <div class="fleet-budget"><span>${en?'Defence spending':'Расходы на оборону'}</span><strong>${budget.paid===null?'—':n(budget.paid,1)} <small>${en?'m / month':'млн / мес.'}</small></strong>
+    <button type="button" data-action="army-budget">${en?'Defence budget':'Оборонный бюджет'} <span aria-hidden="true">→</span></button>
+   </div>
+  </div>
+  <section class="fleet-deployments"><h3>${en?'Commitments and requests':'Обязательства и запросы'}</h3>
+  ${active||requests?`<ul>${requests}${active}</ul>`:`<p>${en?'No active missions or requests.':'Активных миссий и запросов нет.'}</p>`}</section>
+  <details class="fleet-settings"><summary>${en?'Maintenance priorities':'Приоритеты содержания'}</summary>
+   <label><span>${esc(priority[1])}</span> <select data-policy-choice="defensePriority" ${canAct?'':'disabled'}>${options}</select></label>
+  </details>
+ </section>`;
+}
+
 export function armyView(state,plannedPolicy,{n,esc=String,canAct=true}){
+ if(britishDefenseActive(state))return britishDefenseView(state,plannedPolicy,{n,esc,canAct});
  const a=armyBudgetSummary(state,plannedPolicy),d=state.defense,locked=!canAct;
  const shield='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m24 4 17 6v13c0 11-17 20-17 20S7 34 7 23V10l17-6Z"/><path d="m24 13 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1 3-7Z"/></svg>';
  const conflict=d?.war??d?.crisis,neighbor=d?.neighbors.find(x=>x.id===conflict?.neighbor);

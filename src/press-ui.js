@@ -1,8 +1,10 @@
+import {playerExecutive} from './parliamentary-state.js';
+import {britishFleet} from './british-defense.js';
 import {partyDisplayName} from './political-config.js';
 import {electionStory} from './election-ui.js';
 import {pilotHeadline} from './scenario-pilots.js';
 import {FOREIGN_STEPS} from './foreign-programme.js';
-import {worldDecisionAnnouncements,worldDecisionNews} from './world-decisions.js';
+import {pendingWorldDecisions,worldDecisionAnnouncements,worldDecisionNews,worldDecisionStart} from './world-decisions.js';
 import {historicalNews} from './historical-world.js';
 import {activeLanguage} from './localization.js';
 import {interfaceNumberFormatter} from './localization.js';
@@ -174,6 +176,32 @@ export function electionNewspaper(s,election,{esc,date}){
  </dialog>`;
 }
 
+export function worldDecisionArticle(text,esc){
+  return String(text??'').split(/\n\n/).filter(Boolean).map(paragraph=>`<p>${esc(paragraph)}</p>`).join('');
+}
+
+export function worldDecisionActions(state,event,{esc,date}){
+  const english=activeLanguage()==='en',executive=playerExecutive(state);
+  const ownVote=(vote,ru,en,choice)=>`<button type="button" data-world-decision="${esc(event.id)}" data-world-answer="${choice}" data-world-ballot="${vote}">${english?en:ru}</button>`;
+  if(!executive){
+    const hint=english?(event.motion?'You control your party’s vote.':'The cabinet will decide.'):
+      (event.motion?'Вы определяете голос своей фракции.':'Решение принимает кабинет.');
+    const buttons=event.motion?ownVote('accept','Фракция — за','Instruct your party to vote for','motion')+
+      ownVote('reject','Фракция — против','Instruct your party to vote against','motion')+
+      ownVote('abstain','Фракция воздержится','Instruct your party to abstain','motion'):'';
+    return `<p>${hint}</p>${buttons?`<div class="world-decision-actions">${buttons}</div>`:''}`;
+  }
+  const fleet=event.defense?britishFleet(state):null;
+  const buttons=Object.entries(event.options).map(([id,option])=>{
+    const plan=fleet&&option.mission;
+    const percent=plan?(plan.spending*100).toLocaleString(english?'en-GB':'ru-RU',{maximumFractionDigits:3}):'';
+    const estimate=plan?`<small>${plan.months} ${english?'mo.':'мес.'} · ${percent}% ${english?'of monthly GDP':'месячного ВВП'}${plan.kind==='fleet'?` · ${english?'Fleet groups':'Группы флота'} ${plan.demand}/${fleet.available}`:''}</small>`:'';
+    return `<button type="button" data-world-decision="${esc(event.id)}" data-world-answer="${esc(id)}" ${id===event.motion?'data-world-ballot="accept"':''}>${esc(english?option.en:option.ru)}${estimate}</button>`;
+  }).join('');
+  const deadline=event.defense?`<p class="defense-deadline">${english?'Decision due':'Ответ до'} ${date(worldDecisionStart(state,event)+event.window,true)}</p>`:'';
+  return deadline+`<div class="world-decision-actions">${buttons}</div>`;
+}
+
 export function pressDialog(s,selected,press,{esc,date,issueId}){
   const papers=papersFor(s);
   const paper=papers.find(p=>p.id===selected)??papers[0];
@@ -184,12 +212,14 @@ export function pressDialog(s,selected,press,{esc,date,issueId}){
   const electionArticle=election?electionStory(s,election):null;
   const story=issue&&[...historicalNews(s),...worldDecisionAnnouncements(s),...worldDecisionNews(s)].find(event=>event.id===issue.id);
   const english=activeLanguage()==='en'&&issue?(issue.english??story):null;
+  const decision=story?.decisionId&&pendingWorldDecisions(s).find(e=>e.id===story.decisionId);
   const stopped=pressCompanies(s).some(c=>c.id===paper.id&&!c.active);
   return `<dialog id="world-news-dialog" class="newspaper-popup press-reader" aria-labelledby="world-news-heading">
     ${papers.length>1?`<nav class="press-tabs" aria-label="Газеты">${papers.map(p=>`<button type="button" data-press-paper="${esc(p.id)}" aria-pressed="${p.id===paper.id}">${esc(p.name)}${pressUnread(press,p.id)?' <span aria-label="Новый выпуск">●</span>':''}</button>`).join('')}</nav>`:''}
     <article class="newspaper-sheet"><header class="newspaper-masthead"><strong>${esc(paper.name)}</strong><div><span>${esc(paper.beat)}</span>${issue?`<time>${date(issue.month,true)}</time>`:''}</div></header>
     <h2 id="world-news-heading" tabindex="-1">${issue?esc(electionArticle?.title??english?.enTitle??story?.title??issue.title):stopped?'Выпуск приостановлен':'Пока без выпусков'}</h2>
-    ${issue?(electionArticle?.text??(english?[english.enText]:story?[story.text]:issue.text)).map(p=>`<p>${esc(p)}</p>`).join(''):''}
+    ${issue?(electionArticle?.text??(english?[english.enText]:story?[story.text]:issue.text)).map(paragraph=>worldDecisionArticle(paragraph,esc)).join(''):''}
+    ${decision?worldDecisionActions(s,decision,{esc,date}):''}
     <footer><div class="press-edition-nav">${position>0?`<button data-press-issue="${esc(archive[position-1].id)}">← Предыдущий выпуск</button>`:''}
     ${position>=0&&position<archive.length-1?`<button data-press-issue="${esc(archive[position+1].id)}">Следующий выпуск →</button>`:''}</div>
     ${election?`<button type="button" data-action="election-open" data-election-id="${election.id}">${activeLanguage()==='en'?'Full results':'Полные результаты'}</button>`:''}

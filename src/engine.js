@@ -1338,7 +1338,10 @@ function advanceMonthCandidate(state,policy=state.policy,{preserveEconomicRevisi
       amount=>foreignPayment(s,gov,amount/s.exchangeRate,flow),payForeignCommitment,events);
   }
   const commitment=worldDecisionEffects(s).spending*budgetBase;
-  if(commitment>0)flow.worldCommitments=payForeignCommitment(commitment);
+  if(commitment>0){
+    flow.worldCommitments=payForeignCommitment(commitment);
+    if(s.politics.britishDefenseRevision===1)flow.worldCommitmentDue=commitment;
+  }
   const diplomacyEntries=Object.values(flow.scenarioDiplomacy??{});
   const diplomacyPaid=sum(diplomacyEntries.map(item=>item.paid+item.programPaid))+(flow.worldCommitments??0);
   const diplomacyReceipts=sum(diplomacyEntries.map(item=>item.receipts));

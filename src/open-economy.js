@@ -1,3 +1,4 @@
+import {worldDecisionEffects} from './world-decisions.js';
 import {pilotExportFactor} from './scenario-pilots.js';
 import {historicalWorldFactors} from './historical-world.js';
 import {foreignTradeCost} from './foreign-programme.js';
@@ -193,7 +194,7 @@ export function advanceWorldEconomy(s,w=s.world){
  e.globalCapitalBudgetUSD=gdp/12*p.globalCrossBorderShare*historicalWorldFactors(s).capital;
 }
 export function importUnitPrice(s,w){
- return s.exchangeRate*s.worldPriceIndex/100*(.70+.18*w.energyPrice/100+.12*w.commodityPrice/100)*(importPartnerTerms(s)?.index??1);
+ return s.exchangeRate*s.worldPriceIndex/100*(.70+.18*w.energyPrice/100+.12*w.commodityPrice/100)*(importPartnerTerms(s)?.index??1)*(1+worldDecisionEffects(s).freight);
 }
 export function exportDemand(s,prev,w){
  const e=s.economy,p=e.parameters,transport=(1+e.initialTradeCost/networkFactor(s));

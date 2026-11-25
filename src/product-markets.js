@@ -57,8 +57,8 @@ export function productCapacityFactor(s,sector){
 }
 export function productImportPrices(s,w){
  const base=s.exchangeRate*s.worldPriceIndex/100*(importPartnerTerms(s)?.index??1);
- const replacement=worldDecisionEffects(s).premium;
- return productCatalog(s).map(([id, , , ,e,r])=>base*((1-e-r)+e*w.energyPrice/100+r*w.commodityPrice/100)*(id==='equipment'?1+replacement:1));
+ const {premium,freight}=worldDecisionEffects(s);
+ return productCatalog(s).map(([id, , , ,e,r])=>base*((1-e-r)+e*w.energyPrice/100+r*w.commodityPrice/100)*(1+freight)*(id==='equipment'?1+premium:1));
 }
 export function compositeImportPrices(s,w){
  const prices=productImportPrices(s,w);

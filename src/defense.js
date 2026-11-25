@@ -1,3 +1,4 @@
+import {advanceBritishMissions, britishDefenseActive} from './british-defense.js';
 import {scenarioDefenseReliability} from './scenario-diplomacy.js';
 import {initializeDefenseEconomy} from './defense-economy.js';
 import {hash,clone} from './political-config.js';
@@ -184,7 +185,7 @@ export function advanceDefense(s,prev,flow,events,w,militaryPlan=null){
  // Independent external actors: reducing own expenditure never spawns a war.
  for(const n of d.neighbors){const growth=Math.max(.98,Math.pow(1+(s.metrics.worldGrowth??2)/100,1/12));n.active*=growth;n.equipment*=growth;}
  const year=Math.floor((s.month-d.startedMonth)/12),episodeMonth=d.startedMonth+year*12+5;
- if(s.month===episodeMonth&&s.month>=d.cooldownUntil&&!d.war&&!d.crisis&&hash(s.seed,'defense-crisis',year)<A.annualCrisisFrequency){
+ if(!britishDefenseActive(s)&&s.month===episodeMonth&&s.month>=d.cooldownUntil&&!d.war&&!d.crisis&&hash(s.seed,'defense-crisis',year)<A.annualCrisisFrequency){
   const neighbor=d.neighbors[Math.floor(hash(s.seed,'defense-neighbor',year)*d.neighbors.length)];
   d.crisis={id:`crisis:${year}`,neighbor:neighbor.id,started:s.month,deadline:s.month+A.crisisWarningMonths,intent:clamp(neighbor.intent+.3),negotiation:null};
   tell(s,'crisis','Пограничный кризис',neighbor.name+' усиливает давление. Решение — в разделе армии.',events);
@@ -228,6 +229,7 @@ export function advanceDefense(s,prev,flow,events,w,militaryPlan=null){
  }
  if(!d.war&&d.occupation>0)d.occupation=Math.max(0,d.occupation-.002);
  refreshDefense(s);
+ advanceBritishMissions(s,flow);
  d.last={month:s.month,paid,shares:clone(shares),salary,kitPrice:price,workforceCap:workforce,
   ...(militaryPlan?{peoplePaid:militaryPlan.active,grossWages:militaryPlan.paid,netWages:militaryPlan.paid-militaryPlan.tax-militaryPlan.contributions,contractShare:d.economy.contractShare,privateOrders:flow.defensePrivateOrders??0,domesticOrders:flow.defenseDomesticOrders??0,importedOrders:flow.defenseImportedOrders??0}:{}),
   recruitment,callup,exits,maintenanceNeed,maintenance,maintenanceCoverage,supplyPurchased:bought,supplyConsumed:consumed,
